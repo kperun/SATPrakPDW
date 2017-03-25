@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/EIGEN3_REPO/test/sparse_basic.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "sparse_basic_1"
+	}
+}

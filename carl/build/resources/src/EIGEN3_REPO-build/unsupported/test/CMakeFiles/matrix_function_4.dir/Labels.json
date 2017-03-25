@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/EIGEN3_REPO/unsupported/test/matrix_function.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildUnsupported"
+		],
+		"name" : "matrix_function_4"
+	}
+}

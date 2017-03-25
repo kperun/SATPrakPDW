@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/EIGEN3_REPO/test/conservative_resize.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "conservative_resize_6"
+	}
+}

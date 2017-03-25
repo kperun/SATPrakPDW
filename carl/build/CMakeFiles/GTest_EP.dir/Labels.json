@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/CMakeFiles/GTest_EP"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/CMakeFiles/GTest_EP.rule"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/CMakeFiles/GTest_EP-complete.rule"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP-stamp/GTest_EP-install.rule"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP-stamp/GTest_EP-mkdir.rule"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP-stamp/GTest_EP-download.rule"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP-stamp/GTest_EP-update.rule"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP-stamp/GTest_EP-patch.rule"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP-stamp/GTest_EP-configure.rule"
+		},
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP-stamp/GTest_EP-build.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"GTest_EP"
+		],
+		"name" : "GTest_EP"
+	}
+}

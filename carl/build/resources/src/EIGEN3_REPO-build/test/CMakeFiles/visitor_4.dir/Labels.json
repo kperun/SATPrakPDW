@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/EIGEN3_REPO/test/visitor.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "visitor_4"
+	}
+}

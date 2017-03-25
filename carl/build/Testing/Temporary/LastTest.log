@@ -1,0 +1,1267 @@
+Start testing: Mar 13 13:28 CET
+----------------------------------------------------------
+1/8 Testing: util
+1/8 Test: util
+Command: "/home/kperun/Dokumente/SATPraktikum/carl/build/bin/runUtilTests"
+Directory: /home/kperun/Dokumente/SATPraktikum/carl/build/src/tests/util
+"util" start time: Mar 13 13:28 CET
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 11 tests from 7 test cases.
+[----------] Global test environment set-up.
+[----------] 1 test from Numbers
+[ RUN      ] Numbers.IntegralType
+[       OK ] Numbers.IntegralType (0 ms)
+[----------] 1 test from Numbers (0 ms total)
+
+[----------] 3 tests from StringParserTest
+[ RUN      ] StringParserTest.termsWithExplicitMultiplication
+[       OK ] StringParserTest.termsWithExplicitMultiplication (1 ms)
+[ RUN      ] StringParserTest.polynomialsWithExplicitMultiplication
+[       OK ] StringParserTest.polynomialsWithExplicitMultiplication (1 ms)
+[ RUN      ] StringParserTest.rationalFunctionsWithExplicitMultiplication
+[       OK ] StringParserTest.rationalFunctionsWithExplicitMultiplication (0 ms)
+[----------] 3 tests from StringParserTest (2 ms total)
+
+[----------] 3 tests from Parser
+[ RUN      ] Parser.Polynomial
+[       OK ] Parser.Polynomial (1 ms)
+[ RUN      ] Parser.RationalFunction
+[       OK ] Parser.RationalFunction (1 ms)
+[ RUN      ] Parser.Formula
+(=> O4853 (and O3838 (or O4848 O4851 O4849 O4850 O6262 O6285 O6217 O8504) (not O8665)))
+[       OK ] Parser.Formula (1 ms)
+[----------] 3 tests from Parser (3 ms total)
+
+[----------] 1 test from Hash
+[ RUN      ] Hash.hash_add
+[       OK ] Hash.hash_add (0 ms)
+[----------] 1 test from Hash (0 ms total)
+
+[----------] 1 test from Timer
+[ RUN      ] Timer.Basics
+[       OK ] Timer.Basics (100 ms)
+[----------] 1 test from Timer (101 ms total)
+
+[----------] 1 test from VectorUtil
+[ RUN      ] VectorUtil.concat
+[       OK ] VectorUtil.concat (0 ms)
+[----------] 1 test from VectorUtil (0 ms total)
+
+[----------] 1 test from TupleUtil
+[ RUN      ] TupleUtil.apply
+[       OK ] TupleUtil.apply (0 ms)
+[----------] 1 test from TupleUtil (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 7 test cases ran. (106 ms total)
+[  PASSED  ] 11 tests.
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"util" end time: Mar 13 13:28 CET
+"util" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/8 Testing: numbers
+2/8 Test: numbers
+Command: "/home/kperun/Dokumente/SATPraktikum/carl/build/bin/runNumbersTests"
+Directory: /home/kperun/Dokumente/SATPraktikum/carl/build/src/tests/numbers
+"numbers" start time: Mar 13 13:28 CET
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 71 tests from 22 test cases.
+[----------] Global test environment set-up.
+[----------] 4 tests from Number
+[ RUN      ] Number.Constructor
+[       OK ] Number.Constructor (1 ms)
+[ RUN      ] Number.IntegerOperations
+[       OK ] Number.IntegerOperations (1 ms)
+[ RUN      ] Number.RationalOperations
+[       OK ] Number.RationalOperations (0 ms)
+[ RUN      ] Number.BinaryOperators
+[       OK ] Number.BinaryOperators (0 ms)
+[----------] 4 tests from Number (2 ms total)
+
+[----------] 1 test from PrimeFactory/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] PrimeFactory/0.integers
+[       OK ] PrimeFactory/0.integers (0 ms)
+[----------] 1 test from PrimeFactory/0 (0 ms total)
+
+[----------] 1 test from IntegerProperties/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] IntegerProperties/0.IntegerProperties
+[       OK ] IntegerProperties/0.IntegerProperties (1 ms)
+[----------] 1 test from IntegerProperties/0 (1 ms total)
+
+[----------] 2 tests from RationalProperties/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] RationalProperties/0.isInteger
+[       OK ] RationalProperties/0.isInteger (0 ms)
+[ RUN      ] RationalProperties/0.NumDenom
+[       OK ] RationalProperties/0.NumDenom (5 ms)
+[----------] 2 tests from RationalProperties/0 (5 ms total)
+
+[----------] 3 tests from NumbersNative
+[ RUN      ] NumbersNative.NumberWidth
+[       OK ] NumbersNative.NumberWidth (0 ms)
+[ RUN      ] NumbersNative.TypeIdentity
+[       OK ] NumbersNative.TypeIdentity (0 ms)
+[ RUN      ] NumbersNative.highestPower
+[       OK ] NumbersNative.highestPower (0 ms)
+[----------] 3 tests from NumbersNative (0 ms total)
+
+[----------] 1 test from Euclidean
+[ RUN      ] Euclidean.RecursiveAlgorithm
+[       OK ] Euclidean.RecursiveAlgorithm (0 ms)
+[----------] 1 test from Euclidean (0 ms total)
+
+[----------] 4 tests from IntegerDivision/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] IntegerDivision/0.IntegerDivision
+[       OK ] IntegerDivision/0.IntegerDivision (1 ms)
+[ RUN      ] IntegerDivision/0.DivisionOperator
+[       OK ] IntegerDivision/0.DivisionOperator (1 ms)
+[ RUN      ] IntegerDivision/0.Quotient
+[       OK ] IntegerDivision/0.Quotient (1 ms)
+[ RUN      ] IntegerDivision/0.Remainder
+[       OK ] IntegerDivision/0.Remainder (1 ms)
+[----------] 4 tests from IntegerDivision/0 (4 ms total)
+
+[----------] 3 tests from RationalDivision/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] RationalDivision/0.Division
+[       OK ] RationalDivision/0.Division (353 ms)
+[ RUN      ] RationalDivision/0.DivisionOperator
+[       OK ] RationalDivision/0.DivisionOperator (339 ms)
+[ RUN      ] RationalDivision/0.Quotient
+[       OK ] RationalDivision/0.Quotient (332 ms)
+[----------] 3 tests from RationalDivision/0 (1024 ms total)
+
+[----------] 11 tests from typetraits
+[ RUN      ] typetraits.is_field
+[       OK ] typetraits.is_field (0 ms)
+[ RUN      ] typetraits.is_finite
+[       OK ] typetraits.is_finite (0 ms)
+[ RUN      ] typetraits.is_float
+[       OK ] typetraits.is_float (0 ms)
+[ RUN      ] typetraits.is_fundamental
+[       OK ] typetraits.is_fundamental (0 ms)
+[ RUN      ] typetraits.is_integer
+[       OK ] typetraits.is_integer (0 ms)
+[ RUN      ] typetraits.is_subset_of_integers
+[       OK ] typetraits.is_subset_of_integers (0 ms)
+[ RUN      ] typetraits.is_number
+[       OK ] typetraits.is_number (0 ms)
+[ RUN      ] typetraits.is_rational
+[       OK ] typetraits.is_rational (0 ms)
+[ RUN      ] typetraits.is_subset_of_rationals
+[       OK ] typetraits.is_subset_of_rationals (0 ms)
+[ RUN      ] typetraits.IntegralType
+[       OK ] typetraits.IntegralType (0 ms)
+[ RUN      ] typetraits.UnderlyingNumberType
+[       OK ] typetraits.UnderlyingNumberType (0 ms)
+[----------] 11 tests from typetraits (0 ms total)
+
+[----------] 10 tests from doubleFloatTest
+[ RUN      ] doubleFloatTest.Constructor
+[       OK ] doubleFloatTest.Constructor (0 ms)
+[ RUN      ] doubleFloatTest.Hash
+[       OK ] doubleFloatTest.Hash (0 ms)
+[ RUN      ] doubleFloatTest.BooleanOperators
+[       OK ] doubleFloatTest.BooleanOperators (0 ms)
+[ RUN      ] doubleFloatTest.Addition
+[       OK ] doubleFloatTest.Addition (0 ms)
+[ RUN      ] doubleFloatTest.Subtraction
+[       OK ] doubleFloatTest.Subtraction (0 ms)
+[ RUN      ] doubleFloatTest.Multiplication
+[       OK ] doubleFloatTest.Multiplication (0 ms)
+[ RUN      ] doubleFloatTest.Division
+
+[WARNING] /home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP/src/gtest-death-test.cc:825:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test couldn't detect the number of threads.
+[       OK ] doubleFloatTest.Division (1 ms)
+[ RUN      ] doubleFloatTest.Roots
+
+[WARNING] /home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP/src/gtest-death-test.cc:825:: Death tests use fork(), which is unsafe particularly in a threaded context. For this test, Google Test couldn't detect the number of threads.
+[       OK ] doubleFloatTest.Roots (1 ms)
+[ RUN      ] doubleFloatTest.ConversionOperators
+[       OK ] doubleFloatTest.ConversionOperators (0 ms)
+[ RUN      ] doubleFloatTest.Precision
+[       OK ] doubleFloatTest.Precision (0 ms)
+[----------] 10 tests from doubleFloatTest (2 ms total)
+
+[----------] 1 test from IntegerRounding/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] IntegerRounding/0.IntegerRounding
+[       OK ] IntegerRounding/0.IntegerRounding (0 ms)
+[----------] 1 test from IntegerRounding/0 (0 ms total)
+
+[----------] 3 tests from RationalRounding/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] RationalRounding/0.floor
+[       OK ] RationalRounding/0.floor (0 ms)
+[ RUN      ] RationalRounding/0.ceil
+[       OK ] RationalRounding/0.ceil (0 ms)
+[ RUN      ] RationalRounding/0.abs
+[       OK ] RationalRounding/0.abs (0 ms)
+[----------] 3 tests from RationalRounding/0 (0 ms total)
+
+[----------] 3 tests from Numeric
+[ RUN      ] Numeric.constructors
+[       OK ] Numeric.constructors (0 ms)
+[ RUN      ] Numeric.operations
+[       OK ] Numeric.operations (0 ms)
+[ RUN      ] Numeric.gcd
+[       OK ] Numeric.gcd (0 ms)
+[----------] 3 tests from Numeric (0 ms total)
+
+[----------] 2 tests from GMP
+[ RUN      ] GMP.Debug
+[       OK ] GMP.Debug (0 ms)
+[ RUN      ] GMP.Rationalize
+[       OK ] GMP.Rationalize (1 ms)
+[----------] 2 tests from GMP (1 ms total)
+
+[----------] 1 test from GaloisField
+[ RUN      ] GaloisField.integers
+[       OK ] GaloisField.integers (0 ms)
+[----------] 1 test from GaloisField (0 ms total)
+
+[----------] 4 tests from IntegerNumbers/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] IntegerNumbers/0.Division
+[       OK ] IntegerNumbers/0.Division (0 ms)
+[ RUN      ] IntegerNumbers/0.Quotient
+[       OK ] IntegerNumbers/0.Quotient (0 ms)
+[ RUN      ] IntegerNumbers/0.Pow
+[       OK ] IntegerNumbers/0.Pow (0 ms)
+[ RUN      ] IntegerNumbers/0.Constant_Neg_Pos
+[       OK ] IntegerNumbers/0.Constant_Neg_Pos (0 ms)
+[----------] 4 tests from IntegerNumbers/0 (0 ms total)
+
+[----------] 10 tests from RationalNumbers/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] RationalNumbers/0.Constructors
+[       OK ] RationalNumbers/0.Constructors (0 ms)
+[ RUN      ] RationalNumbers/0.Squareroot
+[       OK ] RationalNumbers/0.Squareroot (0 ms)
+[ RUN      ] RationalNumbers/0.Sqrt_fast
+[       OK ] RationalNumbers/0.Sqrt_fast (0 ms)
+[ RUN      ] RationalNumbers/0.Squareroot_exact
+[       OK ] RationalNumbers/0.Squareroot_exact (0 ms)
+[ RUN      ] RationalNumbers/0.Rationalize
+[       OK ] RationalNumbers/0.Rationalize (0 ms)
+[ RUN      ] RationalNumbers/0.Operations
+[       OK ] RationalNumbers/0.Operations (0 ms)
+[ RUN      ] RationalNumbers/0.log
+[       OK ] RationalNumbers/0.log (0 ms)
+[ RUN      ] RationalNumbers/0.sin_cos
+[       OK ] RationalNumbers/0.sin_cos (0 ms)
+[ RUN      ] RationalNumbers/0.Constant_Neg_Pos
+[       OK ] RationalNumbers/0.Constant_Neg_Pos (0 ms)
+[ RUN      ] RationalNumbers/0.ToDouble_Int
+[       OK ] RationalNumbers/0.ToDouble_Int (0 ms)
+[----------] 10 tests from RationalNumbers/0 (0 ms total)
+
+[----------] 2 tests from Integers/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] Integers/0.parse
+[       OK ] Integers/0.parse (0 ms)
+[ RUN      ] Integers/0.try_parse
+[       OK ] Integers/0.try_parse (0 ms)
+[----------] 2 tests from Integers/0 (0 ms total)
+
+[----------] 2 tests from Rationals/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] Rationals/0.parse
+[       OK ] Rationals/0.parse (0 ms)
+[ RUN      ] Rationals/0.try_parse
+[       OK ] Rationals/0.try_parse (0 ms)
+[----------] 2 tests from Rationals/0 (0 ms total)
+
+[----------] 1 test from NumberHash/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] NumberHash/0.Hash
+[       OK ] NumberHash/0.Hash (0 ms)
+[----------] 1 test from NumberHash/0 (0 ms total)
+
+[----------] 1 test from NumberHash/1, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] NumberHash/1.Hash
+[       OK ] NumberHash/1.Hash (0 ms)
+[----------] 1 test from NumberHash/1 (0 ms total)
+
+[----------] 1 test from NumberHash/2, where TypeParam = long
+[ RUN      ] NumberHash/2.Hash
+[       OK ] NumberHash/2.Hash (0 ms)
+[----------] 1 test from NumberHash/2 (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 71 tests from 22 test cases ran. (1040 ms total)
+[  PASSED  ] 71 tests.
+<end of output>
+Test time =   1.06 sec
+----------------------------------------------------------
+Test Passed.
+"numbers" end time: Mar 13 13:28 CET
+"numbers" time elapsed: 00:00:01
+----------------------------------------------------------
+
+3/8 Testing: core
+3/8 Test: core
+Command: "/home/kperun/Dokumente/SATPraktikum/carl/build/bin/runCoreTests"
+Directory: /home/kperun/Dokumente/SATPraktikum/carl/build/src/tests/core
+"core" start time: Mar 13 13:28 CET
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 163 tests from 27 test cases.
+[----------] Global test environment set-up.
+[----------] 1 test from MultivariateGCD
+[ RUN      ] MultivariateGCD.test1
+x*y
+1
+[       OK ] MultivariateGCD.test1 (2 ms)
+[----------] 1 test from MultivariateGCD (3 ms total)
+
+[----------] 3 tests from VariablePool
+[ RUN      ] VariablePool.singleton
+[       OK ] VariablePool.singleton (0 ms)
+[ RUN      ] VariablePool.variableName
+[       OK ] VariablePool.variableName (0 ms)
+[ RUN      ] VariablePool.order
+[       OK ] VariablePool.order (0 ms)
+[----------] 3 tests from VariablePool (0 ms total)
+
+[----------] 1 test from PrimitiveEuclidean
+[ RUN      ] PrimitiveEuclidean.Zx
+[       OK ] PrimitiveEuclidean.Zx (0 ms)
+[----------] 1 test from PrimitiveEuclidean (0 ms total)
+
+[----------] 2 tests from VariableType
+[ RUN      ] VariableType.SpecialValues
+[       OK ] VariableType.SpecialValues (0 ms)
+[ RUN      ] VariableType.Output
+[       OK ] VariableType.Output (0 ms)
+[----------] 2 tests from VariableType (0 ms total)
+
+[----------] 2 tests from MultivariateRootTest/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] MultivariateRootTest/0.Constructor
+[       OK ] MultivariateRootTest/0.Constructor (0 ms)
+[ RUN      ] MultivariateRootTest/0.Evaluate
+[       OK ] MultivariateRootTest/0.Evaluate (0 ms)
+[----------] 2 tests from MultivariateRootTest/0 (0 ms total)
+
+[----------] 17 tests from UnivariatePolynomial
+[ RUN      ] UnivariatePolynomial.Constructor
+[       OK ] UnivariatePolynomial.Constructor (0 ms)
+[ RUN      ] UnivariatePolynomial.toInteger
+[       OK ] UnivariatePolynomial.toInteger (0 ms)
+[ RUN      ] UnivariatePolynomial.Reduction
+[       OK ] UnivariatePolynomial.Reduction (0 ms)
+[ RUN      ] UnivariatePolynomial.Divide
+[       OK ] UnivariatePolynomial.Divide (0 ms)
+[ RUN      ] UnivariatePolynomial.GCD
+[       OK ] UnivariatePolynomial.GCD (1 ms)
+[ RUN      ] UnivariatePolynomial.cauchyBounds
+[       OK ] UnivariatePolynomial.cauchyBounds (0 ms)
+[ RUN      ] UnivariatePolynomial.factorization
+[       OK ] UnivariatePolynomial.factorization (83 ms)
+[ RUN      ] UnivariatePolynomial.isNumber
+[       OK ] UnivariatePolynomial.isNumber (0 ms)
+[ RUN      ] UnivariatePolynomial.isUnivariate
+[       OK ] UnivariatePolynomial.isUnivariate (0 ms)
+[ RUN      ] UnivariatePolynomial.numericUnit
+[       OK ] UnivariatePolynomial.numericUnit (0 ms)
+[ RUN      ] UnivariatePolynomial.numericContent
+[       OK ] UnivariatePolynomial.numericContent (0 ms)
+[ RUN      ] UnivariatePolynomial.resultant
+[       OK ] UnivariatePolynomial.resultant (1 ms)
+[ RUN      ] UnivariatePolynomial.resultant2
+[       OK ] UnivariatePolynomial.resultant2 (1 ms)
+[ RUN      ] UnivariatePolynomial.resultant3
+resultant[(t^4)*a^2 + (t^8+t^6)*a^1 + t^10+t^8, a^3 + (t^2)*a^2 + (t^2)*a^1 + t^4] =
+	t^28+3*t^26+(-1)*t^22+t^20+t^24
+[       OK ] UnivariatePolynomial.resultant3 (2 ms)
+[ RUN      ] UnivariatePolynomial.resultant4
+[       OK ] UnivariatePolynomial.resultant4 (0 ms)
+[ RUN      ] UnivariatePolynomial.PrincipalSubresultantCoefficient
+[       OK ] UnivariatePolynomial.PrincipalSubresultantCoefficient (1 ms)
+[ RUN      ] UnivariatePolynomial.intervalCoeffs
+[       OK ] UnivariatePolynomial.intervalCoeffs (0 ms)
+[----------] 17 tests from UnivariatePolynomial (89 ms total)
+
+[----------] 8 tests from UnivariatePolynomialIntTest/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] UnivariatePolynomialIntTest/0.DivideInteger
+[       OK ] UnivariatePolynomialIntTest/0.DivideInteger (0 ms)
+[ RUN      ] UnivariatePolynomialIntTest/0.GCD
+0
+(1) mod 5
+((2) mod 5)*x^1 + (0) mod 5
+1
+1
+[       OK ] UnivariatePolynomialIntTest/0.GCD (0 ms)
+[ RUN      ] UnivariatePolynomialIntTest/0.toFiniteDomain
+((2) mod 5)*x^1 + (1) mod 5
+(1) mod 5
+[       OK ] UnivariatePolynomialIntTest/0.toFiniteDomain (0 ms)
+[ RUN      ] UnivariatePolynomialIntTest/0.normalizeCoefficients
+[       OK ] UnivariatePolynomialIntTest/0.normalizeCoefficients (0 ms)
+[ RUN      ] UnivariatePolynomialIntTest/0.unitPart
+[       OK ] UnivariatePolynomialIntTest/0.unitPart (0 ms)
+[ RUN      ] UnivariatePolynomialIntTest/0.content
+[       OK ] UnivariatePolynomialIntTest/0.content (0 ms)
+[ RUN      ] UnivariatePolynomialIntTest/0.primitivePart
+[       OK ] UnivariatePolynomialIntTest/0.primitivePart (0 ms)
+[ RUN      ] UnivariatePolynomialIntTest/0.switchVariable
+(3)*x^2 + (2)*x^1 + 1 -> 3*x^2+2*x+1
+[       OK ] UnivariatePolynomialIntTest/0.switchVariable (0 ms)
+[----------] 8 tests from UnivariatePolynomialIntTest/0 (0 ms total)
+
+[----------] 3 tests from Sign
+[ RUN      ] Sign.Output
+[       OK ] Sign.Output (0 ms)
+[ RUN      ] Sign.sgn
+[       OK ] Sign.sgn (0 ms)
+[ RUN      ] Sign.signVariations
+[       OK ] Sign.signVariations (0 ms)
+[----------] 3 tests from Sign (0 ms total)
+
+[----------] 6 tests from Operators/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] Operators/0.Comparison
+[       OK ] Operators/0.Comparison (0 ms)
+[ RUN      ] Operators/0.Addition
+[       OK ] Operators/0.Addition (0 ms)
+[ RUN      ] Operators/0.UnaryMinus
+[       OK ] Operators/0.UnaryMinus (0 ms)
+[ RUN      ] Operators/0.Multiplication
+[       OK ] Operators/0.Multiplication (0 ms)
+[ RUN      ] Operators/0.InplaceAddition
+[       OK ] Operators/0.InplaceAddition (0 ms)
+[ RUN      ] Operators/0.InplaceMultiplication
+[       OK ] Operators/0.InplaceMultiplication (0 ms)
+[----------] 6 tests from Operators/0 (0 ms total)
+
+[----------] 6 tests from OperatorsInterval/0, where TypeParam = carl::Interval<__gmp_expr<__mpz_struct [1], __mpz_struct [1]> >
+[ RUN      ] OperatorsInterval/0.Comparison
+[       OK ] OperatorsInterval/0.Comparison (0 ms)
+[ RUN      ] OperatorsInterval/0.Addition
+[       OK ] OperatorsInterval/0.Addition (0 ms)
+[ RUN      ] OperatorsInterval/0.UnaryMinus
+[       OK ] OperatorsInterval/0.UnaryMinus (0 ms)
+[ RUN      ] OperatorsInterval/0.Multiplication
+[       OK ] OperatorsInterval/0.Multiplication (0 ms)
+[ RUN      ] OperatorsInterval/0.InplaceAddition
+[       OK ] OperatorsInterval/0.InplaceAddition (0 ms)
+[ RUN      ] OperatorsInterval/0.InplaceMultiplication
+[       OK ] OperatorsInterval/0.InplaceMultiplication (0 ms)
+[----------] 6 tests from OperatorsInterval/0 (0 ms total)
+
+[----------] 6 tests from OperatorsInterval/1, where TypeParam = carl::Interval<__gmp_expr<__mpq_struct [1], __mpq_struct [1]> >
+[ RUN      ] OperatorsInterval/1.Comparison
+[       OK ] OperatorsInterval/1.Comparison (0 ms)
+[ RUN      ] OperatorsInterval/1.Addition
+[       OK ] OperatorsInterval/1.Addition (0 ms)
+[ RUN      ] OperatorsInterval/1.UnaryMinus
+[       OK ] OperatorsInterval/1.UnaryMinus (0 ms)
+[ RUN      ] OperatorsInterval/1.Multiplication
+[       OK ] OperatorsInterval/1.Multiplication (0 ms)
+[ RUN      ] OperatorsInterval/1.InplaceAddition
+[       OK ] OperatorsInterval/1.InplaceAddition (0 ms)
+[ RUN      ] OperatorsInterval/1.InplaceMultiplication
+[       OK ] OperatorsInterval/1.InplaceMultiplication (0 ms)
+[----------] 6 tests from OperatorsInterval/1 (0 ms total)
+
+[----------] 6 tests from OperatorsInterval/2, where TypeParam = carl::Interval<int>
+[ RUN      ] OperatorsInterval/2.Comparison
+[       OK ] OperatorsInterval/2.Comparison (0 ms)
+[ RUN      ] OperatorsInterval/2.Addition
+[       OK ] OperatorsInterval/2.Addition (0 ms)
+[ RUN      ] OperatorsInterval/2.UnaryMinus
+[       OK ] OperatorsInterval/2.UnaryMinus (0 ms)
+[ RUN      ] OperatorsInterval/2.Multiplication
+[       OK ] OperatorsInterval/2.Multiplication (0 ms)
+[ RUN      ] OperatorsInterval/2.InplaceAddition
+[       OK ] OperatorsInterval/2.InplaceAddition (0 ms)
+[ RUN      ] OperatorsInterval/2.InplaceMultiplication
+[       OK ] OperatorsInterval/2.InplaceMultiplication (0 ms)
+[----------] 6 tests from OperatorsInterval/2 (0 ms total)
+
+[----------] 6 tests from OperatorsInterval/3, where TypeParam = carl::Interval<double>
+[ RUN      ] OperatorsInterval/3.Comparison
+[       OK ] OperatorsInterval/3.Comparison (0 ms)
+[ RUN      ] OperatorsInterval/3.Addition
+[       OK ] OperatorsInterval/3.Addition (0 ms)
+[ RUN      ] OperatorsInterval/3.UnaryMinus
+[       OK ] OperatorsInterval/3.UnaryMinus (0 ms)
+[ RUN      ] OperatorsInterval/3.Multiplication
+[       OK ] OperatorsInterval/3.Multiplication (0 ms)
+[ RUN      ] OperatorsInterval/3.InplaceAddition
+[       OK ] OperatorsInterval/3.InplaceAddition (0 ms)
+[ RUN      ] OperatorsInterval/3.InplaceMultiplication
+[       OK ] OperatorsInterval/3.InplaceMultiplication (0 ms)
+[----------] 6 tests from OperatorsInterval/3 (0 ms total)
+
+[----------] 9 tests from TermTest/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] TermTest/0.Constructor
+[       OK ] TermTest/0.Constructor (0 ms)
+[ RUN      ] TermTest/0.Operators
+[       OK ] TermTest/0.Operators (0 ms)
+[ RUN      ] TermTest/0.Multiplication
+[       OK ] TermTest/0.Multiplication (0 ms)
+[ RUN      ] TermTest/0.VariableMultiplication
+[       OK ] TermTest/0.VariableMultiplication (0 ms)
+[ RUN      ] TermTest/0.TermMultiplication
+[       OK ] TermTest/0.TermMultiplication (0 ms)
+[ RUN      ] TermTest/0.Derivative
+[       OK ] TermTest/0.Derivative (0 ms)
+[ RUN      ] TermTest/0.Substitute
+[       OK ] TermTest/0.Substitute (0 ms)
+[ RUN      ] TermTest/0.Comparison
+[       OK ] TermTest/0.Comparison (0 ms)
+[ RUN      ] TermTest/0.OtherComparison
+[       OK ] TermTest/0.OtherComparison (0 ms)
+[----------] 9 tests from TermTest/0 (1 ms total)
+
+[----------] 1 test from RootFinder
+[ RUN      ] RootFinder.realRoots
+Map = {y : (NR -1 R)}
+[       OK ] RootFinder.realRoots (2 ms)
+[----------] 1 test from RootFinder (2 ms total)
+
+[----------] 13 tests from FactorizedPolynomial
+[ RUN      ] FactorizedPolynomial.Construction
+Common divisor of x*y and x*y*z: 1
+Common divisor of x*y and 1: 1
+Common divisor of 42 and x*y*z: 1
+GCD of (x) * (x*y) and (x*y)^2: (x) * ((x) * (y)) with rest 1 and y
+GCD of (x) * (y) and x*y*z: (x) * (y) with rest 1 and z
+GCD of 27*x^3*y^2+(-1)*x^4+3*x^5+(-6)*x^2*y+6*x^3*y+(-18)*x^4*y+9*x*y^2+(-9)*x^2*y^2+x^3 and 27*x^6*y+3*x^2*y+(-6)*x^3*y+(-9)*x^7+2*x^4+(-7)*x^5+6*x^6+21*x^4*y+(-18)*x^5*y+(-1)*x^3: 9*x^3*y+x^3+(-3)*x^2*y+(-1)*x^2+3*x*y+(-3)*x^4 with rest 3*y+(-1)*x and 3*x^3+(-1)*x^2+x
+Common multiple of (x) * (y) and (x) * (y) * (z): (x) * (y) * (z)
+Common multiple of (x) * (y) and -2: 2 * ((x) * (y))
+Common multiple of 42 and (x) * (y) * (z): 42 * ((x) * (y) * (z))
+Quotient: (x) * (y) * (z) / (x) * (y): z
+Quotient: (x) * (y) * (z) / -2: -1/2 * ((x) * (y) * (z))
+Quotient: 0 / (x) * (y): 0
+Quotient: (x) * (y) / 1: (x) * (y)
+LCM of (x) * (y) and (x) * (y) * (z): (x) * (y) * (z)
+(x) * (y) * (x) * (y) * (z): (x)^2 * (y)^2 * (z)
+(x) * (y) * 42: 42 * ((x) * (y))
+0 * (x) * (y) * (z): 0
+fMul4 = 42 * (-2) = (-84)
+fpMul4 = 42 * -2 = -84
+fp5 = -1 * (x+(-1))
+fp7 = x+(-1)
+ftest = (x+(-1))^5 * (3*x^3+(-1)*x^2+x)
+fres = -1 * ((x+(-1))^6 * (3*x^3+(-1)*x^2+x))
+(x) * (y) + (x) * (y) * (z): (x) * (y) * (z+1)
+(x) * (y) - (x) * (y) * (z): -1 * ((x) * (y) * (z+(-1)))
+-((x) * (y)) = -1 * ((x) * (y))
+-((x) * (y) * (z)) = -1 * ((x) * (y) * (z))
+[       OK ] FactorizedPolynomial.Construction (12 ms)
+[ RUN      ] FactorizedPolynomial.CommonDivisor
+
+Common divisor of x*y and x*y*z: 1
+
+[       OK ] FactorizedPolynomial.CommonDivisor (1 ms)
+[ RUN      ] FactorizedPolynomial.GCD
+GCD of t^2+(-1) and t+(-1): t+(-1) with rest t+1 and 1
+[       OK ] FactorizedPolynomial.GCD (11 ms)
+[ RUN      ] FactorizedPolynomial.Flattening
+[       OK ] FactorizedPolynomial.Flattening (0 ms)
+[ RUN      ] FactorizedPolynomial.Flattening2
+x, (x)^2, (x)^4
+(x)^4
+[       OK ] FactorizedPolynomial.Flattening2 (1 ms)
+[ RUN      ] FactorizedPolynomial.LCM
+[       OK ] FactorizedPolynomial.LCM (2 ms)
+[ RUN      ] FactorizedPolynomial.Subtraction
+[       OK ] FactorizedPolynomial.Subtraction (1 ms)
+[ RUN      ] FactorizedPolynomial.Addition
+[       OK ] FactorizedPolynomial.Addition (0 ms)
+[ RUN      ] FactorizedPolynomial.Multiplication
+[       OK ] FactorizedPolynomial.Multiplication (0 ms)
+[ RUN      ] FactorizedPolynomial.Quotient
+[       OK ] FactorizedPolynomial.Quotient (1 ms)
+[ RUN      ] FactorizedPolynomial.Destructor
+
+81 * ((x)^2)
+
+[       OK ] FactorizedPolynomial.Destructor (0 ms)
+[ RUN      ] FactorizedPolynomial.Equality
+[       OK ] FactorizedPolynomial.Equality (1 ms)
+[ RUN      ] FactorizedPolynomial.Evaluation
+[       OK ] FactorizedPolynomial.Evaluation (0 ms)
+[----------] 13 tests from FactorizedPolynomial (30 ms total)
+
+[----------] 1 test from Resultant
+[ RUN      ] Resultant.det
+[       OK ] Resultant.det (3 ms)
+[----------] 1 test from Resultant (3 ms total)
+
+[----------] 12 tests from Monomial
+[ RUN      ] Monomial.Constructor
+[       OK ] Monomial.Constructor (0 ms)
+[ RUN      ] Monomial.TotalDegree
+[       OK ] Monomial.TotalDegree (0 ms)
+[ RUN      ] Monomial.degreeCategories
+[       OK ] Monomial.degreeCategories (0 ms)
+[ RUN      ] Monomial.Operators
+[       OK ] Monomial.Operators (0 ms)
+[ RUN      ] Monomial.VariableMultiplication
+[       OK ] Monomial.VariableMultiplication (0 ms)
+[ RUN      ] Monomial.MonomialMultiplication
+[       OK ] Monomial.MonomialMultiplication (1 ms)
+[ RUN      ] Monomial.derivative
+[       OK ] Monomial.derivative (0 ms)
+[ RUN      ] Monomial.division
+[       OK ] Monomial.division (0 ms)
+[ RUN      ] Monomial.divisible
+[       OK ] Monomial.divisible (0 ms)
+[ RUN      ] Monomial.Comparison
+[       OK ] Monomial.Comparison (0 ms)
+[ RUN      ] Monomial.OtherComparison
+[       OK ] Monomial.OtherComparison (0 ms)
+[ RUN      ] Monomial.CalcLCM
+[       OK ] Monomial.CalcLCM (0 ms)
+[----------] 12 tests from Monomial (1 ms total)
+
+[----------] 1 test from SMTLIBStream
+[ RUN      ] SMTLIBStream.Base
+(set-logic QF_NRA)
+(declare-fun x () Real)
+(assert (<= (+ (* -4 (* x x)) (* -1 x) -1) 0))
+(check-sat)
+
+[       OK ] SMTLIBStream.Base (0 ms)
+[----------] 1 test from SMTLIBStream (0 ms total)
+
+[----------] 10 tests from MultivariatePolynomialTest/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] MultivariatePolynomialTest/0.Constructor
+[       OK ] MultivariatePolynomialTest/0.Constructor (0 ms)
+[ RUN      ] MultivariatePolynomialTest/0.Operators
+[       OK ] MultivariatePolynomialTest/0.Operators (0 ms)
+[ RUN      ] MultivariatePolynomialTest/0.getTerms
+[       OK ] MultivariatePolynomialTest/0.getTerms (0 ms)
+[ RUN      ] MultivariatePolynomialTest/0.Addition
+[       OK ] MultivariatePolynomialTest/0.Addition (0 ms)
+[ RUN      ] MultivariatePolynomialTest/0.Substraction
+[       OK ] MultivariatePolynomialTest/0.Substraction (0 ms)
+[ RUN      ] MultivariatePolynomialTest/0.Multiplication
+[       OK ] MultivariatePolynomialTest/0.Multiplication (1 ms)
+[ RUN      ] MultivariatePolynomialTest/0.MultivariatePolynomialMultiplication
+[       OK ] MultivariatePolynomialTest/0.MultivariatePolynomialMultiplication (0 ms)
+[ RUN      ] MultivariatePolynomialTest/0.CreationViaOperators
+[       OK ] MultivariatePolynomialTest/0.CreationViaOperators (0 ms)
+[ RUN      ] MultivariatePolynomialTest/0.Comparison
+[       OK ] MultivariatePolynomialTest/0.Comparison (1 ms)
+[ RUN      ] MultivariatePolynomialTest/0.OtherComparison
+[       OK ] MultivariatePolynomialTest/0.OtherComparison (0 ms)
+[----------] 10 tests from MultivariatePolynomialTest/0 (2 ms total)
+
+[----------] 10 tests from MultivariatePolynomialTest/1, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] MultivariatePolynomialTest/1.Constructor
+[       OK ] MultivariatePolynomialTest/1.Constructor (0 ms)
+[ RUN      ] MultivariatePolynomialTest/1.Operators
+[       OK ] MultivariatePolynomialTest/1.Operators (0 ms)
+[ RUN      ] MultivariatePolynomialTest/1.getTerms
+[       OK ] MultivariatePolynomialTest/1.getTerms (0 ms)
+[ RUN      ] MultivariatePolynomialTest/1.Addition
+[       OK ] MultivariatePolynomialTest/1.Addition (0 ms)
+[ RUN      ] MultivariatePolynomialTest/1.Substraction
+[       OK ] MultivariatePolynomialTest/1.Substraction (0 ms)
+[ RUN      ] MultivariatePolynomialTest/1.Multiplication
+[       OK ] MultivariatePolynomialTest/1.Multiplication (0 ms)
+[ RUN      ] MultivariatePolynomialTest/1.MultivariatePolynomialMultiplication
+[       OK ] MultivariatePolynomialTest/1.MultivariatePolynomialMultiplication (1 ms)
+[ RUN      ] MultivariatePolynomialTest/1.CreationViaOperators
+[       OK ] MultivariatePolynomialTest/1.CreationViaOperators (0 ms)
+[ RUN      ] MultivariatePolynomialTest/1.Comparison
+[       OK ] MultivariatePolynomialTest/1.Comparison (0 ms)
+[ RUN      ] MultivariatePolynomialTest/1.OtherComparison
+[       OK ] MultivariatePolynomialTest/1.OtherComparison (1 ms)
+[----------] 10 tests from MultivariatePolynomialTest/1 (2 ms total)
+
+[----------] 10 tests from MultivariatePolynomialTest/2, where TypeParam = long
+[ RUN      ] MultivariatePolynomialTest/2.Constructor
+[       OK ] MultivariatePolynomialTest/2.Constructor (0 ms)
+[ RUN      ] MultivariatePolynomialTest/2.Operators
+[       OK ] MultivariatePolynomialTest/2.Operators (0 ms)
+[ RUN      ] MultivariatePolynomialTest/2.getTerms
+[       OK ] MultivariatePolynomialTest/2.getTerms (0 ms)
+[ RUN      ] MultivariatePolynomialTest/2.Addition
+[       OK ] MultivariatePolynomialTest/2.Addition (0 ms)
+[ RUN      ] MultivariatePolynomialTest/2.Substraction
+[       OK ] MultivariatePolynomialTest/2.Substraction (0 ms)
+[ RUN      ] MultivariatePolynomialTest/2.Multiplication
+[       OK ] MultivariatePolynomialTest/2.Multiplication (0 ms)
+[ RUN      ] MultivariatePolynomialTest/2.MultivariatePolynomialMultiplication
+[       OK ] MultivariatePolynomialTest/2.MultivariatePolynomialMultiplication (1 ms)
+[ RUN      ] MultivariatePolynomialTest/2.CreationViaOperators
+[       OK ] MultivariatePolynomialTest/2.CreationViaOperators (0 ms)
+[ RUN      ] MultivariatePolynomialTest/2.Comparison
+[       OK ] MultivariatePolynomialTest/2.Comparison (0 ms)
+[ RUN      ] MultivariatePolynomialTest/2.OtherComparison
+[       OK ] MultivariatePolynomialTest/2.OtherComparison (1 ms)
+[----------] 10 tests from MultivariatePolynomialTest/2 (2 ms total)
+
+[----------] 12 tests from MultivariatePolynomial
+[ RUN      ] MultivariatePolynomial.remainder
+[       OK ] MultivariatePolynomial.remainder (0 ms)
+[ RUN      ] MultivariatePolynomial.toUnivariatePolynomial
+[       OK ] MultivariatePolynomial.toUnivariatePolynomial (0 ms)
+[ RUN      ] MultivariatePolynomial.toString
+[       OK ] MultivariatePolynomial.toString (0 ms)
+[ RUN      ] MultivariatePolynomial.Normalize
+[       OK ] MultivariatePolynomial.Normalize (0 ms)
+[ RUN      ] MultivariatePolynomial.Coprime
+[       OK ] MultivariatePolynomial.Coprime (0 ms)
+[ RUN      ] MultivariatePolynomial.Substitute
+[       OK ] MultivariatePolynomial.Substitute (0 ms)
+[ RUN      ] MultivariatePolynomial.SPolynomial
+[       OK ] MultivariatePolynomial.SPolynomial (1 ms)
+[ RUN      ] MultivariatePolynomial.GatherVariables
+[       OK ] MultivariatePolynomial.GatherVariables (0 ms)
+[ RUN      ] MultivariatePolynomial.Derivative
+[       OK ] MultivariatePolynomial.Derivative (0 ms)
+[ RUN      ] MultivariatePolynomial.varInfo
+[       OK ] MultivariatePolynomial.varInfo (0 ms)
+[ RUN      ] MultivariatePolynomial.Quotient
+[       OK ] MultivariatePolynomial.Quotient (0 ms)
+[ RUN      ] MultivariatePolynomial.Quotient2
+[       OK ] MultivariatePolynomial.Quotient2 (4 ms)
+[----------] 12 tests from MultivariatePolynomial (5 ms total)
+
+[----------] 2 tests from MultivariatePolynomialTest
+[ RUN      ] MultivariatePolynomialTest.Resultant
+x0*x1^2+x1^2+x0^2+4*x0+18, 2*x1^2+x1+4*x0*x1+x0^2+8*x0+19
+[       OK ] MultivariatePolynomialTest.Resultant (0 ms)
+[ RUN      ] MultivariatePolynomialTest.Definiteness
+[       OK ] MultivariatePolynomialTest.Definiteness (1 ms)
+[----------] 2 tests from MultivariatePolynomialTest (1 ms total)
+
+[----------] 10 tests from RationalFunction
+[ RUN      ] RationalFunction.Construction
+Construct rational function from (-1)*x+1 leads to ((-1)*x+1)/(1)
+Construct factorized rational function from (-1)*x+1 leads to ((-1)*x+1)/(1)
+(t^3*u^6+(-3)*t*u^5+(-1)*u^6+(-3)*t^2*u^6+3*t*u^6+(-1)*t^3*u^5+(-1)*t^3+(-3)*t+3*t^2+(-3)*u+3*t^3*u+9*t*u+(-9)*t^2*u+5*u^2+(-5)*t^3*u^2+(-15)*t*u^2+15*t^2*u^2+3*t^2*u^4+(-3)*t*u^4+(-1)*t^3*u^4+(-4)*u^3+u^4+(-12)*t^2*u^3+12*t*u^3+4*t^3*u^3+u^5+3*t^2*u^5+1)/((2*t^2+(-2)*t+1) * (u^2+(-1)*u+1) * (2*u^2+(-2)*u+1))
+(t^3*u^4+(-2)*u+3*t^2+6*t*u+2*u^2+(-1)*t^3+(-6)*t^2*u+(-6)*t*u^2+2*t^3*u+6*t^2*u^2+(-1)*u^4+(-2)*t^3*u^2+3*t*u^4+(-3)*t^2*u^4+(-3)*t+1)/((2*t^2+(-2)*t+1) * (2*u^2+(-2)*u+1))
+[       OK ] RationalFunction.Construction (23 ms)
+[ RUN      ] RationalFunction.Multiplication
+(-1 * (_r_1))/(_r_1+(-4))*(_r_1+(-4))/(2 * (_r_1+(-2))) = (-1 * (_r_1))/(2 * (_r_1+(-2)))
+[       OK ] RationalFunction.Multiplication (2 ms)
+[ RUN      ] RationalFunction.Division
+(1)/(2*x+1)
+[       OK ] RationalFunction.Division (0 ms)
+[ RUN      ] RationalFunction.Addition
+[       OK ] RationalFunction.Addition (1 ms)
+[ RUN      ] RationalFunction.Subtraction
+Calculate: 1 - (x)/(1) = ((-1)*x+1)/(1)
+Calculate: 1 - (x)/(1) = (-1 * (x+(-1)))/(1)
+[       OK ] RationalFunction.Subtraction (0 ms)
+[ RUN      ] RationalFunction.Hash
+[       OK ] RationalFunction.Hash (0 ms)
+[ RUN      ] RationalFunction.Derivative
+[       OK ] RationalFunction.Derivative (1 ms)
+[ RUN      ] RationalFunction.Simplification
+(x*y^2+x+2*y+y^2+2*x*y+1)/((y+1)^2)
+(x+1)/(1)
+[       OK ] RationalFunction.Simplification (8 ms)
+[ RUN      ] RationalFunction.Evaluation
+[       OK ] RationalFunction.Evaluation (0 ms)
+[ RUN      ] RationalFunction.Substitute
+[       OK ] RationalFunction.Substitute (1 ms)
+[----------] 10 tests from RationalFunction (36 ms total)
+
+[----------] 3 tests from Variable
+[ RUN      ] Variable.Constructor
+[       OK ] Variable.Constructor (0 ms)
+[ RUN      ] Variable.Equals
+[       OK ] Variable.Equals (0 ms)
+[ RUN      ] Variable.Comparison
+[       OK ] Variable.Comparison (0 ms)
+[----------] 3 tests from Variable (0 ms total)
+
+[----------] 2 tests from RealAlgebraicNumber
+[ RUN      ] RealAlgebraicNumber.Evaluation
+[       OK ] RealAlgebraicNumber.Evaluation (2 ms)
+[ RUN      ] RealAlgebraicNumber.Evaluation2
+(NR 0 R)
+[       OK ] RealAlgebraicNumber.Evaluation2 (0 ms)
+[----------] 2 tests from RealAlgebraicNumber (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 163 tests from 27 test cases ran. (179 ms total)
+[  PASSED  ] 163 tests.
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Passed.
+"core" end time: Mar 13 13:28 CET
+"core" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/8 Testing: formula
+4/8 Test: formula
+Command: "/home/kperun/Dokumente/SATPraktikum/carl/build/bin/runFormulaTests"
+Directory: /home/kperun/Dokumente/SATPraktikum/carl/build/src/tests/formula
+"formula" start time: Mar 13 13:28 CET
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 50 tests from 13 test cases.
+[----------] Global test environment set-up.
+[----------] 3 tests from BVTermType
+[ RUN      ] BVTermType.Output
+[       OK ] BVTermType.Output (0 ms)
+[ RUN      ] BVTermType.typeIsUnary
+[       OK ] BVTermType.typeIsUnary (0 ms)
+[ RUN      ] BVTermType.typeIsBinary
+[       OK ] BVTermType.typeIsBinary (0 ms)
+[----------] 3 tests from BVTermType (0 ms total)
+
+[----------] 1 test from OPBParser
+[ RUN      ] OPBParser.Basic
+[       OK ] OPBParser.Basic (0 ms)
+[----------] 1 test from OPBParser (0 ms total)
+
+[----------] 1 test from UVariable
+[ RUN      ] UVariable.Basics
+[       OK ] UVariable.Basics (0 ms)
+[----------] 1 test from UVariable (0 ms total)
+
+[----------] 3 tests from BVTerm
+[ RUN      ] BVTerm.Empty
+[       OK ] BVTerm.Empty (0 ms)
+[ RUN      ] BVTerm.Constant
+[       OK ] BVTerm.Constant (0 ms)
+[ RUN      ] BVTerm.Variable
+[       OK ] BVTerm.Variable (0 ms)
+[----------] 3 tests from BVTerm (0 ms total)
+
+[----------] 3 tests from ModelEvaluation
+[ RUN      ] ModelEvaluation.Formula
+[       OK ] ModelEvaluation.Formula (1 ms)
+[ RUN      ] ModelEvaluation.EvaluateMVR
+[       OK ] ModelEvaluation.EvaluateMVR (0 ms)
+[ RUN      ] ModelEvaluation.EvaluateRANIR
+[       OK ] ModelEvaluation.EvaluateRANIR (0 ms)
+[----------] 3 tests from ModelEvaluation (1 ms total)
+
+[----------] 2 tests from UninterpretedFunction
+[ RUN      ] UninterpretedFunction.Basics
+[       OK ] UninterpretedFunction.Basics (0 ms)
+[ RUN      ] UninterpretedFunction.Manager
+[       OK ] UninterpretedFunction.Manager (0 ms)
+[----------] 2 tests from UninterpretedFunction (0 ms total)
+
+[----------] 2 tests from PBConstraint
+[ RUN      ] PBConstraint.Basic
+[       OK ] PBConstraint.Basic (0 ms)
+[ RUN      ] PBConstraint.Formula
+[       OK ] PBConstraint.Formula (0 ms)
+[----------] 2 tests from PBConstraint (0 ms total)
+
+[----------] 4 tests from Sort
+[ RUN      ] Sort.DefaultConstruction
+Running main() from gtest_main.cc
+Running main() from gtest_main.cc
+[       OK ] Sort.DefaultConstruction (7 ms)
+[ RUN      ] Sort.SortManager
+[       OK ] Sort.SortManager (0 ms)
+[ RUN      ] Sort.SortValue
+[       OK ] Sort.SortValue (0 ms)
+[ RUN      ] Sort.SortValueManager
+[       OK ] Sort.SortValueManager (0 ms)
+[----------] 4 tests from Sort (7 ms total)
+
+[----------] 8 tests from Formula
+[ RUN      ] Formula.Construction
+[       OK ] Formula.Construction (1 ms)
+[ RUN      ] Formula.BooleanConstructors
+[       OK ] Formula.BooleanConstructors (0 ms)
+[ RUN      ] Formula.FormulaPoolDestructor
+[       OK ] Formula.FormulaPoolDestructor (0 ms)
+[ RUN      ] Formula.ANDConstruction
+[       OK ] Formula.ANDConstruction (0 ms)
+[ RUN      ] Formula.ORConstruction
+[       OK ] Formula.ORConstruction (0 ms)
+[ RUN      ] Formula.XORConstruction
+[       OK ] Formula.XORConstruction (0 ms)
+[ RUN      ] Formula.IFFConstruction
+[       OK ] Formula.IFFConstruction (0 ms)
+[ RUN      ] Formula.ConstraintConstruction
+[       OK ] Formula.ConstraintConstruction (3 ms)
+[----------] 8 tests from Formula (4 ms total)
+
+[----------] 1 test from BVConstraint
+[ RUN      ] BVConstraint.Construction
+[       OK ] BVConstraint.Construction (0 ms)
+[----------] 1 test from BVConstraint (0 ms total)
+
+[----------] 2 tests from Model/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] Model/0.ModelValue
+[       OK ] Model/0.ModelValue (0 ms)
+[ RUN      ] Model/0.ModelSubstitution
+[       OK ] Model/0.ModelSubstitution (0 ms)
+[----------] 2 tests from Model/0 (0 ms total)
+
+[----------] 1 test from BVVariable
+[ RUN      ] BVVariable.Basics
+[       OK ] BVVariable.Basics (0 ms)
+[----------] 1 test from BVVariable (0 ms total)
+
+[----------] 19 tests from BVValueTest/0, where TypeParam = __gmp_expr<__mpz_struct [1], __mpz_struct [1]>
+[ RUN      ] BVValueTest/0.Constructor
+[       OK ] BVValueTest/0.Constructor (1 ms)
+[ RUN      ] BVValueTest/0.width
+[       OK ] BVValueTest/0.width (0 ms)
+[ RUN      ] BVValueTest/0.toString
+[       OK ] BVValueTest/0.toString (0 ms)
+[ RUN      ] BVValueTest/0.isZero
+[       OK ] BVValueTest/0.isZero (0 ms)
+[ RUN      ] BVValueTest/0.UnaryMinus
+[       OK ] BVValueTest/0.UnaryMinus (0 ms)
+[ RUN      ] BVValueTest/0.BinaryInversion
+[       OK ] BVValueTest/0.BinaryInversion (0 ms)
+[ RUN      ] BVValueTest/0.rotateLeft
+[       OK ] BVValueTest/0.rotateLeft (0 ms)
+[ RUN      ] BVValueTest/0.rotateRight
+[       OK ] BVValueTest/0.rotateRight (0 ms)
+[ RUN      ] BVValueTest/0.repeat
+[       OK ] BVValueTest/0.repeat (0 ms)
+[ RUN      ] BVValueTest/0.extendUnsignedBy
+[       OK ] BVValueTest/0.extendUnsignedBy (0 ms)
+[ RUN      ] BVValueTest/0.extendSignedBy
+[       OK ] BVValueTest/0.extendSignedBy (0 ms)
+[ RUN      ] BVValueTest/0.Comparison
+[       OK ] BVValueTest/0.Comparison (0 ms)
+[ RUN      ] BVValueTest/0.Addition
+[       OK ] BVValueTest/0.Addition (0 ms)
+[ RUN      ] BVValueTest/0.Subtraction
+[       OK ] BVValueTest/0.Subtraction (0 ms)
+[ RUN      ] BVValueTest/0.BitwiseAnd
+[       OK ] BVValueTest/0.BitwiseAnd (0 ms)
+[ RUN      ] BVValueTest/0.BitwiseOr
+[       OK ] BVValueTest/0.BitwiseOr (0 ms)
+[ RUN      ] BVValueTest/0.BitwiseXor
+[       OK ] BVValueTest/0.BitwiseXor (0 ms)
+[ RUN      ] BVValueTest/0.concat
+[       OK ] BVValueTest/0.concat (0 ms)
+[ RUN      ] BVValueTest/0.Multiplication
+[       OK ] BVValueTest/0.Multiplication (1 ms)
+[----------] 19 tests from BVValueTest/0 (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 50 tests from 13 test cases ran. (14 ms total)
+[  PASSED  ] 50 tests.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"formula" end time: Mar 13 13:28 CET
+"formula" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/8 Testing: cad
+5/8 Test: cad
+Command: "/home/kperun/Dokumente/SATPraktikum/carl/build/bin/runCADTests"
+Directory: /home/kperun/Dokumente/SATPraktikum/carl/build/src/tests/cad
+"cad" start time: Mar 13 13:28 CET
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 23 tests from 7 test cases.
+[----------] Global test environment set-up.
+[----------] 10 tests from CADTest
+[ RUN      ] CADTest.Check1
+[       OK ] CADTest.Check1 (2 ms)
+[ RUN      ] CADTest.Check2
+[       OK ] CADTest.Check2 (37 ms)
+[ RUN      ] CADTest.Check3
+[       OK ] CADTest.Check3 (3 ms)
+[ RUN      ] CADTest.Check4
+[       OK ] CADTest.Check4 (4 ms)
+[ RUN      ] CADTest.Check5
+[       OK ] CADTest.Check5 (3 ms)
+[ RUN      ] CADTest.Check6
+[       OK ] CADTest.Check6 (44 ms)
+[ RUN      ] CADTest.Check7
+[       OK ] CADTest.Check7 (8 ms)
+[ RUN      ] CADTest.Check8
+[       OK ] CADTest.Check8 (143 ms)
+[ RUN      ] CADTest.Check9
+[       OK ] CADTest.Check9 (817 ms)
+[ RUN      ] CADTest.CheckInt
+[       OK ] CADTest.CheckInt (0 ms)
+[----------] 10 tests from CADTest (1061 ms total)
+
+[----------] 1 test from CAD
+[ RUN      ] CAD.Samples
+[       OK ] CAD.Samples (0 ms)
+[----------] 1 test from CAD (0 ms total)
+
+[----------] 1 test from ConflictGraph
+[ RUN      ] ConflictGraph.BasicOperations
+[       OK ] ConflictGraph.BasicOperations (0 ms)
+[----------] 1 test from ConflictGraph (0 ms total)
+
+[----------] 2 tests from Constraint
+[ RUN      ] Constraint.satisfiedBy
+[       OK ] Constraint.satisfiedBy (0 ms)
+[ RUN      ] Constraint.satisfiedBySqrt
+[       OK ] Constraint.satisfiedBySqrt (1 ms)
+[----------] 2 tests from Constraint (1 ms total)
+
+[----------] 2 tests from EliminationSet
+[ RUN      ] EliminationSet.BasicOperations
+[       OK ] EliminationSet.BasicOperations (0 ms)
+[ RUN      ] EliminationSet.SetProperty
+[       OK ] EliminationSet.SetProperty (0 ms)
+[----------] 2 tests from EliminationSet (0 ms total)
+
+[----------] 2 tests from SampleSet
+[ RUN      ] SampleSet.BasicOperations
+[       OK ] SampleSet.BasicOperations (0 ms)
+[ RUN      ] SampleSet.SampleComparator
+[       OK ] SampleSet.SampleComparator (0 ms)
+[----------] 2 tests from SampleSet (0 ms total)
+
+[----------] 5 tests from Thom
+[ RUN      ] Thom.SignDetermination
+[       OK ] Thom.SignDetermination (601 ms)
+[ RUN      ] Thom.RootFinder
+
+
+
+
+
+
+[       OK ] Thom.RootFinder (370 ms)
+[ RUN      ] Thom.Comparison
+[       OK ] Thom.Comparison (15 ms)
+[ RUN      ] Thom.Samples
+x^2+(-2)*x+(-1) in x, [2: +, +, ]
+x^2+(-2) in x, [2: +, +, ]
+epsilon = 1/10
+res = x^2+1/5*x+(-199/100) in x, [2: +, +, ]
+epsilon = 1/10
+res = x*y+1/10*x+(-2) in y, [1: +, ] OVER x^2+(-2) in x, [3: 0, +, +, ]
+19/10
+[       OK ] Thom.Samples (43 ms)
+[ RUN      ] Thom.Evaluation
+[       OK ] Thom.Evaluation (120 ms)
+[----------] 5 tests from Thom (1149 ms total)
+
+[----------] Global test environment tear-down
+[==========] 23 tests from 7 test cases ran. (2211 ms total)
+[  PASSED  ] 23 tests.
+<end of output>
+Test time =   2.21 sec
+----------------------------------------------------------
+Test Passed.
+"cad" end time: Mar 13 13:28 CET
+"cad" time elapsed: 00:00:02
+----------------------------------------------------------
+
+6/8 Testing: groebner
+6/8 Test: groebner
+Command: "/home/kperun/Dokumente/SATPraktikum/carl/build/bin/runGroebnerTests"
+Directory: /home/kperun/Dokumente/SATPraktikum/carl/build/src/tests/groebner
+"groebner" start time: Mar 13 13:28 CET
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 5 tests from 3 test cases.
+[----------] Global test environment set-up.
+[----------] 1 test from Ideal
+[ RUN      ] Ideal.Construction
+x^2+z [10000000000000000000000000000000];
+y^2 [10000000000000000000000000000000];
+[       OK ] Ideal.Construction (0 ms)
+[----------] 1 test from Ideal (0 ms total)
+
+[----------] 2 tests from Reductor
+[ RUN      ] Reductor.Constructor
+[       OK ] Reductor.Constructor (0 ms)
+[ RUN      ] Reductor.Reduction
+[       OK ] Reductor.Reduction (1 ms)
+[----------] 2 tests from Reductor (1 ms total)
+
+[----------] 2 tests from GB_Buchberger
+[ RUN      ] GB_Buchberger.T1
+[       OK ] GB_Buchberger.T1 (0 ms)
+[ RUN      ] GB_Buchberger.T1_ReasonSets
+[       OK ] GB_Buchberger.T1_ReasonSets (1 ms)
+[----------] 2 tests from GB_Buchberger (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 3 test cases ran. (2 ms total)
+[  PASSED  ] 5 tests.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"groebner" end time: Mar 13 13:28 CET
+"groebner" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/8 Testing: interval
+7/8 Test: interval
+Command: "/home/kperun/Dokumente/SATPraktikum/carl/build/bin/runIntervalTests"
+Directory: /home/kperun/Dokumente/SATPraktikum/carl/build/src/tests/interval
+"interval" start time: Mar 13 13:28 CET
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 47 tests from 6 test cases.
+[----------] Global test environment set-up.
+[----------] 15 tests from DoubleInterval
+[ RUN      ] DoubleInterval.Constructor
+[       OK ] DoubleInterval.Constructor (0 ms)
+[ RUN      ] DoubleInterval.Hash
+[       OK ] DoubleInterval.Hash (0 ms)
+[ RUN      ] DoubleInterval.Getters
+[       OK ] DoubleInterval.Getters (0 ms)
+[ RUN      ] DoubleInterval.StaticCreators
+[       OK ] DoubleInterval.StaticCreators (0 ms)
+[ RUN      ] DoubleInterval.Addition
+[       OK ] DoubleInterval.Addition (0 ms)
+[ RUN      ] DoubleInterval.Subtraction
+[       OK ] DoubleInterval.Subtraction (0 ms)
+[ RUN      ] DoubleInterval.Multiplication
+[       OK ] DoubleInterval.Multiplication (0 ms)
+[ RUN      ] DoubleInterval.ExtendedDivision
+[       OK ] DoubleInterval.ExtendedDivision (1 ms)
+[ RUN      ] DoubleInterval.Intersection
+[       OK ] DoubleInterval.Intersection (0 ms)
+[ RUN      ] DoubleInterval.Union
+[       OK ] DoubleInterval.Union (0 ms)
+[ RUN      ] DoubleInterval.Difference
+[       OK ] DoubleInterval.Difference (0 ms)
+[ RUN      ] DoubleInterval.Split
+[       OK ] DoubleInterval.Split (0 ms)
+[ RUN      ] DoubleInterval.Properties
+[       OK ] DoubleInterval.Properties (0 ms)
+[ RUN      ] DoubleInterval.Contains
+[       OK ] DoubleInterval.Contains (0 ms)
+[ RUN      ] DoubleInterval.BloatShrink
+[       OK ] DoubleInterval.BloatShrink (0 ms)
+[----------] 15 tests from DoubleInterval (1 ms total)
+
+[----------] 13 tests from clRA_Interval
+[ RUN      ] clRA_Interval.Constructor
+[       OK ] clRA_Interval.Constructor (0 ms)
+[ RUN      ] clRA_Interval.Getters
+[       OK ] clRA_Interval.Getters (0 ms)
+[ RUN      ] clRA_Interval.StaticCreators
+[       OK ] clRA_Interval.StaticCreators (0 ms)
+[ RUN      ] clRA_Interval.Addition
+[       OK ] clRA_Interval.Addition (0 ms)
+[ RUN      ] clRA_Interval.Subtraction
+[       OK ] clRA_Interval.Subtraction (0 ms)
+[ RUN      ] clRA_Interval.Multiplication
+[       OK ] clRA_Interval.Multiplication (0 ms)
+[ RUN      ] clRA_Interval.ExtendedDivision
+[       OK ] clRA_Interval.ExtendedDivision (1 ms)
+[ RUN      ] clRA_Interval.Intersection
+[       OK ] clRA_Interval.Intersection (0 ms)
+[ RUN      ] clRA_Interval.Union
+[       OK ] clRA_Interval.Union (0 ms)
+[ RUN      ] clRA_Interval.Split
+[       OK ] clRA_Interval.Split (0 ms)
+[ RUN      ] clRA_Interval.Properties
+[       OK ] clRA_Interval.Properties (0 ms)
+[ RUN      ] clRA_Interval.Contains
+[       OK ] clRA_Interval.Contains (0 ms)
+[ RUN      ] clRA_Interval.BloatShrink
+[       OK ] clRA_Interval.BloatShrink (0 ms)
+[----------] 13 tests from clRA_Interval (1 ms total)
+
+[----------] 13 tests from MpqInterval
+[ RUN      ] MpqInterval.Constructor
+[       OK ] MpqInterval.Constructor (0 ms)
+[ RUN      ] MpqInterval.Getters
+[       OK ] MpqInterval.Getters (0 ms)
+[ RUN      ] MpqInterval.StaticCreators
+[       OK ] MpqInterval.StaticCreators (0 ms)
+[ RUN      ] MpqInterval.Addition
+[       OK ] MpqInterval.Addition (1 ms)
+[ RUN      ] MpqInterval.Subtraction
+[       OK ] MpqInterval.Subtraction (0 ms)
+[ RUN      ] MpqInterval.Multiplication
+[       OK ] MpqInterval.Multiplication (1 ms)
+[ RUN      ] MpqInterval.ExtendedDivision
+[       OK ] MpqInterval.ExtendedDivision (0 ms)
+[ RUN      ] MpqInterval.Intersection
+[       OK ] MpqInterval.Intersection (1 ms)
+[ RUN      ] MpqInterval.Union
+[       OK ] MpqInterval.Union (0 ms)
+[ RUN      ] MpqInterval.Split
+[       OK ] MpqInterval.Split (0 ms)
+[ RUN      ] MpqInterval.Properties
+[       OK ] MpqInterval.Properties (0 ms)
+[ RUN      ] MpqInterval.Contains
+[       OK ] MpqInterval.Contains (0 ms)
+[ RUN      ] MpqInterval.BloatShrink
+[       OK ] MpqInterval.BloatShrink (0 ms)
+[----------] 13 tests from MpqInterval (3 ms total)
+
+[----------] 3 tests from IntervalEvaluation
+[ RUN      ] IntervalEvaluation.Monomial
+[       OK ] IntervalEvaluation.Monomial (1 ms)
+[ RUN      ] IntervalEvaluation.Term
+[       OK ] IntervalEvaluation.Term (0 ms)
+[ RUN      ] IntervalEvaluation.MultivariatePolynomial
+[       OK ] IntervalEvaluation.MultivariatePolynomial (0 ms)
+[----------] 3 tests from IntervalEvaluation (1 ms total)
+
+[----------] 1 test from Contraction
+[ RUN      ] Contraction.SimpleNewton
+[       OK ] Contraction.SimpleNewton (1 ms)
+[----------] 1 test from Contraction (1 ms total)
+
+[----------] 2 tests from SampleTest/0, where TypeParam = __gmp_expr<__mpq_struct [1], __mpq_struct [1]>
+[ RUN      ] SampleTest/0.Sample
+[       OK ] SampleTest/0.Sample (0 ms)
+[ RUN      ] SampleTest/0.SampleSB
+[       OK ] SampleTest/0.SampleSB (0 ms)
+[----------] 2 tests from SampleTest/0 (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 47 tests from 6 test cases ran. (7 ms total)
+[  PASSED  ] 47 tests.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"interval" end time: Mar 13 13:28 CET
+"interval" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/8 Testing: pycarl
+8/8 Test: pycarl
+Command: "/usr/bin/python" "/home/kperun/Dokumente/SATPraktikum/carl/src/tests/pycarl/runAllTests.py"
+Directory: /home/kperun/Dokumente/SATPraktikum/carl/build/src/tests/pycarl
+"pycarl" start time: Mar 13 13:28 CET
+Output:
+----------------------------------------------------------
+E
+======================================================================
+ERROR: core.Test_Variable (unittest.loader.ModuleImportFailure)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: core.Test_Variable
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/unittest/loader.py", line 254, in _find_tests
+    module = self._get_module_from_name(name)
+  File "/usr/lib/python2.7/unittest/loader.py", line 232, in _get_module_from_name
+    __import__(name)
+  File "/home/kperun/Dokumente/SATPraktikum/carl/src/tests/pycarl/core/Test_Variable.py", line 1, in <module>
+    from pycarl import *
+ImportError: No module named pycarl
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"pycarl" end time: Mar 13 13:28 CET
+"pycarl" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Mar 13 13:28 CET
