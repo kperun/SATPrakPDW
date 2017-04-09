@@ -1,0 +1,2 @@
+#Only the build dir shall be ignored
+build/*
