@@ -31,7 +31,7 @@ void printCMakeOptions(std::ostream& os) {
 	 p("COMPARE_WITH_Z3", R"VAR(OFF)VAR");
 	 p("COVERAGE", R"VAR(OFF)VAR");
 	 p("DEVELOPER", R"VAR(OFF)VAR");
-	 p("EXECUTABLE_OUTPUT_PATH", R"VAR(/home/kperun/Dokumente/SATPraktikum/carl/build/bin)VAR");
+	 p("EXECUTABLE_OUTPUT_PATH", R"VAR(/home/kperun/Dokumente/SATPrakPDW/carl/build/bin)VAR");
 	 p("EXPORT_TO_CMAKE", R"VAR(ON)VAR");
 	 p("FORCE_SHIPPED_RESOURCES", R"VAR(OFF)VAR");
 	 p("INCLUDE_INSTALL_DIR", R"VAR(/usr/local/include)VAR");

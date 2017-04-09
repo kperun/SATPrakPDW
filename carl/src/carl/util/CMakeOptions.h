@@ -23,7 +23,7 @@ namespace cmakeoptions {
 	static constexpr auto _COMPARE_WITH_Z3 = "OFF";
 	static constexpr auto _COVERAGE = "OFF";
 	static constexpr auto _DEVELOPER = "OFF";
-	static constexpr auto _EXECUTABLE_OUTPUT_PATH = "/home/kperun/Dokumente/SATPraktikum/carl/build/bin";
+	static constexpr auto _EXECUTABLE_OUTPUT_PATH = "/home/kperun/Dokumente/SATPrakPDW/carl/build/bin";
 	static constexpr auto _EXPORT_TO_CMAKE = "ON";
 	static constexpr auto _FORCE_SHIPPED_RESOURCES = "OFF";
 	static constexpr auto _INCLUDE_INSTALL_DIR = "/usr/local/include";
