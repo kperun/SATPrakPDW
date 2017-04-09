@@ -1,9 +1,0 @@
-util 1 0.112217
-numbers 1 1.05649
-core 1 0.182595
-formula 1 0.017009
-cad 1 2.21399
-groebner 1 0.0045979
-interval 1 0.00962996
-pycarl 1 0.0776222
----

@@ -1,1 +1,0 @@
-cmd='/usr/bin/cmake;-GUnix Makefiles;/home/kperun/Dokumente/SATPraktikum/carl/build/resources/src/GTest_EP'
