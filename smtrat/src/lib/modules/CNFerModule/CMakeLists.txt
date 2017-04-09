@@ -1,0 +1,5 @@
+BeginDefineModule()
+ModuleMainHeader(CNFerModule/CNFerModule.h)
+ModuleName(CNFerModule)
+ModuleClass(CNFerModule)
+EndDefineModule()

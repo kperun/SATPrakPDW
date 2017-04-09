@@ -1,0 +1,115 @@
+/**
+ * @file NewCADSettings.h
+ * @author YOUR NAME <YOUR EMAIL ADDRESS>
+ *
+ * @version 2016-02-23
+ * Created on 2016-02-23.
+ */
+
+#pragma once
+
+#include "../../datastructures/cad/Settings.h"
+
+namespace smtrat {
+namespace cad {
+	/// Mixin that provides settings for incrementality and backtracking.
+	template<Incrementality I, Backtracking B>
+	struct IncrementalityMixin {
+		static constexpr Incrementality incrementality = I;
+		static constexpr Backtracking backtracking = B;
+	};
+	using IncrementalityNO = IncrementalityMixin<Incrementality::NONE,Backtracking::ORDERED>;
+	using IncrementalityNU = IncrementalityMixin<Incrementality::NONE,Backtracking::UNORDERED>;
+	using IncrementalityS = IncrementalityMixin<Incrementality::SIMPLE,Backtracking::UNORDERED>;
+	using IncrementalitySO = IncrementalityMixin<Incrementality::SIMPLE,Backtracking::UNORDERED>;
+	using IncrementalityF = IncrementalityMixin<Incrementality::FULL,Backtracking::UNORDERED>;
+	using IncrementalityFO = IncrementalityMixin<Incrementality::FULL,Backtracking::UNORDERED>;
+	
+	/// Mixin that provides settings for the projection operator.
+	template<ProjectionType P>
+	struct ProjectionMixin {
+		static constexpr ProjectionType projectionOperator = P;
+	};
+	using ProjectionBrown = ProjectionMixin<ProjectionType::Brown>;
+	
+	/// Mixin that provides settings for the sample comparison.
+	template<SampleCompareStrategy SCS, FullSampleCompareStrategy FSCS>
+	struct SampleCompareMixin {
+		static constexpr cad::SampleCompareStrategy sampleComparator = SCS;
+		static constexpr cad::FullSampleCompareStrategy fullSampleComparator = FSCS;
+	};
+	using SampleCompareValue = SampleCompareMixin<SampleCompareStrategy::Value, FullSampleCompareStrategy::Value>;
+	using SampleCompareInteger = SampleCompareMixin<SampleCompareStrategy::Integer, FullSampleCompareStrategy::Integer>;
+	
+	/// Mixin that provides settings for MIS generation
+	template<MISHeuristic MIS>
+	struct MISHeuristicMixin {
+		static constexpr cad::MISHeuristic misHeuristic = MIS;
+	};
+	using MISHeuristicTrivial = MISHeuristicMixin<MISHeuristic::TRIVIAL>;
+	using MISHeuristicGreedy = MISHeuristicMixin<MISHeuristic::GREEDY>;
+}
+
+	struct NewCADBaseSettings: cad::MISHeuristicGreedy {
+		static constexpr cad::RootSplittingStrategy rootSplittingStrategy = cad::RootSplittingStrategy::DEFAULT;
+		static constexpr cad::CoreHeuristic coreHeuristic = cad::CoreHeuristic::PreferSampling;
+		static constexpr std::size_t trivialSampleRadius = 1;
+		static constexpr bool simplifyProjectionByBounds = false;
+		static constexpr bool debugProjection = false;
+		static constexpr bool debugStepsToTikz = false;
+	};
+	struct NewCADSettingsNO: NewCADBaseSettings, cad::IncrementalityNO, cad::ProjectionBrown, cad::SampleCompareInteger {
+		static constexpr auto moduleName = "NewCADModule<NewCADNO>";
+	};
+	
+	struct NewCADSettingsNU: NewCADBaseSettings, cad::IncrementalityNU, cad::ProjectionBrown, cad::SampleCompareInteger {
+		static constexpr auto moduleName = "NewCADModule<NewCADNU>";
+	};
+	
+	struct NewCADSettingsS: NewCADBaseSettings, cad::IncrementalityS, cad::ProjectionBrown, cad::SampleCompareInteger {
+		static constexpr auto moduleName = "NewCADModule<NewCADS>";
+	};
+	struct NewCADSettingsSO: NewCADBaseSettings, cad::IncrementalitySO, cad::ProjectionBrown, cad::SampleCompareInteger {
+		static constexpr auto moduleName = "NewCADModule<NewCADSO>";
+	};
+	
+	struct NewCADSettingsF1: NewCADBaseSettings, cad::IncrementalityF, cad::ProjectionBrown, cad::SampleCompareInteger {
+		static constexpr auto moduleName = "NewCADModule<NewCADF>";
+		static constexpr std::size_t trivialSampleRadius = 1;
+	};
+	struct NewCADSettingsFO1: NewCADBaseSettings, cad::IncrementalityFO, cad::ProjectionBrown, cad::SampleCompareInteger {
+		static constexpr auto moduleName = "NewCADModule<NewCADFO>";
+		static constexpr std::size_t trivialSampleRadius = 1;
+	};
+	struct NewCADSettingsFOS: NewCADBaseSettings, cad::IncrementalityFO, cad::ProjectionBrown, cad::SampleCompareInteger {
+		static constexpr auto moduleName = "NewCADModule<NewCADFO>";
+		static constexpr std::size_t trivialSampleRadius = 1;
+		static constexpr bool simplifyProjectionByBounds = false;
+	};
+	
+	struct NewCADSettingsFV: NewCADBaseSettings, cad::IncrementalityF, cad::ProjectionBrown, cad::SampleCompareValue {
+		static constexpr auto moduleName = "NewCADModule<NewCADFV>";
+	};
+	struct NewCADSettingsFOV: NewCADBaseSettings, cad::IncrementalityFO, cad::ProjectionBrown, cad::SampleCompareValue {
+		static constexpr auto moduleName = "NewCADModule<NewCADFOV>";
+	};
+	
+	struct NewCADSettingsConfigured {
+		static constexpr auto moduleName = "NewCADModule<NewCADConfigured>";
+		static constexpr cad::Incrementality incrementality = cad::Incrementality::${NEWCAD_INCREMENTALITY};
+		static constexpr cad::Backtracking backtracking = cad::Backtracking::${NEWCAD_BACKTRACKING};
+		
+		static constexpr cad::ProjectionType projectionOperator = cad::ProjectionType::Brown;
+		static constexpr cad::CoreHeuristic coreHeuristic = cad::CoreHeuristic::PreferProjection;
+		
+		static constexpr cad::MISHeuristic misHeuristic = cad::MISHeuristic::GREEDY;
+		static constexpr std::size_t trivialSampleRadius = 1;
+		static constexpr bool simplifyProjectionByBounds = false;
+		static constexpr bool debugProjection = false;
+		static constexpr bool debugStepsToTikz = false;
+		
+		static constexpr cad::SampleCompareStrategy sampleComparator = cad::SampleCompareStrategy::Integer;
+		static constexpr cad::FullSampleCompareStrategy fullSampleComparator = cad::FullSampleCompareStrategy::Integer;
+		static constexpr cad::RootSplittingStrategy rootSplittingStrategy = cad::RootSplittingStrategy::DEFAULT;
+	};
+}

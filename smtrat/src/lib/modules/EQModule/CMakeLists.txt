@@ -1,0 +1,5 @@
+BeginDefineModule()
+ModuleMainHeader(EQModule/EQModule.h)
+ModuleName(EQModule)
+ModuleVersion(0 0 1)
+EndDefineModule()

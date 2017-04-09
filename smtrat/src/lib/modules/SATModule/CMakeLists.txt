@@ -1,0 +1,5 @@
+BeginDefineModule()
+ModuleMainHeader(SATModule/SATModule.h)
+ModuleName(SATModule)
+ModuleVersion(1 0 0)
+EndDefineModule()

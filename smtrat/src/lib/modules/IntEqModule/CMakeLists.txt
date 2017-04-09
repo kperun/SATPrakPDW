@@ -1,0 +1,5 @@
+BeginDefineModule()
+ModuleMainHeader(IntEqModule/IntEqModule.h)
+ModuleName(IntEqModule)
+ModuleVersion(0 0 1)
+EndDefineModule()

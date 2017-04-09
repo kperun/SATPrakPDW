@@ -1,0 +1,6 @@
+BeginDefineModule()
+ModuleMainHeader(EQPreprocessingModule/EQPreprocessingModule.h)
+ModuleName(EQPreprocessingModule)
+ModuleVersion(0 0 1)
+ModuleDefaultEnabled()
+EndDefineModule()

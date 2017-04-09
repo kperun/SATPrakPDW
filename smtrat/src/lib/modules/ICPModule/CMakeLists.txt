@@ -1,0 +1,5 @@
+BeginDefineModule()
+ModuleMainHeader(ICPModule/ICPModule.h)
+ModuleName(ICPModule)
+ModuleVersion(1 0 0)
+EndDefineModule()

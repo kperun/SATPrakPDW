@@ -1,0 +1,5 @@
+BeginDefineModule()
+ModuleMainHeader(IncWidthModule/IncWidthModule.h)
+ModuleName(IncWidthModule)
+ModuleVersion(0 0 1)
+EndDefineModule()

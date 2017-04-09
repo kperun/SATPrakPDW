@@ -1,0 +1,5 @@
+BeginDefineModule()
+ModuleMainHeader(BVModule/BVModule.h)
+ModuleName(BVModule)
+ModuleVersion(0 0 1)
+EndDefineModule()
