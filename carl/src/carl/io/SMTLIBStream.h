@@ -33,12 +33,15 @@ private:
 
 	template<typename Pol>
 	void write(const Constraint<Pol>& c) {
-		*this << "(" << c.relation() << " " << c.lhs() << " 0)";
+		if (c.relation() == carl::Relation::NEQ) {
+			*this << Formula<Pol>(FormulaType::NOT, Formula<Pol>(Constraint<Pol>(c.lhs(), carl::Relation::EQ)));
+		} else {
+			*this << "(" << c.relation() << " " << c.lhs() << " 0)";
+		}
 	}
 	
 	template<typename Pol>
-	void write(const Formula<Pol>& f, bool withAssert = true) {
-		if (withAssert) *this << "(assert ";
+	void write(const Formula<Pol>& f) {
 		switch (f.getType()) {
 			case FormulaType::AND:
 			case FormulaType::OR:
@@ -49,15 +52,13 @@ private:
 			{
 				*this << "(" << f.getType();
 				for (const auto& cur: f.subformulas()) {
-					write(cur, false);
+					*this << " " << cur;
 				}
 				*this << ")";
 				break;
 			}
 			case FormulaType::NOT:
-				*this << "(" << f.getType();
-				write(f.subformula(), false);
-				*this << ")";
+				*this << "(" << f.getType() << " " << f.subformula() << ")";
 				break;
 			case FormulaType::BOOL:
 				*this << f.boolean();
@@ -89,7 +90,6 @@ private:
 				CARL_LOG_ERROR("carl.smtlibstream", "Printing exists or forall is not implemented yet.");
 				break;
 		}
-		if (withAssert) *this << ")" << std::endl;
 	}
 
 	void write(const Monomial::Arg& m) {
@@ -205,8 +205,22 @@ public:
 		initialize(l, vars);
 	}
 	
+	template<typename Pol>
+	void assertFormula(const Formula<Pol>& formula) {
+		*this << "(assert " << formula << ")";
+	}
+	
+	template<typename Pol>
+	void minimize(const Pol& objective) {
+		*this << "(minimize " << objective << ")" << std::endl;
+	}
+	
 	void checkSat() {
 		*this << "(check-sat)" << std::endl;
+	}
+	
+	void getModel() {
+		*this << "(get-model)" << std::endl;
 	}
 	
 	template<typename T>
@@ -225,7 +239,7 @@ public:
 	}
 };
 
-std::ostream& operator<<(std::ostream& os, const SMTLIBStream& ss) {
+inline std::ostream& operator<<(std::ostream& os, const SMTLIBStream& ss) {
 	return os << ss.content();
 }
 
@@ -235,14 +249,19 @@ template<typename Pol>
 struct SMTLIBContainer {
 	Logic mLogic;
 	std::initializer_list<Formula<Pol>> mFormulas;
-	SMTLIBContainer(Logic l, std::initializer_list<Formula<Pol>> f): mLogic(l), mFormulas(f) {}
+	bool mGetModel;
+	Pol mObjective;
+	SMTLIBContainer(Logic l, std::initializer_list<Formula<Pol>> f, bool getModel = false): mLogic(l), mFormulas(f), mGetModel(getModel) {}
+	SMTLIBContainer(Logic l, std::initializer_list<Formula<Pol>> f, const Pol& objective, bool getModel = false): mLogic(l), mFormulas(f), mGetModel(getModel), mObjective(objective) {}
 };
 template<typename Pol>
 std::ostream& operator<<(std::ostream& os, const SMTLIBContainer<Pol>& sc) {
 	SMTLIBStream sls;
 	sls.initialize(sc.mLogic, sc.mFormulas);
-	for (const auto& f: sc.mFormulas) sls << f;
+	for (const auto& f: sc.mFormulas) sls.assertFormula(f);
+	if (!sc.mObjective.isZero()) sls.minimize(sc.mObjective);
 	sls.checkSat();
+	if (sc.mGetModel) sls.getModel();
 	return os << sls;
 }
 

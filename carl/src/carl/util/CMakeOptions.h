@@ -16,6 +16,7 @@ namespace cmakeoptions {
 	static constexpr auto _ALLWARNINGS = "OFF";
 	static constexpr auto _BIN_INSTALL_DIR = "/usr/local/lib";
 	static constexpr auto _BUILD_STATIC = "OFF";
+	static constexpr auto _CARL_TARGETS = "lib_carl";
 	static constexpr auto _CLANG_TIDY = "CLANG_TIDY-NOTFOUND";
 	static constexpr auto _CMAKE_BUILD_TYPE = "";
 	static constexpr auto _CMAKE_INSTALL_DIR = "/usr/local/lib/CMake/carl";
@@ -23,7 +24,7 @@ namespace cmakeoptions {
 	static constexpr auto _COMPARE_WITH_Z3 = "OFF";
 	static constexpr auto _COVERAGE = "OFF";
 	static constexpr auto _DEVELOPER = "OFF";
-	static constexpr auto _EXECUTABLE_OUTPUT_PATH = "/home/kperun/Dokumente/SATPrakPDW/carl/build/bin";
+	static constexpr auto _EXECUTABLE_OUTPUT_PATH = "/home/kperun/Dropbox/So2017/SATPrak/SATPrakPDW/carl/build/bin";
 	static constexpr auto _EXPORT_TO_CMAKE = "ON";
 	static constexpr auto _FORCE_SHIPPED_RESOURCES = "OFF";
 	static constexpr auto _INCLUDE_INSTALL_DIR = "/usr/local/include";

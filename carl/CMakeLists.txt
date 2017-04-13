@@ -69,10 +69,10 @@ option( PRUNE_MONOMIAL_POOL "Prune monomial pool" ON )
 option( COVERAGE "Enable collection of coverage statistics" OFF )
 option( EXPORT_TO_CMAKE "Export the project to CMake for easy inclusion" ON)
 
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "DEBUG" "RELEASE")
 
 if (NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type")
+	set(CMAKE_BUILD_TYPE "RELEASE" CACHE STRING "Build type")
 endif()
 
 set(CARL_LIBRARIES_DIR "${PROJECT_BINARY_DIR}/lib")
@@ -101,10 +101,6 @@ endforeach()
 
 # path to put in the executables after building.
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin CACHE PATH "Directory for built executables")
-
-if (NOT WIN32)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=1")
-endif()
 
 include(compiler-options)
 

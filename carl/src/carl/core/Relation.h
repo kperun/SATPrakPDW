@@ -6,40 +6,46 @@
 
 #pragma once
 
+#include "logging.h"
+#include "Sign.h"
+
 #include <cassert>
 #include <iostream>
 #include <memory>
 #include <sstream>
 
-#include "Sign.h"
-#include "logging.h"
-
 namespace carl {
 
 enum class Relation { EQ = 0, NEQ = 1, LESS = 2, LEQ = 4, GREATER = 3, GEQ = 5 };
+
 inline std::ostream& operator<<(std::ostream& os, const Relation& r) {
 	switch (r) {
-		case Relation::EQ:	os << "="; break;
-		case Relation::NEQ:	os << "<>"; break;
+		case Relation::EQ:		os << "="; break;
+		case Relation::NEQ:		os << "!="; break;
 		case Relation::LESS:	os << "<"; break;
-		case Relation::LEQ:	os << "<="; break;
+		case Relation::LEQ:		os << "<="; break;
 		case Relation::GREATER:	os << ">"; break;
-		case Relation::GEQ:	os << ">="; break;
+		case Relation::GEQ:		os << ">="; break;
+		default:
+			CARL_LOG_ERROR("carl.relation", "Invalid relation " << std::underlying_type_t<Relation>(r));
+			assert(false && "Invalid relation");
 	}
 	return os;
 }
 
-inline Relation inverse(Relation c)
+inline Relation inverse(Relation r)
 {
-	switch (c) {
-		case Relation::EQ:	return Relation::NEQ;
-		case Relation::NEQ:	return Relation::EQ;
+	switch (r) {
+		case Relation::EQ:		return Relation::NEQ;
+		case Relation::NEQ:		return Relation::EQ;
 		case Relation::LESS:	return Relation::GEQ;
-		case Relation::LEQ:	return Relation::GREATER;
+		case Relation::LEQ:		return Relation::GREATER;
 		case Relation::GREATER:	return Relation::LEQ;
-		case Relation::GEQ:	return Relation::LESS;
+		case Relation::GEQ:		return Relation::LESS;
+		default:
+			CARL_LOG_ERROR("carl.relation", "Invalid relation " << std::underlying_type_t<Relation>(r));
+			assert(false && "Invalid relation");
 	}
-	assert(false);
 	return Relation::EQ;
 }
 
@@ -49,8 +55,11 @@ inline std::string toString(Relation r) {
 	return ss.str();
 }
 
-inline bool relationIsStrict(Relation r) {
+inline bool isStrict(Relation r) {
 	return r == Relation::LESS || r == Relation::GREATER || r == Relation::NEQ;
+}
+inline bool isWeak(Relation r) {
+	return !isStrict(r);
 }
 
 inline bool evaluate(Sign s, Relation r) {
@@ -62,10 +71,10 @@ inline bool evaluate(Sign s, Relation r) {
 		case Sign::POSITIVE:
 			return r == Relation::NEQ || r == Relation::GREATER || r == Relation::GEQ;
 		default:
-			CARL_LOG_ERROR("carl.relation", "Evaluating unsupported sign " << s);
-			assert(false);
-			return false;
+			CARL_LOG_ERROR("carl.relation", "Evaluating invalid sign " << std::underlying_type_t<Sign>(s));
+			assert(false && "Invalid sign");
 	}
+	return false;
 }
 
 template<typename T>

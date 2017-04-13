@@ -63,6 +63,11 @@ namespace carl {
 			mData.set(n, value);
 			return *this;
 		}
+		Bitset& set_interval(std::size_t start, std::size_t end, bool value = true) {
+			ensureSize(end);
+			for (; start <= end; start++) mData.set(start, value);
+			return *this;
+		}
 		Bitset& reset(std::size_t n) {
 			ensureSize(n);
 			mData.reset(n);
@@ -90,6 +95,11 @@ namespace carl {
 		}
 		auto num_blocks() const {
 			return mData.num_blocks();
+		}
+		auto is_subset_of(const Bitset& rhs) const {
+			if (mDefault && !rhs.mDefault) return false;
+			alignSize(*this, rhs);
+			return mData.is_subset_of(rhs.mData);
 		}
 		auto find_first() const {
 			return mData.find_first();

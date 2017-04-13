@@ -2,10 +2,13 @@
 
 #include "util.h"
 
+#include <carl/config.h>
 #include <carl/interval/Interval.h>
 #include <carl/numbers/numbers.h>
 
 #include <gtest/gtest.h>
+#include <limits>
+#include <type_traits>
 
 using Rational = mpq_class;
 //using Integer = mpz_class;
@@ -61,4 +64,9 @@ template<typename T, typename TT>
 void require_type(const TT& tt) {
 	T t = tt;
 	(void)(t);
+}
+
+template<typename T>
+constexpr T invalid_value() {
+	return T(std::numeric_limits<typename std::underlying_type<T>::type>::max());
 }

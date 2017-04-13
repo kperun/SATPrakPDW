@@ -247,7 +247,7 @@ namespace carl
             {
                 VariablesInformation<false,Pol> varinfos = mLhs.template getVarInfo<false>();
                 for( auto varInfo = varinfos.begin(); varInfo != varinfos.end(); ++varInfo )
-                    mVarInfoMap.emplace_hint( mVarInfoMap.end(), *varInfo );
+                    mVarInfoMap.emplace_hint( mVarInfoMap.end(), varInfo->first, varInfo->second );
             }
                
             /**
@@ -556,22 +556,12 @@ namespace carl
                 }
                 return varInfo->second;
             }
-
-            /**
-             * @param _rel The relation to check whether it is strict.
-             * @return true, if the given relation is strict;
-             *          false, otherwise.
-             */
-            static bool constraintRelationIsStrict( Relation _rel )
-            {
-                return (_rel == Relation::NEQ || _rel == Relation::LESS || _rel == Relation::GREATER);
-            }
 			
 			bool relationIsStrict() const {
-				return constraintRelationIsStrict(mpContent->mRelation);
+                return isStrict(mpContent->mRelation);
 			}
 			bool relationIsWeak() const {
-				return !constraintRelationIsStrict(mpContent->mRelation);
+				return isWeak(mpContent->mRelation);
 			}
             
             /**
@@ -830,6 +820,11 @@ namespace carl
              */
             Pol coefficient( const Variable& _var, uint _degree ) const;
             
+            Constraint negation() const {
+                CARL_LOG_TRACE("carl.formula", "negation of " << *this << " is " << Constraint(lhs(), carl::invertRelation(relation())));
+                return Constraint(lhs(), carl::invertRelation(relation()));
+            }
+
             /**
              * If this constraint represents a substitution (equation, where at least one variable occurs only linearly),
              * this method detects a (there could be various possibilities) corresponding substitution variable and term.

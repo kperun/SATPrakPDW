@@ -3,6 +3,7 @@
  */ 
 #pragma once
 
+#define CARL_BUILD_
 /* #undef LOGGING */
 /* #undef LOGGING_CARL */
 /* #undef LOGGING_DISABLE_INEFFICIENT */
