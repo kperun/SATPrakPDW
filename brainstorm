@@ -1,0 +1,101 @@
+-Whitespaces instead of tabs, 2 whitespaces
+-tests by had (no classes)
+-doxygen comments
+
+
+
+-------------------------------
+
+
+class ICPState {
+    // current search box 
+   (Hash?)Map<Var, Interval> searchBox;
+    // applied contraction
+    ContractionCandidate contractionCandidate;
+    // dimension in which split occured (if any occurred)
+    Variable var;
+    // reasons for a conflict
+    vector<Formula> conflictReason;
+}
+
+// if not existing
+class ContractionCandidate {
+    Variable var;
+    Formula formula;
+}
+
+class ICPTree {
+    // current ICP state
+    ICPState* icpState;
+    // child states
+    vector<ICPTree*> children;
+    // parent state
+    optional<ICPState*> parent;
+}
+
+//---------------------------------------------
+
+// members:
+ICPTree icpTree;
+
+// uses the ICP algorithm on this icp state
+Answer handleICPState(ICPState* state) {
+    if (!checkForNonEmptyBoxes()) {
+         return UNSAT;
+    }
+    if (checkForTerminationCondition()) { // target diameter and # of iterations
+        // call CAD with this ICPState’s box
+        return CAD(???);
+    }
+    else {
+        CC = chooseContractionCandidate(); // best gain heuristic, returns optional
+        if (CC.empty()) {
+             // split box, create two new ICPStates, add them as children to the tree
+             // call handleICPState on these two children
+             ICPState leftState(boxLeft, CC, null, null);
+            ICPState rightState(boxRight, CC, null, null);
+            icpTree.addChild(leftState); //also add father node etc.
+            icpTree.addChild(rightState);
+            
+            Answer leftAnswer = handleState(leftState); // evtl multi threaded
+            Answer rightAnswer = handleState(rightState);
+            // if answer unsat => propagate reasons upwards in the tree
+        }
+        else {
+            Box b = applyContraction(icpState, CC);
+            b = intersect(b, oldBox);
+            ICPState newState(box, CC, null, null);
+            icpState.addChild(newState);
+
+            Answer answer = handleState(newState);
+            // if answer unsat => propagate reasons upwards in the tree
+        }
+    }
+}
+
+Answer checkCore() {
+    Sanitizing/ Init
+    if no formulas -> return sat;
+     
+    Answer status = handleState(initState);
+    
+    return UNSAT;
+}
+
+void removeCore(...){
+   find first occurence in tree
+   delete children
+}
+
+add: trivial: add clauses to vector
+init: depends: init the tree root
+
+updateModel() { 
+   // return set of UNSAT clauses
+    return reasons from root node of icpTree
+}
+
+informCore(){
+   ???    
+}
+
