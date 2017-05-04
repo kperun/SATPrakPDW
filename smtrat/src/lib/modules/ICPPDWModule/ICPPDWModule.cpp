@@ -25,7 +25,22 @@ namespace smtrat
 	template<class Settings>
 	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
 	{
-		// Your code.
+		if( _constraint.getType() == carl::FormulaType::CONSTRAINT )
+        {
+            const ConstraintT& constraint = _constraint.constraint();
+            std::cout << constraint << std::endl;
+            
+            for( auto var = constraint.variables().begin(); var != constraint.variables().end(); ++var )
+            {
+            	carl::Variable v = *var; 
+            	ContractionCandidate cc(&v, &constraint);
+                std::cout << (*var) << std::endl;
+
+                carl::Variable* ccV = cc.getVariable();
+                const ConstraintT* ccC = cc.getConstraint();
+                std::cout << *ccV << *ccC << std::endl;
+            }
+        }
 		return true; // This should be adapted according to your implementation.
 	}
 	

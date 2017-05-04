@@ -11,6 +11,7 @@
 #include "../../solver/Module.h"
 #include "ICPPDWStatistics.h"
 #include "ICPPDWSettings.h"
+#include "ContractionCandidate.h"
 
 namespace smtrat
 {
