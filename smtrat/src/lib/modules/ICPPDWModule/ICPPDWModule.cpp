@@ -25,6 +25,7 @@ namespace smtrat
 	template<class Settings>
 	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
 	{
+		
 		// Your code.
 		return true; // This should be adapted according to your implementation.
 	}
