@@ -38,6 +38,6 @@ namespace smtrat
     }
 
     void ICPState::addConflictingConstraint(ConstraintT* constraint) {
-        mConflictingConstraints.add(constraint);
+        mConflictingConstraints.push_back(constraint);
     }
 }

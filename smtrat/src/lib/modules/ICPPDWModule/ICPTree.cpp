@@ -32,7 +32,7 @@ namespace smtrat
     }
 
     void ICPTree::addChildTree(ICPTree* child) {
-        mChildTrees.add(child);
+        mChildTrees.push_back(child);
     }
 
     bool ICPTree::isLeaf() {
