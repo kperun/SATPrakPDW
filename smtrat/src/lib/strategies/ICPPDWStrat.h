@@ -18,10 +18,10 @@ namespace smtrat
      * @version
      *
      */
-    class RatICP: public Manager
+    class ICPPDWStrat: public Manager
     {
         public:
-            RatICP(): Manager() {
+            ICPPDWStrat(): Manager() {
 				setStrategy({
 					addBackend<SATModule<SATSettings1>>({
 						addBackend<ICPPDWModule<ICPPDWSettings1>>()
