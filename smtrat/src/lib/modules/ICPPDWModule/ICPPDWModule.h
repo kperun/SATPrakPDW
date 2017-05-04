@@ -11,7 +11,7 @@
 #include "../../solver/Module.h"
 #include "ICPPDWStatistics.h"
 #include "ICPPDWSettings.h"
-#include "ContractionCandidate.h"
+#include "ICPTree.h"
 
 namespace smtrat
 {
@@ -23,6 +23,9 @@ namespace smtrat
 			ICPPDWStatistics mStatistics;
 #endif
 			// Members.
+
+			// the ICP search tree
+			ICPTree mSearchTree;
 			
 		public:
 			typedef Settings SettingsType;

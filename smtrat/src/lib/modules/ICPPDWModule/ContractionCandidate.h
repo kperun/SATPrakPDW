@@ -9,6 +9,10 @@
 
 namespace smtrat
 {
+    /**
+     * This class represents a contraction candidate (x, c) where x is a variable
+     * and c is a constraint.
+     */
     class ContractionCandidate
     {
         private:
