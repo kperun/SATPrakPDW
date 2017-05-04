@@ -1,5 +1,5 @@
 -Whitespaces instead of tabs, 2 whitespaces
--tests by hand (no classes)
+-tests by had (no classes)
 -doxygen comments
 
 
@@ -98,4 +98,79 @@ updateModel() {
 informCore(){
    ???    
 }
+
+
+
+
+
+
+
+////-----------------------------------------------------------------------------------
+Input: smt input file als input format für compeierte binary
+        -> .smt2
+        -> smtlib.org  ->  rechts benchmarks -> availible here -> QF NRA.zip als test (nehme zu anfang die kleinste datei am besten
+        -
+CADOnlyAssignement.h -> kopieren und CADMoodule durch unser modul ersetzten include und 
+
+--> smtrat -> ccmake.. --> DEVELOPER und LOGGIN anmachen, SMTRAT_Strategy auf unsere strategie stellen
+                            --> statistics für statistiken
+
+in CADModule.cpp
+Loggin -> SMTRAT_LOG_ERROR
+    -> chanel-> wo
+    -> zweites die ausgabe
+
+smtratSolver.cpp  -> oben wird gezeigt in LOGGIN wo welche ausgabe generiert
+
+./smtrat --help 
+
+
+Informationen kann man in Modules nachgucken
+
+mModel -> muss mit einen assignement gefüllt werden wenn es SAT ist
+
+
+Lifecycle:
+    1.Für jeden constraint wird informCore aufgerufen. -> man kann dann gucken welche constraints aufgetaucht sind.
+    2.init
+    3.per addCore werden sachen zur menge der betrachten sachen zugegeben. mit remove löschen.  --> mit .formula kriegt man die formeln
+        -> iterator: eine einzige formel
+    4.Achtung -> das löschen wird nicht in der selben reihenfolge gemacht wie das adden
+    5.addCore -> man kann false ausgeben, wenn es shcon nicht lösbar sind
+    6.checkCore: checke ob betrachtete lösbar 
+
+Bei UNSAT muss man ein infisible subset generieren -> mit: generateTrivialInfeasible...
+
+mit runBackeds kann man ein zusätzliches backend aufrufen 
+
+Wichtig -> updateModel in wiki angucken udn implementieren
+
+FPPSettings -> kann man settings verwenden
+
+
+-> CARL -> constraints/polynom 
+
+-> Carl -> interval evaluation
+
+-> in COMMON.h soll man am besten die sachen verwenden 
+    
+
+
+
+--------------------------
+
+TODO:
+
+überall pointer auf null setzten in constructoren
+
+1. Linearisierung
+2. Umformen+Einsetzten
+3. CC auswählen mit meißten gain
+
+
+
+
+
+
+
 
