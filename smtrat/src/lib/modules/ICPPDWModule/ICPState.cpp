@@ -1,11 +1,12 @@
 #include "ICPState.h"
+#include "ICPContractionCandidate.h"
 
 namespace smtrat
 {
     ICPState::ICPState() {
     }
 
-    ICPState::ICPState(ContractionCandidate* contractionCandidate) :
+    ICPState::ICPState(ICPContractionCandidate* contractionCandidate) :
         mContractionCandidate(contractionCandidate)
     {
     }
@@ -17,11 +18,11 @@ namespace smtrat
         return &mSearchBox;
     }
 
-    ContractionCandidate* ICPState::getContractionCandidate() {
+    ICPContractionCandidate* ICPState::getContractionCandidate() {
         return mContractionCandidate;
     }
 
-    void ICPState::setContractionCandidate(ContractionCandidate* contractionCandidate) {
+    void ICPState::setContractionCandidate(ICPContractionCandidate* contractionCandidate) {
         mContractionCandidate = contractionCandidate;
     }
 

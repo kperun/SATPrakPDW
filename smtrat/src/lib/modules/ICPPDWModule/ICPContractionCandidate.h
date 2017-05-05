@@ -13,20 +13,20 @@ namespace smtrat
      * This class represents a contraction candidate (x, c) where x is a variable
      * and c is a constraint.
      */
-    class ContractionCandidate
+    class ICPContractionCandidate
     {
         private:
             carl::Variable mVariable;
             ConstraintT mConstraint;
 
         public:
-            ContractionCandidate(carl::Variable& var, const ConstraintT& constraint):
+            ICPContractionCandidate(carl::Variable& var, const ConstraintT& constraint):
                 mVariable(var),
                 mConstraint(constraint)
             {
             }
 
-            ~ContractionCandidate() {
+            ~ICPContractionCandidate() {
             }
 
             carl::Variable& getVariable();

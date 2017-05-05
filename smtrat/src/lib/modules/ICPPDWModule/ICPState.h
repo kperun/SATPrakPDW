@@ -6,7 +6,7 @@
 #pragma once
 
 #include "../../Common.h"
-#include "ContractionCandidate.h"
+#include "ICPContractionCandidate.h"
 
 namespace smtrat
 {
@@ -21,7 +21,7 @@ namespace smtrat
         private:
             // the search box maps from variables to their current intervals
             std::map<carl::Variable*, RationalInterval> mSearchBox;
-            ContractionCandidate* mContractionCandidate;
+            ICPContractionCandidate* mContractionCandidate;
             
             // dimension in which the split occurred
             carl::Variable* mSplitDimension;
@@ -30,12 +30,12 @@ namespace smtrat
 
         public:
             ICPState();
-            ICPState(ContractionCandidate* contractionCandidate);
+            ICPState(ICPContractionCandidate* contractionCandidate);
             ~ICPState();
 
             std::map<carl::Variable*, RationalInterval>* getBox();
-            ContractionCandidate* getContractionCandidate();
-            void setContractionCandidate(ContractionCandidate* contractionCandidate);
+            ICPContractionCandidate* getContractionCandidate();
+            void setContractionCandidate(ICPContractionCandidate* contractionCandidate);
             carl::Variable* getSplitDimension();
             void setSplitDimension(carl::Variable* var);
             vector<ConstraintT*>* getConflictingConstraints();

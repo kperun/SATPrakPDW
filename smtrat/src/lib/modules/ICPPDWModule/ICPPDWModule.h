@@ -30,7 +30,7 @@ namespace smtrat
 			/**
 			 * we need to linearize constraints for ICP
 			 * so we will store a map from original constraints to the linearized ones
-			 * ând for convinience also a map from linearized constraints to original ones
+			 * and for convinience also a map from linearized constraints to original ones
 			 */
 			std::map<ConstraintT, vector<ConstraintT>> mLinearizations;
 			std::map<ConstraintT,        ConstraintT > mDeLinearizations;

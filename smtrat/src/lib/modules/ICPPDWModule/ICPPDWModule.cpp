@@ -7,7 +7,7 @@
  */
 
 #include "ICPPDWModule.h"
-#include "ContractionCandidate.h"
+#include "ICPContractionCandidate.h"
 #include "ICPState.h"
 
 namespace smtrat
@@ -71,6 +71,7 @@ namespace smtrat
 	
 	template<class Settings>
 	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
+	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
 	{
 		// we only consider actual constraints
 		if (_constraint.getType() == carl::FormulaType::CONSTRAINT) {
@@ -121,6 +122,13 @@ namespace smtrat
 		// Your code.
 		return Answer::UNKNOWN; // This should be adapted according to your implementation.
 	}
+
+
+	double computeGain(ICPContractionCandidate* candidate){
+		//1 - D_new/D_old
+		return 0.0;
+	}
+
 }
 
 #include "Instantiation.h"
