@@ -25,7 +25,7 @@ namespace smtrat
 	{}
 
 	template<class Settings>
-	vector<ConstraintT>& ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint) {
+	std::vector<ConstraintT>& ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint) {
 		const Poly& polynomial = constraint.lhs();
 		vector<ConstraintT> linearizedConstraints;
 
@@ -70,7 +70,6 @@ namespace smtrat
 	}
 	
 	template<class Settings>
-	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
 	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
 	{
 		// we only consider actual constraints
@@ -124,10 +123,55 @@ namespace smtrat
 	}
 
 
-	double computeGain(ICPContractionCandidate* candidate){
-		//1 - D_new/D_old
-		return 0.0;
+
+
+	template<class Settings>
+	/*double*/ void ICPPDWModule<Settings>::computeGain(/*ICPContractionCandidate* candidate, DoubleInterval old_interval*/){
+		//Input:  Kriege einen kandidaten, das alte sowie das neue intervall.
+		// 		1. schneide beide intervalle um das neue intervall zu berechnen.
+		//		2. berechne 1- D_new/D_old <- hier müssen die diameter mit .diameter berechnet werden. returne den wert
+		/*
+			DoubleInterval new_inteval = evaluateIntervall(candidate);
+			return 1 - (new_inteval.diameter()/old_interval.diameter());
+		*/
+
 	}
+
+
+	template<class Settings>
+	/*Interval*/ void ICPPDWModule<Settings>::evaluateIntervall(/*ICPContractionCandidate* candidate, */){
+		//Input: ein Constraint candiadte bestehend aus einer variablen und einen constraint
+		//TODO:1.nehme die variable und stelle im constraint die sachen nach dieser variablen um.
+		//	   2.evaluiere das constraint in dem du die intervalle aller anderen variablen (die in der beobachteten menge)
+		//	     drin sind einsetzt und ausrechnest (mit carl::IntrvalEvaluation::evaluate(candidate.var, candidate.constraint)??)
+		//	   3.gebe zurück ein neues intervall, das jedoch noch nicht geschnitten wurde mit dem alten.
+		return nullptr;
+	}
+
+	template<class Settings>
+	/*ICPContractionCandidate* */ void ICPPDWModule<Settings>::computeBestCandidate(/*std::list<ICPContractionCandidate> candidates*/){
+		//Input: eine Liste an contraction candiate
+		/*TODO:1.gehe durch die liste, für jeden kandiadaten berechne mit computeGain den gain.
+		*	   2.speichere den aktuell größten gain zwischen und den CC zwischen. (als double und pointer)
+		*	   3.wähle variable mit größten gain und gebe sie aus
+		*/
+	} 
+
+	template<class Settings>
+	/* ConstraintT* */ void ICPPDWModule<Settings>::transposeConstraint(/* ConstraintT* constraint, Variable* var */){
+		/* Input: eine ConstraintT und ein Variable object
+			TODO:1. hole das polynom raus mit:  const Poly& polynomial = constraint.lhs(); 
+				 2. erstelle ein neues poly objekt.
+				 3. prüfe mit constraint->hasVariable(var) ob die variable drin ist nach der man umstellen will
+				 4. stelle von hand um (es gibt keine methode dafür). Vorgehen: gehe durch das constraint, entferne 
+				 	die variable die man betrachtet raus, setzte sie auf die rechte seite und invertiere das vorzeichen entsprechend
+				 	in dem man ein neues poly erstellt mit der var und einen - davor. 
+				 5. prüfe dass der operator nicht nicht == und nicht != ist, wenn es so ist dann negiere ihn wenn - vor der variable steht.	
+		*/
+	}
+
+
+
 
 }
 
