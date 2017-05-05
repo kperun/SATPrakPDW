@@ -29,7 +29,7 @@ namespace smtrat
 		const Poly& polynomial = constraint.lhs();
 		vector<ConstraintT> linearizedConstraints;
 
-		if (polynomial.isLinear()) {
+		if (polynomial.isLinear()) { // TODO: are polynomials with just one monome okay?
 			// we don't need to do anything, so we simply map this constraint to itself
 			linearizedConstraints.push_back(constraint);
 		}
@@ -43,12 +43,15 @@ namespace smtrat
 
 	            	// introduce a new slack variable representing that monomial
 	            	carl::Variable slackVariable = carl::freshRealVariable();
+	            	mSlackVariables.push_back(slackVariable);
 
 					// we create a new constraint to connect the new slack variable with the monomial
-					// TODO
+					// TODO: needs to be: slack - monome = 0
+					Poly slackPolynomial;
+					ConstraintT slackConstraint(slackPolynomial, carl::Relation::EQ);
 
 					// and add that new constraint to the resulting vector
-					// TODO
+					linearizedConstraints.push_back(slackConstraint);
 
 					// we also need to calculate an initial bound on that new slack variable
 					// TODO
