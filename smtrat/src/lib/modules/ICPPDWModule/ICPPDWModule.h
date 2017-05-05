@@ -26,6 +26,35 @@ namespace smtrat
 
 			// the ICP search tree
 			ICPTree mSearchTree;
+
+			/**
+			 * we need to linearize constraints for ICP
+			 * so we will store a map from original constraints to the linearized ones
+			 * ând for convinience also a map from linearized constraints to original ones
+			 */
+			std::map<ConstraintT, vector<ConstraintT>> mLinearizations;
+			std::map<ConstraintT,        ConstraintT > mDeLinearizations;
+
+			// a list of newly introduced variables (during the linearization)
+			vector<carl::Variable> mSlackVariables;
+		
+		private:
+			/**
+			 * Linearizes a constraint.
+			 *
+			 * E.g.: x*y + x*y*y + 5 = 0 will be linearized to
+			 *       a + b + 5 = 0 and a - x*y = 0 and b - x*y*y = 0
+			 *
+			 * The resulting constraints will be returned and stored in the mLinearizations 
+			 * and mDeLinearizations map.
+			 * The newly introduced variables will be added to mSlackVariables.
+			 * In case the constraint was linear, it will be mapped to itself.
+			 *
+			 * @param constraint The constraint that should be linearized
+			 * @return A pointer to the vector of resulting linearized constraints.
+			 *         This vector is actually stored in the mLinearizations map.
+			 */
+			vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint);
 			
 		public:
 			typedef Settings SettingsType;

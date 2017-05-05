@@ -16,11 +16,11 @@ namespace smtrat
     class ContractionCandidate
     {
         private:
-            carl::Variable* mVariable;
-            const ConstraintT* mConstraint;
+            carl::Variable mVariable;
+            ConstraintT mConstraint;
 
         public:
-            ContractionCandidate(carl::Variable* var, const ConstraintT* constraint):
+            ContractionCandidate(carl::Variable& var, const ConstraintT& constraint):
                 mVariable(var),
                 mConstraint(constraint)
             {
@@ -29,9 +29,9 @@ namespace smtrat
             ~ContractionCandidate() {
             }
 
-            carl::Variable* getVariable();
-            void setVariable(carl::Variable* var);
-            const ConstraintT* getConstraint();
-            void setConstraint(const ConstraintT* constraint);
+            carl::Variable& getVariable();
+            void setVariable(carl::Variable& var);
+            ConstraintT& getConstraint();
+            void setConstraint(const ConstraintT& constraint);
     };
 }

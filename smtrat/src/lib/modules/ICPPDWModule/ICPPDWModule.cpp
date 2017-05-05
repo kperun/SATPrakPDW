@@ -23,12 +23,64 @@ namespace smtrat
 	template<class Settings>
 	ICPPDWModule<Settings>::~ICPPDWModule()
 	{}
+
+	template<class Settings>
+	vector<ConstraintT>& ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint) {
+		const Poly& polynomial = constraint.lhs();
+		vector<ConstraintT> linearizedConstraints;
+
+		if (polynomial.isLinear()) {
+			// we don't need to do anything, so we simply map this constraint to itself
+			linearizedConstraints.push_back(constraint);
+		}
+		else {
+			// we need to actually linearize this constraint
+
+			// so we traverse every monomial (product of variables)
+            for (auto monomial = polynomial.polynomial().begin(); monomial != polynomial.polynomial().end(); monomial++) {
+            	// we only need to linearize non-linear monomials
+            	if (! monomial->monomial()->isLinear()) {
+
+	            	// introduce a new slack variable representing that monomial
+	            	carl::Variable slackVariable = carl::freshRealVariable();
+
+					// we create a new constraint to connect the new slack variable with the monomial
+					// TODO
+
+					// and add that new constraint to the resulting vector
+					// TODO
+
+					// we also need to calculate an initial bound on that new slack variable
+					// TODO
+	            }
+            }
+		}
+
+		// fill the maps so that we know how we linearized this constraint
+		mLinearizations[constraint] = linearizedConstraints;
+		for (int i = 0; i < (int) linearizedConstraints.size(); i++) {
+			ConstraintT c = linearizedConstraints[i];
+			mDeLinearizations[c] = constraint;
+		}
+
+		return mLinearizations[constraint];
+	}
 	
 	template<class Settings>
 	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
 	{
-		// we only consider constraints
+		// we only consider actual constraints
 		if (_constraint.getType() == carl::FormulaType::CONSTRAINT) {
+			const ConstraintT& constraint = _constraint.constraint();
+
+			// pre-processing
+			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint);
+
+			// DEBUG
+			std::cout << "Linearized constraints for " << constraint << std::endl;
+			for (int i = 0; i < (int) newConstraints.size(); i++) {
+				std::cout << newConstraints[i] << std::endl;
+			}
         }
 		return true; // This should be adapted according to your implementation.
 	}
