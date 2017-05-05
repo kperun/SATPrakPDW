@@ -126,7 +126,7 @@ namespace smtrat
 
 
 	template<class Settings>
-	/*double*/ void ICPPDWModule<Settings>::computeGain(/*ICPContractionCandidate* candidate, DoubleInterval old_interval*/){
+	double ICPPDWModule<Settings>::computeGain(/*ICPContractionCandidate* candidate, DoubleInterval old_interval*/){
 		//Input:  Kriege einen kandidaten, das alte sowie das neue intervall.
 		// 		1. schneide beide intervalle um das neue intervall zu berechnen.
 		//		2. berechne 1- D_new/D_old <- hier müssen die diameter mit .diameter berechnet werden. returne den wert
@@ -134,22 +134,21 @@ namespace smtrat
 			DoubleInterval new_inteval = evaluateIntervall(candidate);
 			return 1 - (new_inteval.diameter()/old_interval.diameter());
 		*/
-
+	    return 0;
 	}
 
 
 	template<class Settings>
-	/*Interval*/ void ICPPDWModule<Settings>::evaluateIntervall(/*ICPContractionCandidate* candidate, */){
+	/*Interval*/ void ICPPDWModule<Settings>::evaluateInterval(/*ICPContractionCandidate* candidate, */){
 		//Input: ein Constraint candiadte bestehend aus einer variablen und einen constraint
 		//TODO:1.nehme die variable und stelle im constraint die sachen nach dieser variablen um.
 		//	   2.evaluiere das constraint in dem du die intervalle aller anderen variablen (die in der beobachteten menge)
 		//	     drin sind einsetzt und ausrechnest (mit carl::IntrvalEvaluation::evaluate(candidate.var, candidate.constraint)??)
 		//	   3.gebe zurück ein neues intervall, das jedoch noch nicht geschnitten wurde mit dem alten.
-		return nullptr;
 	}
 
 	template<class Settings>
-	/*ICPContractionCandidate* */ void ICPPDWModule<Settings>::computeBestCandidate(/*std::list<ICPContractionCandidate> candidates*/){
+	/*ICPContractionCandidate */ void ICPPDWModule<Settings>::computeBestCandidate(/*std::list<ICPContractionCandidate> candidates*/){
 		//Input: eine Liste an contraction candiate
 		/*TODO:1.gehe durch die liste, für jeden kandiadaten berechne mit computeGain den gain.
 		*	   2.speichere den aktuell größten gain zwischen und den CC zwischen. (als double und pointer)
@@ -158,7 +157,7 @@ namespace smtrat
 	} 
 
 	template<class Settings>
-	/* ConstraintT* */ void ICPPDWModule<Settings>::transposeConstraint(/* ConstraintT* constraint, Variable* var */){
+	/* ConstraintT */ void ICPPDWModule<Settings>::transposeConstraint(/* ConstraintT* constraint, Variable* var */){
 		/* Input: eine ConstraintT und ein Variable object
 			TODO:1. hole das polynom raus mit:  const Poly& polynomial = constraint.lhs(); 
 				 2. erstelle ein neues poly objekt.

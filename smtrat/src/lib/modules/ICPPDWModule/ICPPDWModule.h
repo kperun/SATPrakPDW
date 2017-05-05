@@ -55,6 +55,11 @@ namespace smtrat
 			 *         This vector is actually stored in the mLinearizations map.
 			 */
 			vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint);
+
+			double computeGain();
+			void evaluateInterval();
+			void computeBestCandidate();
+			void transposeConstraint();
 			
 		public:
 			typedef Settings SettingsType;
