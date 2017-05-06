@@ -12,6 +12,7 @@
 #include "ICPPDWStatistics.h"
 #include "ICPPDWSettings.h"
 #include "ICPTree.h"
+#include "ICPContractionCandidate.h"
 
 namespace smtrat
 {
@@ -27,13 +28,16 @@ namespace smtrat
 			// the ICP search tree
 			ICPTree mSearchTree;
 
+			// all contraction candidates
+			vector<ICPContractionCandidate> mContractionCandidates;
+
 			/**
 			 * we need to linearize constraints for ICP
 			 * so we will store a map from original constraints to the linearized ones
-			 * and for convinience also a map from linearized constraints to original ones
+			 * and for convenience also a map from linearized constraints to original ones
 			 */
-			std::map<ConstraintT, vector<ConstraintT>> mLinearizations;
-			std::map<ConstraintT,        ConstraintT > mDeLinearizations;
+			carl::FastMap<ConstraintT, vector<ConstraintT>> mLinearizations;
+			carl::FastMap<ConstraintT,        ConstraintT > mDeLinearizations;
 
 			// a list of newly introduced variables (during the linearization)
 			vector<carl::Variable> mSlackVariables;
@@ -43,7 +47,7 @@ namespace smtrat
 			 * Linearizes a constraint.
 			 *
 			 * E.g.: x*y + x*y*y + 5 = 0 will be linearized to
-			 *       a + b + 5 = 0 and a - x*y = 0 and b - x*y*y = 0
+			 *       a + b + 5 = 0 and x*y - a = 0 and x*y*y - b = 0
 			 *
 			 * The resulting constraints will be returned and stored in the mLinearizations 
 			 * and mDeLinearizations map.
@@ -51,10 +55,22 @@ namespace smtrat
 			 * In case the constraint was linear, it will be mapped to itself.
 			 *
 			 * @param constraint The constraint that should be linearized
-			 * @return A pointer to the vector of resulting linearized constraints.
+			 * @return A vector of resulting linearized constraints.
 			 *         This vector is actually stored in the mLinearizations map.
 			 */
 			vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint);
+
+			/**
+			 * Creates an initial bound on a newly introduced slack variable.
+			 * 
+			 * This method will be called during the linearization process.
+			 * The calculated initial bound will then be set as the current/initial bound for the slack variable.
+			 *
+			 * @param slackVariable The slack variable for which an initial bound should be created
+			 * @param monomial The monomial for which this slack variable stands
+			 *                 (i.e. the constraint slack = monomial was added during linearization)
+			 */
+			void createInitialSlackBound(const carl::Variable& slackVariable, const Poly& monomial);
 
 			double computeGain();
 			void evaluateInterval();

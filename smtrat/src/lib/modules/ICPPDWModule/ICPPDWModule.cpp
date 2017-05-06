@@ -36,27 +36,49 @@ namespace smtrat
 		else {
 			// we need to actually linearize this constraint
 
+			// this polynomial will contain the original polynomial,
+			// but every non-linear term will have been replaced by a slack variable
+			Poly linearizedOriginalPolynomial;
+
 			// so we traverse every monomial (product of variables)
             for (auto monomial = polynomial.polynomial().begin(); monomial != polynomial.polynomial().end(); monomial++) {
             	// we only need to linearize non-linear monomials
-            	if (! monomial->monomial()->isLinear()) {
+            	// we also need to check if the monomial is actually a monomial (it might be a constant)
+            	if (monomial->monomial() && ! monomial->monomial()->isLinear()) {
+
+					/* 
+					 * Note: The difference between *monomial and monomial->monomial() is that the former is the complete monomial
+					 *       and the latter is only the variables without coefficient. The coefficient can be accessed through
+					 *       monomial->coeff(), i.e. *monomial == monomial->coeff() * monomial->monomial()
+					 */
+            		// convert the monomial without coefficient to a polynomial data type
+            		Poly pureMonomial = carl::makePolynomial<Poly>(Poly::PolyType(monomial->monomial()));
 
 	            	// introduce a new slack variable representing that monomial
 	            	carl::Variable slackVariable = carl::freshRealVariable();
 	            	mSlackVariables.push_back(slackVariable);
 
-					// we create a new constraint to connect the new slack variable with the monomial
-					// TODO: needs to be: slack - monome = 0
-					Poly slackPolynomial;
+					// we create a new constraint (monomial - slack = 0) to connect the new slack variable with the monomial
+					Poly slackPolynomial = pureMonomial - slackVariable;
 					ConstraintT slackConstraint(slackPolynomial, carl::Relation::EQ);
+
+					// replace that monomial in the original constraint by the slack variable
+					linearizedOriginalPolynomial += monomial->coeff() * carl::makePolynomial<Poly>(slackVariable);
 
 					// and add that new constraint to the resulting vector
 					linearizedConstraints.push_back(slackConstraint);
 
 					// we also need to calculate an initial bound on that new slack variable
-					// TODO
+					createInitialSlackBound(slackVariable, pureMonomial);
+	            }
+	            else {
+	            	linearizedOriginalPolynomial += *monomial;
 	            }
             }
+
+            // finally, we add the linearized original constraint
+            ConstraintT linearizedOriginalConstraint(linearizedOriginalPolynomial, constraint.relation());
+            linearizedConstraints.push_back(linearizedOriginalConstraint);
 		}
 
 		// fill the maps so that we know how we linearized this constraint
@@ -67,6 +89,14 @@ namespace smtrat
 		}
 
 		return mLinearizations[constraint];
+	}
+
+	template<class Settings>
+	void ICPPDWModule<Settings>::createInitialSlackBound(const carl::Variable& slackVariable, const Poly& monomial) {
+		// TODO
+		// since slack = monomial, we simply need to evaluate the monomial with it's initial bounds
+		// and then set the initial bound of the slack variable to the result
+		// we also need to store those initial bounds somewhere
 	}
 	
 	template<class Settings>
@@ -80,7 +110,7 @@ namespace smtrat
 			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint);
 
 			// DEBUG
-			std::cout << "Linearized constraints for " << constraint << std::endl;
+			std::cout << "Linearized constraints for " << constraint << ": " << std::endl;
 			for (int i = 0; i < (int) newConstraints.size(); i++) {
 				std::cout << newConstraints[i] << std::endl;
 			}
