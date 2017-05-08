@@ -21,12 +21,12 @@ namespace smtrat
         return mSearchBox[var];
     }
 
-    ICPContractionCandidate& ICPState::getContractionCandidate() {
-        return mContractionCandidate;
+    vector<ICPContractionCandidate*>& ICPState::getContractionCandidates() {
+        return mContractionCandidates;
     }
 
-    void ICPState::setContractionCandidate(const ICPContractionCandidate& contractionCandidate) {
-        mContractionCandidate = contractionCandidate;
+    void ICPState::addContractionCandidate(ICPContractionCandidate* contractionCandidate) {
+        mContractionCandidates.push_back(contractionCandidate);
     }
 
     carl::Variable ICPState::getSplitDimension() {
@@ -37,11 +37,11 @@ namespace smtrat
         mSplitDimension = splitDimension;
     }
 
-    vector<ConstraintT>& ICPState::getConflictingConstraints() {
+    std::set<ConstraintT>& ICPState::getConflictingConstraints() {
         return mConflictingConstraints;
     }
 
     void ICPState::addConflictingConstraint(const ConstraintT& constraint) {
-        mConflictingConstraints.push_back(constraint);
+        mConflictingConstraints.insert(constraint);
     }
 }
