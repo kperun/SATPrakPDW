@@ -30,6 +30,9 @@ namespace smtrat
 			// the initial ICP state
 			ICPState mInitialState;
 
+			// the set of original variables
+			std::set<carl::Variable> mOriginalVariables;
+
 			// all contraction candidates
 			vector<ICPContractionCandidate> mContractionCandidates;
 
@@ -38,11 +41,12 @@ namespace smtrat
 			 * so we will store a map from original constraints to the linearized ones
 			 * and for convenience also a map from linearized constraints to original ones
 			 */
-			carl::FastMap<ConstraintT, vector<ConstraintT>> mLinearizations;
-			carl::FastMap<ConstraintT,        ConstraintT > mDeLinearizations;
+			std::map<ConstraintT, vector<ConstraintT>> mLinearizations;
+			std::map<ConstraintT,        ConstraintT > mDeLinearizations;
 
-			// a list of newly introduced variables (during the linearization)
-			vector<carl::Variable> mSlackVariables;
+			// the set of newly introduced variables (during the linearization)
+			std::set<carl::Variable> mSlackVariables;
+
 		
 		private:
 			/**

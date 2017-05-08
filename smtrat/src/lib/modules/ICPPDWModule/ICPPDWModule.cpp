@@ -56,7 +56,7 @@ namespace smtrat
 
 		            	// introduce a new slack variable representing that monomial
 		            	carl::Variable slackVariable = carl::freshRealVariable();
-		            	mSlackVariables.push_back(slackVariable);
+		            	mSlackVariables.insert(slackVariable);
 
 						// we create a new constraint (monomial - slack = 0) to connect the new slack variable with the monomial
 						Poly slackPolynomial = monomial - slackVariable;
@@ -98,17 +98,18 @@ namespace smtrat
 	void ICPPDWModule<Settings>::createInitialVariableBound(const carl::Variable& variable) {
 		// TODO
 		// retrieve the inital bound of the given original variable and store it in mInitialState.mSearchBox
-		IntervalT initialInterval;
-		std::cout << "Initial interval for " << variable << ": " << initialInterval << std::endl;
+		IntervalT initialInterval(-42.0, 42.0);
 		mInitialState.setInterval(variable, initialInterval);
 	}
 
 	template<class Settings>
 	void ICPPDWModule<Settings>::createInitialSlackVariableBound(const carl::Variable& slackVariable, const Poly& monomial) {
-		// TODO
 		// since slack = monomial, we simply need to evaluate the monomial with it's initial bounds
 		// and then set the initial bound of the slack variable to the result
+		IntervalT slackInterval = carl::IntervalEvaluation::evaluate(monomial, *(mInitialState.getBox()));
+		
 		// we also need to store those initial bounds in mInitialState.mSearchBox
+		mInitialState.setInterval(slackVariable, slackInterval);
 	}
 	
 	template<class Settings>
@@ -120,6 +121,7 @@ namespace smtrat
 
     		// retrieve the initial bound for all variables
     		for (auto var = constraint.variables().begin(); var != constraint.variables().end(); var++) {
+    			mOriginalVariables.insert(*var);
         		createInitialVariableBound(*var);
         	}
 
@@ -138,6 +140,16 @@ namespace smtrat
 	template<class Settings>
 	void ICPPDWModule<Settings>::init()
 	{
+		std::cout << "------------------------------------" << std::endl;
+		std::cout << "All constraints informed.\n" << std::endl; 
+    	std::cout << "Initial original variable bounds: " << std::endl;
+    	for (auto var = mOriginalVariables.begin(); var != mOriginalVariables.end(); var++) {
+    		std::cout << *var << " in " << mInitialState.getInterval(*var) << std::endl;
+    	}
+    	std::cout << "Initial slack variable bounds: " << std::endl;
+    	for (auto var = mSlackVariables.begin(); var != mSlackVariables.end(); var++) {
+    		std::cout << *var << " in " << mInitialState.getInterval(*var) << std::endl;
+    	}
 	}
 	
 	template<class Settings>

@@ -10,7 +10,7 @@
 
 namespace smtrat
 {
-    typedef RationalInterval IntervalT;
+    typedef DoubleInterval IntervalT;
     typedef std::map<carl::Variable, IntervalT> BoxT;
 
     /**
@@ -39,8 +39,26 @@ namespace smtrat
             ICPState(ICPContractionCandidate* contractionCandidate);
             ~ICPState();
 
+            /**
+             * Returns the full search box, i.e. a map from variables to intervals.
+             * @return a pointer to the map
+             */
             BoxT* getBox();
-            void setInterval(const carl::Variable& var, const RationalInterval& interval);
+
+            /**
+             * Sets or updates the current interval bound for a specific variable.
+             * @param var The variable of which the interval should be updated
+             * @param interval The new interval for that variable
+             */
+            void setInterval(const carl::Variable& var, const IntervalT& interval);
+
+            /**
+             * Returns the current interval bound for a specific variable.
+             * @param var The variable
+             * @return The interval
+             */
+            IntervalT& getInterval(const carl::Variable& var);
+
             ICPContractionCandidate* getContractionCandidate();
             void setContractionCandidate(ICPContractionCandidate* contractionCandidate);
             carl::Variable* getSplitDimension();
