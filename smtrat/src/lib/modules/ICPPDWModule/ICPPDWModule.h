@@ -27,6 +27,8 @@ namespace smtrat
 
 			// the ICP search tree
 			ICPTree mSearchTree;
+			// the initial ICP state
+			ICPState mInitialState;
 
 			// all contraction candidates
 			vector<ICPContractionCandidate> mContractionCandidates;
@@ -61,6 +63,13 @@ namespace smtrat
 			vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint);
 
 			/**
+			 * Creates/Retrieves an initial bound on am original variable.
+			 *
+			 * @param variable The original variable for which an initial bound should be created
+			 */
+			void createInitialVariableBound(const carl::Variable& variable);
+
+			/**
 			 * Creates an initial bound on a newly introduced slack variable.
 			 * 
 			 * This method will be called during the linearization process.
@@ -70,7 +79,7 @@ namespace smtrat
 			 * @param monomial The monomial for which this slack variable stands
 			 *                 (i.e. the constraint slack = monomial was added during linearization)
 			 */
-			void createInitialSlackBound(const carl::Variable& slackVariable, const Poly& monomial);
+			void createInitialSlackVariableBound(const carl::Variable& slackVariable, const Poly& monomial);
 
 			double computeGain();
 			void evaluateInterval();

@@ -18,7 +18,9 @@ namespace smtrat
 #ifdef SMTRAT_DEVOPTION_Statistics
 		, mStatistics(Settings::moduleName)
 #endif
-	{}
+	{
+		mSearchTree.setCurrentState(&mInitialState);
+	}
 	
 	template<class Settings>
 	ICPPDWModule<Settings>::~ICPPDWModule()
@@ -44,29 +46,33 @@ namespace smtrat
             for (auto term = polynomial.polynomial().begin(); term != polynomial.polynomial().end(); term++) {
             	// we only need to linearize non-linear monomials
             	// we also need to check if the term is actually a monomial (it might be a constant)
-            	if (term->monomial() && ! term->monomial()->isLinear()) {
+            	if (term->monomial()) {
 
-					/* 
-					 * Note: *term == term->coeff() * term->monomial()
-					 */
-            		Poly monomial = carl::makePolynomial<Poly>(Poly::PolyType(term->monomial()));
+            		if (!term->monomial()->isLinear()) {
+						/* 
+						 * Note: *term == term->coeff() * term->monomial()
+						 */
+	            		Poly monomial = carl::makePolynomial<Poly>(Poly::PolyType(term->monomial()));
 
-	            	// introduce a new slack variable representing that monomial
-	            	carl::Variable slackVariable = carl::freshRealVariable();
-	            	mSlackVariables.push_back(slackVariable);
+		            	// introduce a new slack variable representing that monomial
+		            	carl::Variable slackVariable = carl::freshRealVariable();
+		            	mSlackVariables.push_back(slackVariable);
 
-					// we create a new constraint (monomial - slack = 0) to connect the new slack variable with the monomial
-					Poly slackPolynomial = monomial - slackVariable;
-					ConstraintT slackConstraint(slackPolynomial, carl::Relation::EQ);
+						// we create a new constraint (monomial - slack = 0) to connect the new slack variable with the monomial
+						Poly slackPolynomial = monomial - slackVariable;
+						ConstraintT slackConstraint(slackPolynomial, carl::Relation::EQ);
 
-					// replace that monomial in the original constraint by the slack variable
-					linearizedOriginalPolynomial += term->coeff() * carl::makePolynomial<Poly>(slackVariable);
+						// replace that monomial in the original constraint by the slack variable
+						// polynomial = c_1 * m_1 + ... + c_n * m_n
+						// replaced to: c_1 * slack + ...
+						linearizedOriginalPolynomial += term->coeff() * carl::makePolynomial<Poly>(slackVariable);
 
-					// and add that new constraint to the resulting vector
-					linearizedConstraints.push_back(slackConstraint);
+						// and add that new constraint to the resulting vector
+						linearizedConstraints.push_back(slackConstraint);
 
-					// we also need to calculate an initial bound on that new slack variable
-					createInitialSlackBound(slackVariable, monomial);
+						// we also need to calculate an initial bound on that new slack variable
+						createInitialSlackVariableBound(slackVariable, monomial);
+					}
 	            }
 	            else {
 	            	linearizedOriginalPolynomial += *term;
@@ -89,11 +95,20 @@ namespace smtrat
 	}
 
 	template<class Settings>
-	void ICPPDWModule<Settings>::createInitialSlackBound(const carl::Variable& slackVariable, const Poly& monomial) {
+	void ICPPDWModule<Settings>::createInitialVariableBound(const carl::Variable& variable) {
+		// TODO
+		// retrieve the inital bound of the given original variable and store it in mInitialState.mSearchBox
+		IntervalT initialInterval;
+		std::cout << "Initial interval for " << variable << ": " << initialInterval << std::endl;
+		mInitialState.setInterval(variable, initialInterval);
+	}
+
+	template<class Settings>
+	void ICPPDWModule<Settings>::createInitialSlackVariableBound(const carl::Variable& slackVariable, const Poly& monomial) {
 		// TODO
 		// since slack = monomial, we simply need to evaluate the monomial with it's initial bounds
 		// and then set the initial bound of the slack variable to the result
-		// we also need to store those initial bounds somewhere
+		// we also need to store those initial bounds in mInitialState.mSearchBox
 	}
 	
 	template<class Settings>
@@ -103,7 +118,12 @@ namespace smtrat
 		if (_constraint.getType() == carl::FormulaType::CONSTRAINT) {
 			const ConstraintT& constraint = _constraint.constraint();
 
-			// pre-processing
+    		// retrieve the initial bound for all variables
+    		for (auto var = constraint.variables().begin(); var != constraint.variables().end(); var++) {
+        		createInitialVariableBound(*var);
+        	}
+
+        	// linearize the constraints
 			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint);
 
 			// DEBUG
@@ -117,7 +137,8 @@ namespace smtrat
 	
 	template<class Settings>
 	void ICPPDWModule<Settings>::init()
-	{}
+	{
+	}
 	
 	template<class Settings>
 	bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
@@ -153,12 +174,12 @@ namespace smtrat
 
 
 	template<class Settings>
-	double ICPPDWModule<Settings>::computeGain(/*ICPContractionCandidate* candidate, DoubleInterval old_interval*/){
+	double ICPPDWModule<Settings>::computeGain(/*ICPContractionCandidate* candidate, IntervalT old_interval*/){
 		//Input:  Kriege einen kandidaten, das alte sowie das neue intervall.
 		// 		1. schneide beide intervalle um das neue intervall zu berechnen.
 		//		2. berechne 1- D_new/D_old <- hier müssen die diameter mit .diameter berechnet werden. returne den wert
 		/*
-			DoubleInterval new_inteval = evaluateIntervall(candidate);
+			IntervalT new_inteval = evaluateIntervall(candidate);
 			return 1 - (new_inteval.diameter()/old_interval.diameter());
 		*/
 	    return 0;
@@ -166,7 +187,7 @@ namespace smtrat
 
 
 	template<class Settings>
-	/*Interval*/ void ICPPDWModule<Settings>::evaluateInterval(/*ICPContractionCandidate* candidate, */){
+	/*IntervalT*/ void ICPPDWModule<Settings>::evaluateInterval(/*ICPContractionCandidate* candidate, */){
 		//Input: ein Constraint candiadte bestehend aus einer variablen und einen constraint
 		//TODO:1.nehme die variable und stelle im constraint die sachen nach dieser variablen um.
 		//	   2.evaluiere das constraint in dem du die intervalle aller anderen variablen (die in der beobachteten menge)

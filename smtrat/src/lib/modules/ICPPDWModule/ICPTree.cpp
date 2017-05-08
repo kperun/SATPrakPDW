@@ -23,6 +23,10 @@ namespace smtrat
         return mCurrentState;
     }
 
+    void ICPTree::setCurrentState(ICPState* state) {
+        mCurrentState = state;
+    }
+
     ICPTree* ICPTree::getParentTree() {
         return mParentTree;
     }

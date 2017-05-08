@@ -29,6 +29,7 @@ namespace smtrat
             ~ICPTree();
 
             ICPState* getCurrentState();
+            void setCurrentState(ICPState* state);
             ICPTree* getParentTree();
             vector<ICPTree*>* getChildTrees();
             void addChildTree(ICPTree* child);

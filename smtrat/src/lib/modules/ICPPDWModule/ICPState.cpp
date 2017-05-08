@@ -14,8 +14,12 @@ namespace smtrat
     ICPState::~ICPState() {
     }
 
-    std::map<carl::Variable*, RationalInterval>* ICPState::getBox() {
+    BoxT* ICPState::getBox() {
         return &mSearchBox;
+    }
+
+    void ICPState::setInterval(const carl::Variable& var, const RationalInterval& interval) {
+        mSearchBox[var] = interval;
     }
 
     ICPContractionCandidate* ICPState::getContractionCandidate() {

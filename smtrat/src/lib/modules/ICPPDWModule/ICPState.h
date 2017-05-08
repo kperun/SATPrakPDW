@@ -10,6 +10,9 @@
 
 namespace smtrat
 {
+    typedef RationalInterval IntervalT;
+    typedef std::map<carl::Variable, IntervalT> BoxT;
+
     /**
      * Represents a state of the ICP algorithm.
      * A state contains the current search box and the contraction candidate that has been applied.
@@ -20,11 +23,14 @@ namespace smtrat
     {
         private:
             // the search box maps from variables to their current intervals
-            std::map<carl::Variable*, RationalInterval> mSearchBox;
+            BoxT mSearchBox;
+
+            // the contraction candidate that has been applied
             ICPContractionCandidate* mContractionCandidate;
             
             // dimension in which the split occurred
             carl::Variable* mSplitDimension;
+
             // conflicting clauses
             vector<ConstraintT*> mConflictingConstraints;
 
@@ -33,7 +39,8 @@ namespace smtrat
             ICPState(ICPContractionCandidate* contractionCandidate);
             ~ICPState();
 
-            std::map<carl::Variable*, RationalInterval>* getBox();
+            BoxT* getBox();
+            void setInterval(const carl::Variable& var, const RationalInterval& interval);
             ICPContractionCandidate* getContractionCandidate();
             void setContractionCandidate(ICPContractionCandidate* contractionCandidate);
             carl::Variable* getSplitDimension();
