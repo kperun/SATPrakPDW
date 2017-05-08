@@ -20,17 +20,13 @@ namespace smtrat
             ConstraintT mConstraint;
 
         public:
-            ICPContractionCandidate(carl::Variable& var, const ConstraintT& constraint):
-                mVariable(var),
-                mConstraint(constraint)
-            {
-            }
+            ICPContractionCandidate();
+            ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint);
+            ~ICPContractionCandidate();
 
-            ~ICPContractionCandidate() {
-            }
+            carl::Variable getVariable();
+            void setVariable(const carl::Variable& var);
 
-            carl::Variable& getVariable();
-            void setVariable(carl::Variable& var);
             ConstraintT& getConstraint();
             void setConstraint(const ConstraintT& constraint);
     };

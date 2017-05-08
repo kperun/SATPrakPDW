@@ -27,8 +27,6 @@ namespace smtrat
 
 			// the ICP search tree
 			ICPTree mSearchTree;
-			// the initial ICP state
-			ICPState mInitialState;
 
 			// the set of original variables
 			std::set<carl::Variable> mOriginalVariables;
@@ -37,12 +35,14 @@ namespace smtrat
 			vector<ICPContractionCandidate> mContractionCandidates;
 
 			/**
-			 * we need to linearize constraints for ICP
-			 * so we will store a map from original constraints to the linearized ones
-			 * and for convenience also a map from linearized constraints to original ones
+			 * We need to linearize constraints for ICP.
+			 * So we will store a map from original constraints to the linearized ones
+			 * and for convenience also a map from linearized constraints to original ones.
+			 * 
+			 * The key set of this map also functions as the storage for the set of all constraints.
 			 */
-			std::map<ConstraintT, vector<ConstraintT>> mLinearizations;
-			std::map<ConstraintT,        ConstraintT > mDeLinearizations;
+			std::unordered_map<ConstraintT, vector<ConstraintT>> mLinearizations;
+			std::unordered_map<ConstraintT,        ConstraintT > mDeLinearizations;
 
 			// the set of newly introduced variables (during the linearization)
 			std::set<carl::Variable> mSlackVariables;
@@ -67,7 +67,7 @@ namespace smtrat
 			vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint);
 
 			/**
-			 * Creates/Retrieves an initial bound on am original variable.
+			 * Creates/Retrieves an initial bound on an original variable.
 			 *
 			 * @param variable The original variable for which an initial bound should be created
 			 */
@@ -84,6 +84,14 @@ namespace smtrat
 			 *                 (i.e. the constraint slack = monomial was added during linearization)
 			 */
 			void createInitialSlackVariableBound(const carl::Variable& slackVariable, const Poly& monomial);
+
+			/**
+			 * Creates all contraction candidates.
+			 * 
+			 * I.e. for every constraint that is stored in mDeLinearizations and every variable that occurs
+			 * in that constraint, a new constraction candidate will be created and stored in mContractionCandidates.
+			 */
+			void createAllContractionCandidates();
 
 			double computeGain();
 			void evaluateInterval();

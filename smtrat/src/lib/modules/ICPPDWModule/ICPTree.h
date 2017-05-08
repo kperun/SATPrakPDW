@@ -17,22 +17,24 @@ namespace smtrat
     {
         private:
             // the current ICP state.
-            ICPState* mCurrentState;
+            ICPState mCurrentState;
+
             // the parent ICP state
             ICPTree* mParentTree;
+
             // the child states
-            vector<ICPTree*> mChildTrees;
+            vector<ICPTree> mChildTrees;
 
         public:
             ICPTree();
-            ICPTree(ICPState* state, ICPTree* parent);
             ~ICPTree();
 
-            ICPState* getCurrentState();
-            void setCurrentState(ICPState* state);
+            ICPState& getCurrentState();
+            void setCurrentState(const ICPState& state);
+
             ICPTree* getParentTree();
-            vector<ICPTree*>* getChildTrees();
-            void addChildTree(ICPTree* child);
+            vector<ICPTree>& getChildTrees();
+            void addChildTree(const ICPTree& child);
             bool isLeaf();
     };
 }

@@ -26,44 +26,45 @@ namespace smtrat
             BoxT mSearchBox;
 
             // the contraction candidate that has been applied
-            ICPContractionCandidate* mContractionCandidate;
+            ICPContractionCandidate mContractionCandidate;
             
             // dimension in which the split occurred
-            carl::Variable* mSplitDimension;
+            carl::Variable mSplitDimension;
 
             // conflicting clauses
-            vector<ConstraintT*> mConflictingConstraints;
+            vector<ConstraintT> mConflictingConstraints;
 
         public:
             ICPState();
-            ICPState(ICPContractionCandidate* contractionCandidate);
             ~ICPState();
 
             /**
              * Returns the full search box, i.e. a map from variables to intervals.
              * @return a pointer to the map
              */
-            BoxT* getBox();
+            BoxT& getBox();
 
             /**
              * Sets or updates the current interval bound for a specific variable.
              * @param var The variable of which the interval should be updated
              * @param interval The new interval for that variable
              */
-            void setInterval(const carl::Variable& var, const IntervalT& interval);
+            void setInterval(carl::Variable var, const IntervalT& interval);
 
             /**
              * Returns the current interval bound for a specific variable.
              * @param var The variable
              * @return The interval
              */
-            IntervalT& getInterval(const carl::Variable& var);
+            IntervalT& getInterval(carl::Variable var);
 
-            ICPContractionCandidate* getContractionCandidate();
-            void setContractionCandidate(ICPContractionCandidate* contractionCandidate);
-            carl::Variable* getSplitDimension();
-            void setSplitDimension(carl::Variable* var);
-            vector<ConstraintT*>* getConflictingConstraints();
-            void addConflictingConstraint(ConstraintT* constraint);
+            ICPContractionCandidate& getContractionCandidate();
+            void setContractionCandidate(const ICPContractionCandidate& contractionCandidate);
+
+            carl::Variable getSplitDimension();
+            void setSplitDimension(carl::Variable var);
+
+            vector<ConstraintT>& getConflictingConstraints();
+            void addConflictingConstraint(const ConstraintT& constraint);
     };
 }

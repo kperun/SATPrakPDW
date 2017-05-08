@@ -2,11 +2,23 @@
 
 namespace smtrat
 {
-    carl::Variable& ICPContractionCandidate::getVariable() {
+    ICPContractionCandidate::ICPContractionCandidate() {
+    }
+
+    ICPContractionCandidate::ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint):
+        mVariable(var),
+        mConstraint(constraint)
+    {
+    }
+
+    ICPContractionCandidate::~ICPContractionCandidate() {
+    }
+
+    carl::Variable ICPContractionCandidate::getVariable() {
         return mVariable;
     }
 
-    void ICPContractionCandidate::setVariable(carl::Variable& var) {
+    void ICPContractionCandidate::setVariable(const carl::Variable& var) {
         mVariable = var;
     }
 

@@ -19,7 +19,6 @@ namespace smtrat
 		, mStatistics(Settings::moduleName)
 #endif
 	{
-		mSearchTree.setCurrentState(&mInitialState);
 	}
 	
 	template<class Settings>
@@ -43,16 +42,16 @@ namespace smtrat
 			Poly linearizedOriginalPolynomial;
 
 			// so we traverse every term
-            for (auto term = polynomial.polynomial().begin(); term != polynomial.polynomial().end(); term++) {
+            for (const auto& term : polynomial.polynomial()) {
             	// we only need to linearize non-linear monomials
             	// we also need to check if the term is actually a monomial (it might be a constant)
-            	if (term->monomial()) {
+            	if (term.monomial()) {
 
-            		if (!term->monomial()->isLinear()) {
+            		if (!term.monomial()->isLinear()) {
 						/* 
-						 * Note: *term == term->coeff() * term->monomial()
+						 * Note: term == term.coeff() * term.monomial()
 						 */
-	            		Poly monomial = carl::makePolynomial<Poly>(Poly::PolyType(term->monomial()));
+	            		Poly monomial = carl::makePolynomial<Poly>(Poly::PolyType(term.monomial()));
 
 		            	// introduce a new slack variable representing that monomial
 		            	carl::Variable slackVariable = carl::freshRealVariable();
@@ -65,7 +64,7 @@ namespace smtrat
 						// replace that monomial in the original constraint by the slack variable
 						// polynomial = c_1 * m_1 + ... + c_n * m_n
 						// replaced to: c_1 * slack + ...
-						linearizedOriginalPolynomial += term->coeff() * carl::makePolynomial<Poly>(slackVariable);
+						linearizedOriginalPolynomial += term.coeff() * carl::makePolynomial<Poly>(slackVariable);
 
 						// and add that new constraint to the resulting vector
 						linearizedConstraints.push_back(slackConstraint);
@@ -75,7 +74,7 @@ namespace smtrat
 					}
 	            }
 	            else {
-	            	linearizedOriginalPolynomial += *term;
+	            	linearizedOriginalPolynomial += term;
 	            }
             }
 
@@ -97,20 +96,36 @@ namespace smtrat
 	template<class Settings>
 	void ICPPDWModule<Settings>::createInitialVariableBound(const carl::Variable& variable) {
 		// TODO
-		// retrieve the inital bound of the given original variable and store it in mInitialState.mSearchBox
+		// retrieve the inital bound of the given original variable and store it in mSearchTree.getCurrentState()
 		IntervalT initialInterval(-42.0, 42.0);
-		mInitialState.setInterval(variable, initialInterval);
+		mSearchTree.getCurrentState().setInterval(variable, initialInterval);
 	}
 
 	template<class Settings>
 	void ICPPDWModule<Settings>::createInitialSlackVariableBound(const carl::Variable& slackVariable, const Poly& monomial) {
 		// since slack = monomial, we simply need to evaluate the monomial with it's initial bounds
 		// and then set the initial bound of the slack variable to the result
-		IntervalT slackInterval = carl::IntervalEvaluation::evaluate(monomial, *(mInitialState.getBox()));
-		
+		IntervalT slackInterval = carl::IntervalEvaluation::evaluate(monomial, mSearchTree.getCurrentState().getBox());
+
 		// we also need to store those initial bounds in mInitialState.mSearchBox
-		mInitialState.setInterval(slackVariable, slackInterval);
+		mSearchTree.getCurrentState().setInterval(slackVariable, slackInterval);
 	}
+
+	template<class Settings>
+	void ICPPDWModule<Settings>::createAllContractionCandidates() {
+		// since we don't explicitly store all constraints, we need to iterate
+		// over the key set of mDeLinearizations, since that map contains all constraints.
+
+		for (const auto& mapIter : mDeLinearizations) {
+			const ConstraintT& constraint = mapIter.first;
+
+			// we create a new contraction candidate for every variable in that constraint
+			for (const auto& variable : constraint.variables()) {
+				ICPContractionCandidate candidate(variable, constraint);
+			}
+		}
+	}
+			
 	
 	template<class Settings>
 	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
@@ -120,13 +135,17 @@ namespace smtrat
 			const ConstraintT& constraint = _constraint.constraint();
 
     		// retrieve the initial bound for all variables
-    		for (auto var = constraint.variables().begin(); var != constraint.variables().end(); var++) {
-    			mOriginalVariables.insert(*var);
-        		createInitialVariableBound(*var);
+    		for (const auto& var : constraint.variables()) {
+    			mOriginalVariables.insert(var);
+        		createInitialVariableBound(var);
         	}
 
         	// linearize the constraints
 			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint);
+
+			// generates all contraction candidates, i.e. for every constraint c 
+			// it generates a pair of (var, c) for every variable that occurs in that constraint
+			createAllContractionCandidates();
 
 			// DEBUG
 			std::cout << "Linearized constraints for " << constraint << ": " << std::endl;
@@ -144,11 +163,11 @@ namespace smtrat
 		std::cout << "All constraints informed.\n" << std::endl; 
     	std::cout << "Initial original variable bounds: " << std::endl;
     	for (auto var = mOriginalVariables.begin(); var != mOriginalVariables.end(); var++) {
-    		std::cout << *var << " in " << mInitialState.getInterval(*var) << std::endl;
+    		std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
     	}
     	std::cout << "Initial slack variable bounds: " << std::endl;
     	for (auto var = mSlackVariables.begin(); var != mSlackVariables.end(); var++) {
-    		std::cout << *var << " in " << mInitialState.getInterval(*var) << std::endl;
+    		std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
     	}
 	}
 	

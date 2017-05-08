@@ -4,14 +4,7 @@ namespace smtrat
 {
 
     ICPTree::ICPTree() :
-        mCurrentState(nullptr),
         mParentTree(nullptr)
-    {
-    }
-
-    ICPTree::ICPTree(ICPState* state, ICPTree* parent) :
-        mCurrentState(state),
-        mParentTree(parent)
     {
     }
 
@@ -19,11 +12,11 @@ namespace smtrat
 
     }
 
-    ICPState* ICPTree::getCurrentState() {
+    ICPState& ICPTree::getCurrentState() {
         return mCurrentState;
     }
 
-    void ICPTree::setCurrentState(ICPState* state) {
+    void ICPTree::setCurrentState(const ICPState& state) {
         mCurrentState = state;
     }
 
@@ -31,11 +24,11 @@ namespace smtrat
         return mParentTree;
     }
 
-    vector<ICPTree*>* ICPTree::getChildTrees() {
-        return &mChildTrees;
+    vector<ICPTree>& ICPTree::getChildTrees() {
+        return mChildTrees;
     }
 
-    void ICPTree::addChildTree(ICPTree* child) {
+    void ICPTree::addChildTree(const ICPTree& child) {
         mChildTrees.push_back(child);
     }
 
