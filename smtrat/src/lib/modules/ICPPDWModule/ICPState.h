@@ -29,7 +29,7 @@ namespace smtrat
             // the contraction candidates that have been applied
             // they will be stored in the order they have been applied
             vector<ICPContractionCandidate*> mContractionCandidates;
-            
+
             // dimension in which the split occurred
             carl::Variable mSplitDimension;
 

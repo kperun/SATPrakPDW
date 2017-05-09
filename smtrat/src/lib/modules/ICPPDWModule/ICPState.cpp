@@ -9,6 +9,7 @@ namespace smtrat
     ICPState::~ICPState() {
     }
 
+
     BoxT& ICPState::getBox() {
         return mSearchBox;
     }

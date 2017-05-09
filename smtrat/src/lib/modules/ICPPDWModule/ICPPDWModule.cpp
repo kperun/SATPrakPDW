@@ -20,7 +20,7 @@ namespace smtrat
 #endif
 	{
 	}
-	
+
 	template<class Settings>
 	ICPPDWModule<Settings>::~ICPPDWModule()
 	{}
@@ -48,7 +48,7 @@ namespace smtrat
             	if (term.monomial()) {
 
             		if (!term.monomial()->isLinear()) {
-						/* 
+						/*
 						 * Note: term == term.coeff() * term.monomial()
 						 */
 	            		Poly monomial = carl::makePolynomial<Poly>(Poly::PolyType(term.monomial()));
@@ -111,6 +111,8 @@ namespace smtrat
 		mSearchTree.getCurrentState().setInterval(slackVariable, slackInterval);
 	}
 
+
+
 	template<class Settings>
 	void ICPPDWModule<Settings>::createAllContractionCandidates() {
 		// since we don't explicitly store all constraints, we need to iterate
@@ -125,8 +127,8 @@ namespace smtrat
 			}
 		}
 	}
-			
-	
+
+
 	template<class Settings>
 	bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
 	{
@@ -143,7 +145,7 @@ namespace smtrat
         	// linearize the constraints
 			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint);
 
-			// generates all contraction candidates, i.e. for every constraint c 
+			// generates all contraction candidates, i.e. for every constraint c
 			// it generates a pair of (var, c) for every variable that occurs in that constraint
 			createAllContractionCandidates();
 
@@ -155,12 +157,12 @@ namespace smtrat
         }
 		return true; // This should be adapted according to your implementation.
 	}
-	
+
 	template<class Settings>
 	void ICPPDWModule<Settings>::init()
 	{
 		std::cout << "------------------------------------" << std::endl;
-		std::cout << "All constraints informed.\n" << std::endl; 
+		std::cout << "All constraints informed.\n" << std::endl;
     	std::cout << "Initial original variable bounds: " << std::endl;
     	for (auto var = mOriginalVariables.begin(); var != mOriginalVariables.end(); var++) {
     		std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
@@ -170,20 +172,20 @@ namespace smtrat
     		std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
     	}
 	}
-	
+
 	template<class Settings>
 	bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
 	{
 		// Your code.
 		return true; // This should be adapted according to your implementation.
 	}
-	
+
 	template<class Settings>
 	void ICPPDWModule<Settings>::removeCore( ModuleInput::const_iterator _subformula )
 	{
 		// Your code.
 	}
-	
+
 	template<class Settings>
 	void ICPPDWModule<Settings>::updateModel() const
 	{
@@ -193,7 +195,7 @@ namespace smtrat
 			// Your code.
 		}
 	}
-	
+
 	template<class Settings>
 	Answer ICPPDWModule<Settings>::checkCore()
 	{
@@ -202,6 +204,16 @@ namespace smtrat
 	}
 
 
+
+	template<class Settings>
+	void ICPPDWModule<Settings>::addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
+		mBounds.addBound(_constraint,_origin);
+	}
+
+	template<class Settings>
+	void ICPPDWModule<Settings>::removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
+		mBounds.removeBound(_constraint,_origin);
+	}
 
 
 	template<class Settings>
@@ -233,20 +245,21 @@ namespace smtrat
 		*	   2.speichere den aktuell größten gain zwischen und den CC zwischen. (als double und pointer)
 		*	   3.wähle variable mit größten gain und gebe sie aus
 		*/
-	} 
+	}
 
 	template<class Settings>
 	/* ConstraintT */ void ICPPDWModule<Settings>::transposeConstraint(/* ConstraintT* constraint, Variable* var */){
 		/* Input: eine ConstraintT und ein Variable object
-			TODO:1. hole das polynom raus mit:  const Poly& polynomial = constraint.lhs(); 
+			TODO:1. hole das polynom raus mit:  const Poly& polynomial = constraint.lhs();
 				 2. erstelle ein neues poly objekt.
 				 3. prüfe mit constraint->hasVariable(var) ob die variable drin ist nach der man umstellen will
-				 4. stelle von hand um (es gibt keine methode dafür). Vorgehen: gehe durch das constraint, entferne 
+				 4. stelle von hand um (es gibt keine methode dafür). Vorgehen: gehe durch das constraint, entferne
 				 	die variable die man betrachtet raus, setzte sie auf die rechte seite und invertiere das vorzeichen entsprechend
-				 	in dem man ein neues poly erstellt mit der var und einen - davor. 
-				 5. prüfe dass der operator nicht nicht == und nicht != ist, wenn es so ist dann negiere ihn wenn - vor der variable steht.	
+				 	in dem man ein neues poly erstellt mit der var und einen - davor.
+				 5. prüfe dass der operator nicht nicht == und nicht != ist, wenn es so ist dann negiere ihn wenn - vor der variable steht.
 		*/
 	}
+
 
 
 

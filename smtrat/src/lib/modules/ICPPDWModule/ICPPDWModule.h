@@ -9,10 +9,12 @@
 #pragma once
 
 #include "../../solver/Module.h"
+#include "../../datastructures/VariableBounds.h"
 #include "ICPPDWStatistics.h"
 #include "ICPPDWSettings.h"
 #include "ICPTree.h"
 #include "ICPContractionCandidate.h"
+
 
 namespace smtrat
 {
@@ -34,11 +36,15 @@ namespace smtrat
 			// all contraction candidates
 			vector<ICPContractionCandidate> mContractionCandidates;
 
+			// handles the bounds of the contraction candidates
+			//we deal with bounds of a set of constraints
+			vb::VariableBounds<FormulaT> mBounds;
+
 			/**
 			 * We need to linearize constraints for ICP.
 			 * So we will store a map from original constraints to the linearized ones
 			 * and for convenience also a map from linearized constraints to original ones.
-			 * 
+			 *
 			 * The key set of this map also functions as the storage for the set of all constraints.
 			 */
 			std::unordered_map<ConstraintT, vector<ConstraintT>> mLinearizations;
@@ -47,7 +53,7 @@ namespace smtrat
 			// the set of newly introduced variables (during the linearization)
 			std::set<carl::Variable> mSlackVariables;
 
-		
+
 		private:
 			/**
 			 * Linearizes a constraint.
@@ -55,7 +61,7 @@ namespace smtrat
 			 * E.g.: x*y + x*y*y + 5 = 0 will be linearized to
 			 *       a + b + 5 = 0 and x*y - a = 0 and x*y*y - b = 0
 			 *
-			 * The resulting constraints will be returned and stored in the mLinearizations 
+			 * The resulting constraints will be returned and stored in the mLinearizations
 			 * and mDeLinearizations map.
 			 * The newly introduced variables will be added to mSlackVariables.
 			 * In case the constraint was linear, it will be mapped to itself.
@@ -75,7 +81,7 @@ namespace smtrat
 
 			/**
 			 * Creates an initial bound on a newly introduced slack variable.
-			 * 
+			 *
 			 * This method will be called during the linearization process.
 			 * The calculated initial bound will then be set as the current/initial bound for the slack variable.
 			 *
@@ -87,7 +93,7 @@ namespace smtrat
 
 			/**
 			 * Creates all contraction candidates.
-			 * 
+			 *
 			 * I.e. for every constraint that is stored in mDeLinearizations and every variable that occurs
 			 * in that constraint, a new constraction candidate will be created and stored in mContractionCandidates.
 			 */
@@ -97,7 +103,11 @@ namespace smtrat
 			void evaluateInterval();
 			void computeBestCandidate();
 			void transposeConstraint();
-			
+
+			void addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin );
+			void removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin );
+
+
 		public:
 			typedef Settings SettingsType;
 			std::string moduleName() const {
@@ -106,7 +116,7 @@ namespace smtrat
 			ICPPDWModule(const ModuleInput* _formula, RuntimeSettings* _settings, Conditionals& _conditionals, Manager* _manager = nullptr);
 
 			~ICPPDWModule();
-			
+
 			// Main interfaces.
 			/**
 			 * Informs the module about the given constraint. It should be tried to inform this
