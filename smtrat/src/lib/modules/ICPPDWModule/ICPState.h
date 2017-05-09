@@ -11,7 +11,7 @@
 namespace smtrat
 {
     typedef DoubleInterval IntervalT;
-    typedef std::map<carl::Variable, IntervalT> BoxT;
+    //typedef std::map<carl::Variable, IntervalT> BoxT;
 
     /**
      * Represents a state of the ICP algorithm.
@@ -24,7 +24,7 @@ namespace smtrat
     {
         private:
             // the search box maps from variables to their current intervals
-            BoxT mSearchBox;
+            //BoxT mSearchBox;
 
             // the contraction candidates that have been applied
             // they will be stored in the order they have been applied
@@ -44,7 +44,7 @@ namespace smtrat
              * Returns the full search box, i.e. a map from variables to intervals.
              * @return the map
              */
-            BoxT& getBox();
+            //oxT& getBox();
 
             /**
              * Sets or updates the current interval bound for a specific variable.

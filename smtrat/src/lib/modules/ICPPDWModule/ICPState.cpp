@@ -9,7 +9,7 @@ namespace smtrat
     ICPState::~ICPState() {
     }
 
-
+    /*
     BoxT& ICPState::getBox() {
         return mSearchBox;
     }
@@ -21,7 +21,7 @@ namespace smtrat
     IntervalT& ICPState::getInterval(carl::Variable var) {
         return mSearchBox[var];
     }
-
+    */
     vector<ICPContractionCandidate*>& ICPState::getContractionCandidates() {
         return mContractionCandidates;
     }

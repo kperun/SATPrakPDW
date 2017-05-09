@@ -98,7 +98,7 @@ namespace smtrat
 		// TODO
 		// retrieve the inital bound of the given original variable and store it in mSearchTree.getCurrentState()
 		IntervalT initialInterval(-42.0, 42.0);
-		mSearchTree.getCurrentState().setInterval(variable, initialInterval);
+		//mSearchTree.getCurrentState().setInterval(variable, initialInterval);
 	}
 
 	template<class Settings>
@@ -108,7 +108,7 @@ namespace smtrat
 		IntervalT slackInterval = carl::IntervalEvaluation::evaluate(monomial, mBounds.getIntervalMap());
 
 		// we also need to store those initial bounds in mInitialState.mSearchBox
-		mSearchTree.getCurrentState().setInterval(slackVariable, slackInterval);
+		//mSearchTree.getCurrentState().setInterval(slackVariable, slackInterval);
 	}
 
 
@@ -166,12 +166,18 @@ namespace smtrat
 		std::cout << "All constraints informed.\n" << std::endl;
     	std::cout << "Initial original variable bounds: " << std::endl;
     	for (auto var = mOriginalVariables.begin(); var != mOriginalVariables.end(); var++) {
-    		std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
+    		//std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
     	}
     	std::cout << "Initial slack variable bounds: " << std::endl;
     	for (auto var = mSlackVariables.begin(); var != mSlackVariables.end(); var++) {
-    		std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
+    		//std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
     	}
+		std::cout << "Initial original variable bound in mBounds" << std::endl;
+		for(auto it = mBounds.getIntervalMap().begin(); it != mBounds.getIntervalMap().end(); ++it){
+    		std::cout << it->first << " " << it->second << std::endl;
+		}
+
+
 	}
 
 	template<class Settings>
