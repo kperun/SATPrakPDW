@@ -67,10 +67,11 @@ namespace smtrat
 			 * In case the constraint was linear, it will be mapped to itself.
 			 *
 			 * @param constraint The constraint that should be linearized
+			 * @param _origin Slac constraints are added to the set of bounds, here we need an origin of the bound,i.e. the formula.
 			 * @return A vector of resulting linearized constraints.
 			 *         This vector is actually stored in the mLinearizations map.
 			 */
-			vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint);
+			vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin);
 
 			/**
 			 * Creates/Retrieves an initial bound on an original variable.

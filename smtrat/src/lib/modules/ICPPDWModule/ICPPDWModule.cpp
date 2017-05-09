@@ -25,8 +25,9 @@ namespace smtrat
 	ICPPDWModule<Settings>::~ICPPDWModule()
 	{}
 
+	
 	template<class Settings>
-	std::vector<ConstraintT>& ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint) {
+	std::vector<ConstraintT>& ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin) {
 		const Poly& polynomial = constraint.lhs();
 		vector<ConstraintT> linearizedConstraints;
 
@@ -60,6 +61,8 @@ namespace smtrat
 						// we create a new constraint (monomial - slack = 0) to connect the new slack variable with the monomial
 						Poly slackPolynomial = monomial - slackVariable;
 						ConstraintT slackConstraint(slackPolynomial, carl::Relation::EQ);
+
+						addConstraintToBounds(slackConstraint,_origin);
 
 						// replace that monomial in the original constraint by the slack variable
 						// polynomial = c_1 * m_1 + ... + c_n * m_n
@@ -144,7 +147,7 @@ namespace smtrat
 			addConstraintToBounds(constraint,_constraint );
 
         	// linearize the constraints
-			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint);
+			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint,_constraint);
 
 			// generates all contraction candidates, i.e. for every constraint c
 			// it generates a pair of (var, c) for every variable that occurs in that constraint
