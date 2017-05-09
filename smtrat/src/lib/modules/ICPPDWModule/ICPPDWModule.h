@@ -14,7 +14,7 @@
 #include "ICPPDWSettings.h"
 #include "ICPTree.h"
 #include "ICPContractionCandidate.h"
-
+#include <map>
 
 namespace smtrat
 {
@@ -106,6 +106,8 @@ namespace smtrat
 
 			void addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin );
 			void removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin );
+
+			std::map<carl::Variable, IntervalT> createMapFromVariables();
 
 
 		public:

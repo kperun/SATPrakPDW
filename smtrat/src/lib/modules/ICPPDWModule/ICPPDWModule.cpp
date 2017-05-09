@@ -105,7 +105,7 @@ namespace smtrat
 	void ICPPDWModule<Settings>::createInitialSlackVariableBound(const carl::Variable& slackVariable, const Poly& monomial) {
 		// since slack = monomial, we simply need to evaluate the monomial with it's initial bounds
 		// and then set the initial bound of the slack variable to the result
-		IntervalT slackInterval = carl::IntervalEvaluation::evaluate(monomial, mSearchTree.getCurrentState().getBox());
+		IntervalT slackInterval = carl::IntervalEvaluation::evaluate(monomial, mBounds.getIntervalMap());
 
 		// we also need to store those initial bounds in mInitialState.mSearchBox
 		mSearchTree.getCurrentState().setInterval(slackVariable, slackInterval);
@@ -141,6 +141,7 @@ namespace smtrat
     			mOriginalVariables.insert(var);
         		createInitialVariableBound(var);
         	}
+			addConstraintToBounds(constraint,_constraint );
 
         	// linearize the constraints
 			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint);
@@ -204,7 +205,6 @@ namespace smtrat
 	}
 
 
-
 	template<class Settings>
 	void ICPPDWModule<Settings>::addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
 		mBounds.addBound(_constraint,_origin);
@@ -214,6 +214,8 @@ namespace smtrat
 	void ICPPDWModule<Settings>::removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
 		mBounds.removeBound(_constraint,_origin);
 	}
+
+
 
 
 	template<class Settings>

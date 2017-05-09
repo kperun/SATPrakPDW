@@ -36,9 +36,9 @@ namespace smtrat
                 /// A set of origins of the bound, e.g., x-3<0 is the origin of the bound <3.
                 std::set<T,carl::less<T,false>>* const mpOrigins; // Here, we cannot use the carl::PointerSet, which falls back on the comparison operator
                                                      // of T, as we must ensure to store for every pointer to T one origin.
-                
+
             public:
-                
+
                 /**
                  * Constructs this bound.
                  * @param _limit A pointer to the limit (rational) of the bound. It is NULL, if the limit is not finite.
@@ -51,7 +51,7 @@ namespace smtrat
                  * Destructs this bound.
                  */
                 ~Bound();
-                
+
                 /**
                  * Checks whether the this bound is smaller than the given one.
                  * @param _bound The bound to compare with.
@@ -62,7 +62,7 @@ namespace smtrat
                  *          false,   otherwise.
                  */
                 bool operator<( const Bound<T>& _bound ) const;
-                
+
                 /**
                  * Prints the bound on the given output stream.
                  * @param _out The output stream to print on.
@@ -70,7 +70,7 @@ namespace smtrat
                  * @return The output stream after printing the bound on it.
                  */
                 template <typename T1> friend std::ostream& operator<<( std::ostream& _out, const Bound<T1>& _bound );
-                
+
                 /**
                  * Prints this bound on the given stream.
                  * @param _out The stream to print on.
@@ -121,7 +121,7 @@ namespace smtrat
                 {
                     return mType > WEAK_LOWER_BOUND;
                 }
-                
+
                 /**
                  * @return true, if the bound is a lower bound;
                  *          false, otherwise.
@@ -169,7 +169,7 @@ namespace smtrat
                     mpOrigins->insert( _origin );
                     return mpOrigins->size() == 1;
                 }
-                
+
                 /**
                  * Removes an origin from this bound.
                  * @param _origin The origin to add.
@@ -215,7 +215,7 @@ namespace smtrat
 
             /// A set of bounds.
             typedef std::set<const Bound<T>*, boundPointerComp> BoundSet;
-            
+
             private:
                 /// A flag that indicates that the stored exact interval of this variable is up to date.
                 mutable bool    mUpdatedExactInterval;
@@ -246,19 +246,19 @@ namespace smtrat
                  *          false, otherwise.
                  */
                 bool conflicting() const;
-                
+
                 /**
                  * Adds the bound corresponding to the constraint to the given variable. The constraint
                  * is expected to contain only one variable and this one only linearly.
                  * @param _constraint A pointer to a constraint of the form ax~b.
                  * @param _var Hence, the variable x.
-                 * @param _origin The origin of the constraint. This is could be the constraint itself or anything else 
+                 * @param _origin The origin of the constraint. This is could be the constraint itself or anything else
                  *                 in the data structure which uses this object.
                  * @param _limit
                  * @return The added bound.
                  */
                 const Bound<T>* addBound( const ConstraintT& _constraint, const carl::Variable& _var, const T& _origin );
-                
+
                 /**
                  * Updates the infimum and supremum of this variable.
                  * @param _changedBound The bound, for which we certainly know that it got deactivated before.
@@ -283,7 +283,7 @@ namespace smtrat
                 {
                     mUpdatedExactInterval = false;
                 }
-                
+
                 /**
                  * @return true, if the stored double interval representing the variable's bounds is up to date.
                  *          false, otherwise
@@ -292,7 +292,7 @@ namespace smtrat
                 {
                     return mUpdatedDoubleInterval;
                 }
-                
+
                 /**
                  * Sets the flag indicating that the stored double interval representing the variable's bounds is up to date to false.
                  */
@@ -340,7 +340,7 @@ namespace smtrat
                 {
                     return mUpperbounds;
                 }
-                
+
                 /**
                  * @return A constant reference to the set of lower bounds of this variable.
                  */
@@ -389,12 +389,12 @@ namespace smtrat
                  */
                 ~VariableBounds();
                 void clear();
-                
+
                 bool empty() const
                 {
                     return mpConstraintBoundMap->empty();
                 }
-                
+
                 /**
                  * Updates the variable bounds by the given constraint.
                  * @param _constraint The constraint to consider.
@@ -403,9 +403,9 @@ namespace smtrat
                  *          false, otherwise.
                  */
                 bool addBound( const ConstraintT& _constraint, const T& _origin );
-				
+
 				bool addBound( const FormulaT& _formula, const T& _origin );
-                
+
                 /**
                  * Removes all effects the given constraint has on the variable bounds.
                  * @param _constraint The constraint, which effects shall be undone for the variable bounds.
@@ -415,9 +415,9 @@ namespace smtrat
                  *          0, otherwise.
                  */
                 unsigned removeBound( const ConstraintT& _constraint, const T& _origin );
-				
+
 				unsigned removeBound( const FormulaT& _formula, const T& _origin );
-                
+
                 /**
                  * Removes all effects the given constraint has on the variable bounds.
                  * @param _constraint The constraint, which effects shall be undone for the variable bounds.
@@ -428,73 +428,73 @@ namespace smtrat
                  *          0, otherwise.
                  */
                 unsigned removeBound( const ConstraintT& _constraint, const T& _origin, carl::Variable*& _changedVariable );
-                
+
                 /**
                  * Creates an evalintervalmap corresponding to the variable bounds.
                  * @return The variable bounds as an evalintervalmap.
                  */
                 const EvalRationalIntervalMap& getEvalIntervalMap() const;
-                
+
                 /**
                  * Creates an interval corresponding to the variable bounds of the given variable.
                  * @param _var The variable to compute the variable bounds as interval for.
                  * @return The variable bounds as an interval.
                  */
                 const RationalInterval& getInterval( const carl::Variable& _var ) const;
-				
+
 				/**
                  * Creates an interval corresponding to the bounds of the given monomial.
                  * @param _mon The monomial to compute the bounds as interval for.
                  * @return The monomial bounds as an interval.
                  */
 				RationalInterval getInterval( carl::Monomial::Arg _mon ) const;
-				
+
 				/**
                  * Creates an interval corresponding to the bounds of the given term.
                  * @param _term The term to compute the bounds as interval for.
                  * @return The term bounds as an interval.
                  */
 				RationalInterval getInterval( const TermT& _term ) const;
-                
+
                 /**
                  * Creates an interval map corresponding to the variable bounds.
                  * @return The variable bounds as an interval map.
                  */
                 const smtrat::EvalDoubleIntervalMap& getIntervalMap() const;
-                
+
                 /**
                  * Creates a double interval corresponding to the variable bounds of the given variable.
                  * @param _var The variable to compute the variable bounds as double interval for.
                  * @return The variable bounds as a double interval.
                  */
                 const carl::Interval<double>& getDoubleInterval( const carl::Variable& _var ) const;
-                
+
                 /**
                  * @param _var The variable to get origins of the bounds for.
                  * @return The origin constraints of the supremum and infimum of the given variable.
                  */
                 std::vector<T> getOriginsOfBounds( const carl::Variable& _var ) const;
                 std::set<T> getOriginSetOfBounds( const carl::Variable& _var ) const;
-                
+
                 /**
                  * @param _variables The variables to get origins of the bounds for.
                  * @return The origin constraints of the supremum and infimum of the given variables.
                  */
                 std::vector<T> getOriginsOfBounds( const carl::Variables& _variables ) const;
                 std::set<T> getOriginSetOfBounds( const carl::Variables& _variables ) const;
-                
+
                 /**
                  * Collect the origins to the supremums and infimums of all variables.
                  * @return A set of origins corresponding to the supremums and infimums of all variables.
                  */
                 std::vector<T> getOriginsOfBounds() const;
                 std::set<T> getOriginSetOfBounds() const;
-                
+
                 /**
                  * @return The deductions which this variable bounds manager has detected.
                  */
                 std::vector<std::pair<std::vector<ConstraintT>, ConstraintT>> getBoundDeductions() const;
-                
+
                 /**
                  * Prints the variable bounds.
                  * @param _out The output stream to print on.
@@ -525,11 +525,11 @@ namespace smtrat
                     return conflict;
                 }
         };
-        
+
         /**
          * Prints the contents of the given variable bounds manager to the given stream.
          * @param _os The stream to print on.
-         * @param _vs The variable bounds manager to print. 
+         * @param _vs The variable bounds manager to print.
          * @return The stream after printing on it.
          */
         template<typename Type>
