@@ -29,7 +29,11 @@ namespace smtrat
 	template<class Settings>
 	std::vector<ConstraintT>& ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin) {
 		const Poly& polynomial = constraint.lhs();
+
+		// this vector stores all generated linearized constraints that will actually be used during ICP
+		// Note: this means that instead of the original formula, the linearized constraints will be added to mBounds
 		vector<ConstraintT> linearizedConstraints;
+
 
 		if (polynomial.isLinear()) { // TODO: are polynomials with just one monome okay?
 			// we don't need to do anything, so we simply map this constraint to itself
@@ -62,8 +66,6 @@ namespace smtrat
 						Poly slackPolynomial = monomial - slackVariable;
 						ConstraintT slackConstraint(slackPolynomial, carl::Relation::EQ);
 
-						addConstraintToBounds(slackConstraint,_origin);
-
 						// replace that monomial in the original constraint by the slack variable
 						// polynomial = c_1 * m_1 + ... + c_n * m_n
 						// replaced to: c_1 * slack + ...
@@ -71,9 +73,6 @@ namespace smtrat
 
 						// and add that new constraint to the resulting vector
 						linearizedConstraints.push_back(slackConstraint);
-
-						// we also need to calculate an initial bound on that new slack variable
-						createInitialSlackVariableBound(slackVariable, monomial);
 					}
 	            }
 	            else {
@@ -86,47 +85,31 @@ namespace smtrat
             linearizedConstraints.push_back(linearizedOriginalConstraint);
 		}
 
-		// fill the maps so that we know how we linearized this constraint
+		// after we generated all constraints that will actually be used
+		// we store the mapping of original constraint to linearized constraints
 		mLinearizations[constraint] = linearizedConstraints;
-		for (int i = 0; i < (int) linearizedConstraints.size(); i++) {
-			ConstraintT c = linearizedConstraints[i];
-			mDeLinearizations[c] = constraint;
+		for (const auto& lC : linearizedConstraints) {
+			mDeLinearizations[lC] = constraint;
+
+			// we calculate initial bounds for all variables (original and slack variables)
+			addConstraintToBounds(lC, _origin);
 		}
 
 		return mLinearizations[constraint];
 	}
-
-	template<class Settings>
-	void ICPPDWModule<Settings>::createInitialVariableBound(const carl::Variable& variable) {
-		// TODO
-		// retrieve the inital bound of the given original variable and store it in mSearchTree.getCurrentState()
-		IntervalT initialInterval(-42.0, 42.0);
-		//mSearchTree.getCurrentState().setInterval(variable, initialInterval);
-	}
-
-	template<class Settings>
-	void ICPPDWModule<Settings>::createInitialSlackVariableBound(const carl::Variable& slackVariable, const Poly& monomial) {
-		// since slack = monomial, we simply need to evaluate the monomial with it's initial bounds
-		// and then set the initial bound of the slack variable to the result
-		IntervalT slackInterval = carl::IntervalEvaluation::evaluate(monomial, mBounds.getIntervalMap());
-
-		// we also need to store those initial bounds in mInitialState.mSearchBox
-		//mSearchTree.getCurrentState().setInterval(slackVariable, slackInterval);
-	}
-
 
 
 	template<class Settings>
 	void ICPPDWModule<Settings>::createAllContractionCandidates() {
 		// since we don't explicitly store all constraints, we need to iterate
 		// over the key set of mDeLinearizations, since that map contains all constraints.
-
 		for (const auto& mapIter : mDeLinearizations) {
 			const ConstraintT& constraint = mapIter.first;
 
 			// we create a new contraction candidate for every variable in that constraint
 			for (const auto& variable : constraint.variables()) {
 				ICPContractionCandidate candidate(variable, constraint);
+				mContractionCandidates.push_back(candidate);
 			}
 		}
 	}
@@ -139,19 +122,13 @@ namespace smtrat
 		if (_constraint.getType() == carl::FormulaType::CONSTRAINT) {
 			const ConstraintT& constraint = _constraint.constraint();
 
-    		// retrieve the initial bound for all variables
+			// store all variables we see for book-keeping purposes
     		for (const auto& var : constraint.variables()) {
     			mOriginalVariables.insert(var);
-        		createInitialVariableBound(var);
         	}
-			addConstraintToBounds(constraint,_constraint );
 
         	// linearize the constraints
-			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint,_constraint);
-
-			// generates all contraction candidates, i.e. for every constraint c
-			// it generates a pair of (var, c) for every variable that occurs in that constraint
-			createAllContractionCandidates();
+			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint, _constraint);
 
 			// DEBUG
 			std::cout << "Linearized constraints for " << constraint << ": " << std::endl;
@@ -165,22 +142,17 @@ namespace smtrat
 	template<class Settings>
 	void ICPPDWModule<Settings>::init()
 	{
+		// generates all contraction candidates, i.e. for every constraint c
+		// it generates a pair of (var, c) for every variable that occurs in that constraint
+		createAllContractionCandidates();
+
+		// DEBUG
 		std::cout << "------------------------------------" << std::endl;
 		std::cout << "All constraints informed.\n" << std::endl;
-    	std::cout << "Initial original variable bounds: " << std::endl;
-    	for (auto var = mOriginalVariables.begin(); var != mOriginalVariables.end(); var++) {
-    		//std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
-    	}
-    	std::cout << "Initial slack variable bounds: " << std::endl;
-    	for (auto var = mSlackVariables.begin(); var != mSlackVariables.end(); var++) {
-    		//std::cout << *var << " in " << mSearchTree.getCurrentState().getInterval(*var) << std::endl;
-    	}
-		std::cout << "Initial original variable bound in mBounds" << std::endl;
-		for(auto it = mBounds.getIntervalMap().begin(); it != mBounds.getIntervalMap().end(); ++it){
-    		std::cout << it->first << " " << it->second << std::endl;
+		std::cout << "Variable bounds" << std::endl;
+		for (const auto& mapEntry : mBounds.getIntervalMap()){
+    		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
 		}
-
-
 	}
 
 	template<class Settings>

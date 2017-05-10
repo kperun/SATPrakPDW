@@ -11,21 +11,18 @@
 namespace smtrat
 {
     typedef DoubleInterval IntervalT;
-    //typedef std::map<carl::Variable, IntervalT> BoxT;
 
     /**
      * Represents a state of the ICP algorithm.
      *
-     * A state contains the current search box and all the contraction candidates that have been applied.
+     * A state stores all the contraction candidates that have been applied.
+     * The current search box is stored in ICPPDWModule.
      * In case of a split, the state stores the dimension (i.e. variable) in which the split occurred.
      * In case of unsatisfiability, this state stores the reasons (i.e. constraints).
      */
     class ICPState
     {
         private:
-            // the search box maps from variables to their current intervals
-            //BoxT mSearchBox;
-
             // the contraction candidates that have been applied
             // they will be stored in the order they have been applied
             vector<ICPContractionCandidate*> mContractionCandidates;
@@ -39,12 +36,6 @@ namespace smtrat
         public:
             ICPState();
             ~ICPState();
-
-            /**
-             * Returns the full search box, i.e. a map from variables to intervals.
-             * @return the map
-             */
-            //oxT& getBox();
 
             /**
              * Sets or updates the current interval bound for a specific variable.

@@ -56,15 +56,15 @@ namespace smtrat
 
 		private:
 			/**
-			 * Linearizes a constraint.
+			 * Linearizes a constraint and initializes its variable bounds.
 			 *
 			 * E.g.: x*y + x*y*y + 5 = 0 will be linearized to
 			 *       a + b + 5 = 0 and x*y - a = 0 and x*y*y - b = 0
 			 *
-			 * The resulting constraints will be returned and stored in the mLinearizations
-			 * and mDeLinearizations map.
+			 * The resulting constraints will be returned and stored in the mLinearizations and mDeLinearizations map.
 			 * The newly introduced variables will be added to mSlackVariables.
 			 * In case the constraint was linear, it will be mapped to itself.
+			 * All linearized constraints will be added to the variable bounds.
 			 *
 			 * @param constraint The constraint that should be linearized
 			 * @param _origin Slac constraints are added to the set of bounds, here we need an origin of the bound,i.e. the formula.
@@ -74,23 +74,22 @@ namespace smtrat
 			vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin);
 
 			/**
-			 * Creates/Retrieves an initial bound on an original variable.
-			 *
-			 * @param variable The original variable for which an initial bound should be created
+			 * Informs the current variable bounds about a new constraint.
+			 * The variable bounds will then be re-calculated to include that new constraint.
+			 * 
+			 * @param _constraint The new constraint
+			 * @param _origin The formula where the constraint originates from
 			 */
-			void createInitialVariableBound(const carl::Variable& variable);
+			void addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin );
 
 			/**
-			 * Creates an initial bound on a newly introduced slack variable.
-			 *
-			 * This method will be called during the linearization process.
-			 * The calculated initial bound will then be set as the current/initial bound for the slack variable.
-			 *
-			 * @param slackVariable The slack variable for which an initial bound should be created
-			 * @param monomial The monomial for which this slack variable stands
-			 *                 (i.e. the constraint slack = monomial was added during linearization)
+			 * Removes a constraint from the current variable bounds.
+			 * The variable bounds will then be re-calculated to exclude that new constraint.
+			 * 
+			 * @param _constraint The new constraint
+			 * @param _origin The formula where the constraint originates from
 			 */
-			void createInitialSlackVariableBound(const carl::Variable& slackVariable, const Poly& monomial);
+			void removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin );
 
 			/**
 			 * Creates all contraction candidates.
@@ -104,12 +103,6 @@ namespace smtrat
 			void evaluateInterval();
 			void computeBestCandidate();
 			void transposeConstraint();
-
-			void addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin );
-			void removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin );
-
-			std::map<carl::Variable, IntervalT> createMapFromVariables();
-
 
 		public:
 			typedef Settings SettingsType;

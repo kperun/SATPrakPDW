@@ -9,19 +9,6 @@ namespace smtrat
     ICPState::~ICPState() {
     }
 
-    /*
-    BoxT& ICPState::getBox() {
-        return mSearchBox;
-    }
-
-    void ICPState::setInterval(carl::Variable var, const IntervalT& interval) {
-        mSearchBox[var] = interval;
-    }
-
-    IntervalT& ICPState::getInterval(carl::Variable var) {
-        return mSearchBox[var];
-    }
-    */
     vector<ICPContractionCandidate*>& ICPState::getContractionCandidates() {
         return mContractionCandidates;
     }
