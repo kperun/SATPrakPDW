@@ -221,6 +221,11 @@ namespace smtrat
 		for (const auto& mapEntry : mBounds.getIntervalMap()){
     		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
 		}
+		std::cout << "\nContractions: " << std::endl;
+		for (auto& cc : mContractionCandidates) {
+			std::pair<IntervalT, IntervalT> bounds = cc.getContractedInterval(mBounds);
+			std::cout << cc << " results in bound: " << bounds << std::endl;
+		}
 
 		return Answer::UNKNOWN; // This should be adapted according to your implementation.
 	}

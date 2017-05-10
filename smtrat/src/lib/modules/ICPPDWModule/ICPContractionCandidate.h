@@ -23,11 +23,12 @@ namespace smtrat
         private:
             carl::Variable mVariable;
             ConstraintT mConstraint;
-            //TODO byKosti
-            //Contractor<carl::SimpleNewton>& mContractor;;//the contractor, currently it is on simple newton
+            
+            // this contractor helps us with applying the contraction of this candidate
+            Contractor<carl::SimpleNewton> mContractor;
 
         public:
-            ICPContractionCandidate();
+            ICPContractionCandidate(const ICPContractionCandidate& rhs);
             ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint);
             ~ICPContractionCandidate();
 
@@ -37,10 +38,7 @@ namespace smtrat
             ConstraintT& getConstraint();
             void setConstraint(const ConstraintT& constraint);
 
-
-
-            //std::pair<IntervalT,IntervalT> TODO byKosti
-            void getContractedInterval(const vb::VariableBounds<FormulaT>& _bounds,const carl::Variable& _variable);
+            std::pair<IntervalT,IntervalT> getContractedInterval(const vb::VariableBounds<FormulaT>& _bounds);
 
             friend inline std::ostream& operator <<(std::ostream& os, const ICPContractionCandidate& cc) {
                 os << "(" << cc.mVariable << ", " << cc.mConstraint << ")";
