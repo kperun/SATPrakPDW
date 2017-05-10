@@ -25,7 +25,7 @@ namespace smtrat
 	ICPPDWModule<Settings>::~ICPPDWModule()
 	{}
 
-	
+
 	template<class Settings>
 	std::vector<ConstraintT>& ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin) {
 		const Poly& polynomial = constraint.lhs();
@@ -162,7 +162,7 @@ namespace smtrat
 
 			// A constraint was activated
 			mActiveOriginalConstraints.insert(constraint);
-			
+
 			// we need to activate the bounds for that constraint
 			// since we linearized the constraints, we actually need to activate
 			// the linearized constraints instead of the original one
@@ -235,9 +235,6 @@ namespace smtrat
 	void ICPPDWModule<Settings>::removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
 		mBounds.removeBound(_constraint,_origin);
 	}
-
-
-
 
 	template<class Settings>
 	double ICPPDWModule<Settings>::computeGain(/*ICPContractionCandidate* candidate, IntervalT old_interval*/){

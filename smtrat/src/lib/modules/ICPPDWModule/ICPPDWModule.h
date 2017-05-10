@@ -78,7 +78,7 @@ namespace smtrat
 			/**
 			 * Informs the current variable bounds about a new constraint.
 			 * The variable bounds will then be re-calculated to include that new constraint.
-			 * 
+			 *
 			 * @param _constraint The new constraint
 			 * @param _origin The formula where the constraint originates from
 			 */
@@ -87,7 +87,7 @@ namespace smtrat
 			/**
 			 * Removes a constraint from the current variable bounds.
 			 * The variable bounds will then be re-calculated to exclude that new constraint.
-			 * 
+			 *
 			 * @param _constraint The new constraint
 			 * @param _origin The formula where the constraint originates from
 			 */
