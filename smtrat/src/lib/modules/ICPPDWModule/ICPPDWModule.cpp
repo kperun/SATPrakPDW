@@ -149,9 +149,13 @@ namespace smtrat
 		// DEBUG
 		std::cout << "------------------------------------" << std::endl;
 		std::cout << "All constraints informed.\n" << std::endl;
-		std::cout << "Variable bounds" << std::endl;
+		std::cout << "Variable bounds:" << std::endl;
 		for (const auto& mapEntry : mBounds.getIntervalMap()){
     		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+		}
+		std::cout << "\nContraction Candidates:" << std::endl;
+		for (const auto& cc : mContractionCandidates) {
+			std::cout << cc << std::endl;
 		}
 	}
 

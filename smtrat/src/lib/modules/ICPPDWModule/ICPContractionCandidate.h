@@ -29,5 +29,10 @@ namespace smtrat
 
             ConstraintT& getConstraint();
             void setConstraint(const ConstraintT& constraint);
+
+            friend inline std::ostream& operator <<(std::ostream& os, const ICPContractionCandidate& cc) {
+                os << "(" << cc.mVariable << ", " << cc.mConstraint << ")";
+                return os;
+            }
     };
 }
