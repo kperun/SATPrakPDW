@@ -90,9 +90,6 @@ namespace smtrat
 		mLinearizations[constraint] = linearizedConstraints;
 		for (const auto& lC : linearizedConstraints) {
 			mDeLinearizations[lC] = constraint;
-
-			// we calculate initial bounds for all variables (original and slack variables)
-			addConstraintToBounds(lC, _origin);
 		}
 
 		return mLinearizations[constraint];
@@ -149,11 +146,7 @@ namespace smtrat
 		// DEBUG
 		std::cout << "------------------------------------" << std::endl;
 		std::cout << "All constraints informed.\n" << std::endl;
-		std::cout << "Variable bounds:" << std::endl;
-		for (const auto& mapEntry : mBounds.getIntervalMap()){
-    		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
-		}
-		std::cout << "\nContraction Candidates:" << std::endl;
+		std::cout << "Contraction Candidates:" << std::endl;
 		for (const auto& cc : mContractionCandidates) {
 			std::cout << cc << std::endl;
 		}
@@ -162,14 +155,45 @@ namespace smtrat
 	template<class Settings>
 	bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
 	{
-		// Your code.
+		const FormulaT& formula = _subformula->formula();
+		// we only consider actual constraints
+		if (formula.getType() == carl::FormulaType::CONSTRAINT) {
+			const ConstraintT& constraint = formula.constraint();
+
+			// A constraint was activated
+			mActiveOriginalConstraints.insert(constraint);
+			
+			// we need to activate the bounds for that constraint
+			// since we linearized the constraints, we actually need to activate
+			// the linearized constraints instead of the original one
+			for (const auto& lC : mLinearizations[constraint]) {
+				addConstraintToBounds(lC, formula);
+			}
+		}
+
 		return true; // This should be adapted according to your implementation.
 	}
 
 	template<class Settings>
 	void ICPPDWModule<Settings>::removeCore( ModuleInput::const_iterator _subformula )
 	{
-		// Your code.
+		const FormulaT& formula = _subformula->formula();
+		// we only consider actual constraints
+		if (formula.getType() == carl::FormulaType::CONSTRAINT) {
+			const ConstraintT& constraint = formula.constraint();
+
+			// A constraint was de-activated
+			mActiveOriginalConstraints.erase(constraint);
+
+			// we need to de-activate the bounds for that constraint
+			// since we linearized the constraints, we actually need to remove
+			// the linearized constraints instead of the original one
+			for (const auto& lC : mLinearizations[constraint]) {
+				removeConstraintFromBounds(lC, formula);
+			}
+
+			// TODO: go through the search tree and remove sub-trees where this constraint was used
+		}
 	}
 
 	template<class Settings>
@@ -185,7 +209,19 @@ namespace smtrat
 	template<class Settings>
 	Answer ICPPDWModule<Settings>::checkCore()
 	{
-		// Your code.
+		// DEBUG
+		std::cout << "------------------------------------" << std::endl;
+		std::cout << "Check core with the following active constraints:\n" << std::endl;
+		for (const auto& c : mActiveOriginalConstraints) {
+			for (const auto& lC : mLinearizations[c]) {
+				std::cout << lC << std::endl;
+			}
+		}
+		std::cout << "\nVariable bounds:" << std::endl;
+		for (const auto& mapEntry : mBounds.getIntervalMap()){
+    		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+		}
+
 		return Answer::UNKNOWN; // This should be adapted according to your implementation.
 	}
 

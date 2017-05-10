@@ -37,7 +37,7 @@ namespace smtrat
 			vector<ICPContractionCandidate> mContractionCandidates;
 
 			// handles the bounds of the contraction candidates
-			//we deal with bounds of a set of constraints
+			// we deal with bounds of a set of constraints
 			vb::VariableBounds<FormulaT> mBounds;
 
 			/**
@@ -53,10 +53,13 @@ namespace smtrat
 			// the set of newly introduced variables (during the linearization)
 			std::set<carl::Variable> mSlackVariables;
 
+			// the set of all active original constraints
+			std::set<ConstraintT> mActiveOriginalConstraints;
+
 
 		private:
 			/**
-			 * Linearizes a constraint and initializes its variable bounds.
+			 * Linearizes a constraint.
 			 *
 			 * E.g.: x*y + x*y*y + 5 = 0 will be linearized to
 			 *       a + b + 5 = 0 and x*y - a = 0 and x*y*y - b = 0
@@ -64,7 +67,6 @@ namespace smtrat
 			 * The resulting constraints will be returned and stored in the mLinearizations and mDeLinearizations map.
 			 * The newly introduced variables will be added to mSlackVariables.
 			 * In case the constraint was linear, it will be mapped to itself.
-			 * All linearized constraints will be added to the variable bounds.
 			 *
 			 * @param constraint The constraint that should be linearized
 			 * @param _origin Slac constraints are added to the set of bounds, here we need an origin of the bound,i.e. the formula.
