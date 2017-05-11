@@ -20,6 +20,7 @@ namespace smtrat
             ICPState mCurrentState;
 
             // the parent ICP state
+            // TODO: optional<shared_pt<ICPTree>>
             ICPTree* mParentTree;
 
             // the child states
@@ -27,6 +28,7 @@ namespace smtrat
 
         public:
             ICPTree();
+            ICPTree(ICPTree* parent);
             ~ICPTree();
 
             ICPState& getCurrentState();

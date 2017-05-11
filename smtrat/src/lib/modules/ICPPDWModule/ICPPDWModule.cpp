@@ -14,10 +14,17 @@ namespace smtrat
 {
 	template<class Settings>
 	ICPPDWModule<Settings>::ICPPDWModule(const ModuleInput* _formula, RuntimeSettings*, Conditionals& _conditionals, Manager* _manager):
-		Module( _formula, _conditionals, _manager )
+		Module( _formula, _conditionals, _manager ),
 #ifdef SMTRAT_DEVOPTION_Statistics
-		, mStatistics(Settings::moduleName)
+		mStatistics(Settings::moduleName),
 #endif
+		mSearchTree(),
+		mOriginalVariables(),
+		mContractionCandidates(),
+		mLinearizations(),
+		mDeLinearizations(),
+		mSlackVariables(),
+		mActiveOriginalConstraints()
 	{
 	}
 
@@ -31,7 +38,6 @@ namespace smtrat
 		const Poly& polynomial = constraint.lhs();
 
 		// this vector stores all generated linearized constraints that will actually be used during ICP
-		// Note: this means that instead of the original formula, the linearized constraints will be added to mBounds
 		vector<ConstraintT> linearizedConstraints;
 
 
@@ -218,12 +224,12 @@ namespace smtrat
 			}
 		}
 		std::cout << "\nVariable bounds:" << std::endl;
-		for (const auto& mapEntry : mBounds.getIntervalMap()){
+		for (const auto& mapEntry : mSearchTree.getCurrentState().getBounds().getIntervalMap()){
     		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
 		}
 		std::cout << "\nContractions: " << std::endl;
 		for (auto& cc : mContractionCandidates) {
-			std::pair<IntervalT, IntervalT> bounds = cc.getContractedInterval(mBounds);
+			std::pair<IntervalT, IntervalT> bounds = cc.getContractedInterval(mSearchTree.getCurrentState().getBounds());
 			std::cout << cc << " results in bound: " << bounds << std::endl;
 		}
 
@@ -233,12 +239,12 @@ namespace smtrat
 
 	template<class Settings>
 	void ICPPDWModule<Settings>::addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
-		mBounds.addBound(_constraint,_origin);
+		mSearchTree.getCurrentState().getBounds().addBound(_constraint,_origin);
 	}
 
 	template<class Settings>
 	void ICPPDWModule<Settings>::removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
-		mBounds.removeBound(_constraint,_origin);
+		mSearchTree.getCurrentState().getBounds().removeBound(_constraint,_origin);
 	}
 
 	template<class Settings>

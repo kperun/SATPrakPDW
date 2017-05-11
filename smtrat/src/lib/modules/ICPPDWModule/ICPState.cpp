@@ -3,10 +3,28 @@
 
 namespace smtrat
 {
-    ICPState::ICPState() {
+    ICPState::ICPState() :
+        mBounds(),
+        mContractionCandidates(),
+        mAppliedIntervalConstraints(),
+        mSplitDimension(),
+        mConflictingConstraints()
+    {
     }
 
     ICPState::~ICPState() {
+    }
+
+    vb::VariableBounds<FormulaT>& ICPState::getBounds() {
+        return mBounds;
+    }
+
+    void ICPState::setInterval(carl::Variable var, const IntervalT& interval) {
+        // TODO
+    }
+
+    IntervalT& ICPState::getInterval(carl::Variable var) {
+        mBounds.getInterval(var);
     }
 
     vector<ICPContractionCandidate*>& ICPState::getContractionCandidates() {
@@ -15,6 +33,14 @@ namespace smtrat
 
     void ICPState::addContractionCandidate(ICPContractionCandidate* contractionCandidate) {
         mContractionCandidates.push_back(contractionCandidate);
+    }
+
+    vector<std::pair<ConstraintT, ConstraintT>>& ICPState::getAppliedIntervalConstraints() {
+        return mAppliedIntervalConstraints;
+    }
+
+    void ICPState::addAppliedIntervalConstraints(const ConstraintT& lowerBound, const ConstraintT& upperBound) {
+        mAppliedIntervalConstraints.push_back(make_pair(lowerBound, upperBound));
     }
 
     carl::Variable ICPState::getSplitDimension() {

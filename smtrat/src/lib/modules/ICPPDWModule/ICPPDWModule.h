@@ -36,10 +36,6 @@ namespace smtrat
 			// all contraction candidates
 			vector<ICPContractionCandidate> mContractionCandidates;
 
-			// handles the bounds of the contraction candidates
-			// we deal with bounds of a set of constraints
-			vb::VariableBounds<FormulaT> mBounds;
-
 			/**
 			 * We need to linearize constraints for ICP.
 			 * So we will store a map from original constraints to the linearized ones

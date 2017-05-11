@@ -4,12 +4,20 @@ namespace smtrat
 {
 
     ICPTree::ICPTree() :
-        mParentTree(nullptr)
+        mCurrentState(),
+        mParentTree(nullptr),
+        mChildTrees()
+    {
+    }
+
+    ICPTree::ICPTree(ICPTree* parent) :
+        mCurrentState(),
+        mParentTree(parent),
+        mChildTrees()
     {
     }
 
     ICPTree::~ICPTree() {
-
     }
 
     ICPState& ICPTree::getCurrentState() {

@@ -15,7 +15,7 @@ namespace smtrat
     ICPContractionCandidate::ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint):
         mVariable(var),
         mConstraint(constraint),
-        mContractor(Contractor<carl::SimpleNewton>(constraint.lhs(), constraint.lhs()))
+        mContractor(constraint.lhs(), constraint.lhs())
     {
     }
 
