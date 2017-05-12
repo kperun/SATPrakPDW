@@ -41,7 +41,7 @@ namespace smtrat
              *         in case the result is only one interval, the second element of the pair will be an empty interval
              *         // TODO: use optional for second argument
              */
-            std::pair<IntervalT,IntervalT> getContractedInterval(const vb::VariableBounds<FormulaT>& _bounds);
+            std::pair<IntervalT,IntervalT> getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds);
 
             carl::Variable getVariable();
             ConstraintT& getConstraint();

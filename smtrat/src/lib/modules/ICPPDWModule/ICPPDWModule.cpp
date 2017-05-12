@@ -109,9 +109,12 @@ namespace smtrat
 		for (const auto& mapIter : mDeLinearizations) {
 			const ConstraintT& constraint = mapIter.first;
 
-			// we create a new contraction candidate for every variable in that constraint
-			for (const auto& variable : constraint.variables()) {
-				mContractionCandidates.push_back(ICPContractionCandidate(variable, constraint));
+			// if the constraint only contains one variable, we cannot use it for contraction
+			if (constraint.variables().size() > 1) {
+				// we create a new contraction candidate for every variable in that constraint
+				for (const auto& variable : constraint.variables()) {
+					mContractionCandidates.push_back(ICPContractionCandidate(variable, constraint));
+				}
 			}
 		}
 	}
@@ -172,7 +175,7 @@ namespace smtrat
 			// since we linearized the constraints, we actually need to activate
 			// the linearized constraints instead of the original one
 			for (const auto& lC : mLinearizations[constraint]) {
-				addConstraintToBounds(lC, formula);
+				addConstraintToBounds(lC, constraint);
 			}
 		}
 
@@ -194,7 +197,7 @@ namespace smtrat
 			// since we linearized the constraints, we actually need to remove
 			// the linearized constraints instead of the original one
 			for (const auto& lC : mLinearizations[constraint]) {
-				removeConstraintFromBounds(lC, formula);
+				removeConstraintFromBounds(lC, constraint);
 			}
 
 			// TODO: go through the search tree and remove sub-trees where this constraint was used
@@ -222,14 +225,22 @@ namespace smtrat
 				std::cout << lC << std::endl;
 			}
 		}
-		std::cout << "\nVariable bounds:" << std::endl;
-		for (const auto& mapEntry : mSearchTree.getCurrentState().getBounds().getIntervalMap()){
-    		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
-		}
-		std::cout << "\nContractions: " << std::endl;
-		for (auto& cc : mContractionCandidates) {
-			std::pair<IntervalT, IntervalT> bounds = cc.getContractedInterval(mSearchTree.getCurrentState().getBounds());
-			std::cout << cc << " results in bound: " << bounds << std::endl;
+
+		// main loop. for now: hard-coded 10 iterations
+		for (int i = 0; i < 10; i++) {
+			std::cout << "\nICP Iteration #" << i << std::endl;
+			std::cout << "\nContractions: " << std::endl;
+			for (auto& cc : mContractionCandidates) {
+				std::pair<IntervalT, IntervalT> bounds = cc.getContractedInterval(mSearchTree.getCurrentState().getBounds());
+				std::cout << cc << " results in bound: " << bounds << std::endl;
+
+				// this is incorrect. just for debugging, we always only choose the first interval (no splits)
+				mSearchTree.getCurrentState().setInterval(cc.getVariable(), bounds.first);
+			}
+			std::cout << "\nVariable bounds:" << std::endl;
+			for (const auto& mapEntry : mSearchTree.getCurrentState().getBounds().getIntervalMap()){
+	    		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+			}
 		}
 
 		return Answer::UNKNOWN; // This should be adapted according to your implementation.
@@ -237,12 +248,12 @@ namespace smtrat
 
 
 	template<class Settings>
-	void ICPPDWModule<Settings>::addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
+	void ICPPDWModule<Settings>::addConstraintToBounds(const ConstraintT& _constraint, const ConstraintT& _origin ){
 		mSearchTree.getCurrentState().getBounds().addBound(_constraint,_origin);
 	}
 
 	template<class Settings>
-	void ICPPDWModule<Settings>::removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin ){
+	void ICPPDWModule<Settings>::removeConstraintFromBounds(const ConstraintT& _constraint, const ConstraintT& _origin ){
 		mSearchTree.getCurrentState().getBounds().removeBound(_constraint,_origin);
 	}
 

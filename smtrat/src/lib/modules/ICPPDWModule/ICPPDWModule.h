@@ -78,7 +78,7 @@ namespace smtrat
 			 * @param _constraint The new constraint
 			 * @param _origin The formula where the constraint originates from
 			 */
-			void addConstraintToBounds(const ConstraintT& _constraint, const FormulaT& _origin );
+			void addConstraintToBounds(const ConstraintT& _constraint, const ConstraintT& _origin );
 
 			/**
 			 * Removes a constraint from the current variable bounds.
@@ -87,7 +87,7 @@ namespace smtrat
 			 * @param _constraint The new constraint
 			 * @param _origin The formula where the constraint originates from
 			 */
-			void removeConstraintFromBounds(const ConstraintT& _constraint, const FormulaT& _origin );
+			void removeConstraintFromBounds(const ConstraintT& _constraint, const ConstraintT& _origin );
 
 			/**
 			 * Creates all contraction candidates.

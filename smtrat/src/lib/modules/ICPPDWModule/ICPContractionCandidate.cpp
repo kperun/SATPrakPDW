@@ -30,7 +30,7 @@ namespace smtrat
         return mConstraint;
     }
 
-    std::pair<IntervalT,IntervalT> ICPContractionCandidate::getContractedInterval(const vb::VariableBounds<FormulaT>& _bounds) {
+    std::pair<IntervalT,IntervalT> ICPContractionCandidate::getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds) {
         // first retrieve all variables with their respective bounds
     	auto& map = _bounds.getIntervalMap();
 

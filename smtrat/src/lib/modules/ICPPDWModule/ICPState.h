@@ -29,7 +29,7 @@ namespace smtrat
              * It also keeps track of which constraints were the reasons for the 
              * intervals. This way, we can automatically revert applied constraints.
              */
-            vb::VariableBounds<FormulaT> mBounds;
+            vb::VariableBounds<ConstraintT> mBounds;
 
             /**
              * The contraction candidates that have been applied.
@@ -41,10 +41,14 @@ namespace smtrat
              * After we apply a contraction candidate, we add the lower and upper
              * bounds of the contracted interval as constraints. Those constraints
              * are stored in this vector.
-             * The index of constraint pairs for a contracted interval coincides with
+             * 
+             * We choose a vector to store constraint pairs instead of std::pair
+             * because we might only add one constraint if the interval was unbounded.
+             *
+             * The index of applied interval constraints coincides with
              * the index of its contraction candidate in mContractionCandidates.
              */
-            vector<std::pair<ConstraintT, ConstraintT>> mAppliedIntervalConstraints;
+            vector<vector<ConstraintT>> mAppliedIntervalConstraints;
 
             // dimension in which the split occurred, if a split occured
             // TODO optional<carl::Variable>
@@ -64,7 +68,7 @@ namespace smtrat
              *
              * @return reference to the search box
              */
-            vb::VariableBounds<FormulaT>& getBounds();
+            vb::VariableBounds<ConstraintT>& getBounds();
 
             /**
              * Updates the current interval bound for a specific variable.
@@ -86,8 +90,10 @@ namespace smtrat
             vector<ICPContractionCandidate*>& getAppliedContractionCandidates();
             void addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate);
 
-            vector<std::pair<ConstraintT, ConstraintT>>& getAppliedIntervalConstraints();
+            vector<vector<ConstraintT>>& getAppliedIntervalConstraints();
+            void addAppliedIntervalConstraint(const ConstraintT& constraint);
             void addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound);
+            void addAppliedIntervalConstraint(const vector<ConstraintT>& constraints);
 
             carl::Variable getSplitDimension();
             void setSplitDimension(carl::Variable var);
