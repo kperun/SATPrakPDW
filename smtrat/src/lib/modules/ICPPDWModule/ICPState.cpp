@@ -5,7 +5,7 @@ namespace smtrat
 {
     ICPState::ICPState() :
         mBounds(),
-        mContractionCandidates(),
+        mAppliedContractionCandidates(),
         mAppliedIntervalConstraints(),
         mSplitDimension(),
         mConflictingConstraints()
@@ -23,23 +23,23 @@ namespace smtrat
         // TODO
     }
 
-    IntervalT& ICPState::getInterval(carl::Variable var) {
+    IntervalT ICPState::getInterval(carl::Variable var) {
         mBounds.getInterval(var);
     }
 
-    vector<ICPContractionCandidate*>& ICPState::getContractionCandidates() {
-        return mContractionCandidates;
+    vector<ICPContractionCandidate*>& ICPState::getAppliedContractionCandidates() {
+        return mAppliedContractionCandidates;
     }
 
-    void ICPState::addContractionCandidate(ICPContractionCandidate* contractionCandidate) {
-        mContractionCandidates.push_back(contractionCandidate);
+    void ICPState::addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate) {
+        mAppliedContractionCandidates.push_back(contractionCandidate);
     }
 
     vector<std::pair<ConstraintT, ConstraintT>>& ICPState::getAppliedIntervalConstraints() {
         return mAppliedIntervalConstraints;
     }
 
-    void ICPState::addAppliedIntervalConstraints(const ConstraintT& lowerBound, const ConstraintT& upperBound) {
+    void ICPState::addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound) {
         mAppliedIntervalConstraints.push_back(make_pair(lowerBound, upperBound));
     }
 

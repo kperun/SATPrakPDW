@@ -41,7 +41,7 @@ namespace smtrat
 		vector<ConstraintT> linearizedConstraints;
 
 
-		if (polynomial.isLinear()) { // TODO: are polynomials with just one monome okay?
+		if (polynomial.isLinear()) {
 			// we don't need to do anything, so we simply map this constraint to itself
 			linearizedConstraints.push_back(constraint);
 		}
@@ -62,7 +62,7 @@ namespace smtrat
 						/*
 						 * Note: term == term.coeff() * term.monomial()
 						 */
-	            		Poly monomial = carl::makePolynomial<Poly>(Poly::PolyType(term.monomial()));
+	            		Poly monomial(term.monomial());
 
 		            	// introduce a new slack variable representing that monomial
 		            	carl::Variable slackVariable = carl::freshRealVariable();
@@ -111,8 +111,7 @@ namespace smtrat
 
 			// we create a new contraction candidate for every variable in that constraint
 			for (const auto& variable : constraint.variables()) {
-				ICPContractionCandidate candidate(variable, constraint);
-				mContractionCandidates.push_back(candidate);
+				mContractionCandidates.push_back(ICPContractionCandidate(variable, constraint));
 			}
 		}
 	}

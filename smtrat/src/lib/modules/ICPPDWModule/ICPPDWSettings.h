@@ -1,6 +1,6 @@
 /**
  * @file ICPPDWSettings.h
- * @author YOUR NAME <YOUR EMAIL ADDRESS>
+ * @author David
  *
  * @version 2017-04-27
  * Created on 2017-04-27.
@@ -10,6 +10,8 @@
 
 namespace smtrat
 {
+	typedef DoubleInterval IntervalT;
+
 	struct ICPPDWSettings1
 	{
 		/// Name of the Module
