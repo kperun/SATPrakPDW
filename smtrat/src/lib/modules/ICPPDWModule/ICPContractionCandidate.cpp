@@ -30,7 +30,7 @@ namespace smtrat
         return mConstraint;
     }
 
-    std::pair<IntervalT,IntervalT> ICPContractionCandidate::getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds) {
+    std::pair<IntervalT,IntervalT> ICPContractionCandidate::getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds){
         // first retrieve all variables with their respective bounds
     	auto& map = _bounds.getIntervalMap();
 
@@ -49,10 +49,10 @@ namespace smtrat
          * After our linearization, the only types of constraints we have are:
          * 1) monomial - slack = 0
          * 2) linear_polynomial ~ 0, where ~ is <=, =, >=, <, > (we assume it is <= or <)
-         * 
+         *
          * So the only time the constraint can be something different than an equality, it is a linear constraint.
          * This makes adjustment of the result for linear_polynomial = 0 to linear_polynomial ~ 0 easier.
-         * If the relation was <= (taking the coefficient of the variable we solved for into account), 
+         * If the relation was <= (taking the coefficient of the variable we solved for into account),
          * then the result will be relaxed to: (-inf, upper bound].
          * Similarly, if the relation was >=, then the result will be relaxed to [lower bound, inf)
          */
@@ -79,7 +79,7 @@ namespace smtrat
             // so there is nothing to do here.
         }
 
-        // finally, we intersect the contracted interval with the original interval    
+        // finally, we intersect the contracted interval with the original interval
         resultA = resultA.intersect(originalInterval);
         resultB = resultB.intersect(originalInterval);
 

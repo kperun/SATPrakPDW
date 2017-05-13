@@ -14,7 +14,7 @@ namespace smtrat
     typedef DoubleInterval IntervalT;
 
     /**
-     * This class represents a contraction candidate (x, c) 
+     * This class represents a contraction candidate (x, c)
      * where x is a variable and c is a constraint.
      */
     class ICPContractionCandidate
@@ -22,7 +22,7 @@ namespace smtrat
         private:
             carl::Variable mVariable;
             ConstraintT mConstraint;
-            
+
             // this contractor helps us with applying the contraction of this candidate
             Contractor<carl::SimpleNewton> mContractor;
 
@@ -35,7 +35,7 @@ namespace smtrat
              * Calculates the contracted interval of this contraction candidate.
              * I.e., it will solve the constraint for mVariable and insert the given variable bounds.
              * The result may be either one or two intervals, depending on the order of the variable.
-             * 
+             *
              * @param _bounds The variable bounds
              * @return a pair of resulting intervals
              *         in case the result is only one interval, the second element of the pair will be an empty interval
