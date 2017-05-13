@@ -23,13 +23,16 @@ namespace smtrat
             // TODO: optional<ICPTree*>
             ICPTree* mParentTree;
 
+            // dimension in which the split occurred, if a split occured
+            // TODO optional<carl::Variable>
+            carl::Variable mSplitDimension;
+
             // the child states
             vector<ICPTree> mChildTrees;
 
         public:
             ICPTree();
-            ICPTree(ICPTree* parent);
-            ~ICPTree();
+            ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds);
 
             /**
              * Contracts the current ICP state until either:
@@ -57,8 +60,10 @@ namespace smtrat
 
             ICPTree* getParentTree();
 
+            carl::Variable getSplitDimension();
+            void setSplitDimension(carl::Variable var);
+
             vector<ICPTree>& getChildTrees();
-            void addChildTree(const ICPTree& child);
             bool isLeaf();
     };
 }

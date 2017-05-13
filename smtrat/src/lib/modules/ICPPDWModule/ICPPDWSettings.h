@@ -16,6 +16,10 @@ namespace smtrat
 	{
 		/// Name of the Module
 		static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettings1>";
+
+		// number of maximal contraction per ICP state
+		static const int maxContractions = 100;
+
 		/**
 		 * Example for a setting.
 		 */

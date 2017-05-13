@@ -7,7 +7,6 @@ namespace smtrat
         mBounds(),
         mAppliedContractionCandidates(),
         mAppliedIntervalConstraints(),
-        mSplitDimension(),
         mConflictingConstraints()
     {
     }
@@ -16,19 +15,20 @@ namespace smtrat
         mBounds(parentBounds),
         mAppliedContractionCandidates(),
         mAppliedIntervalConstraints(),
-        mSplitDimension(),
         mConflictingConstraints()
     {
-    }
-
-    ICPState::~ICPState() {
     }
 
     vb::VariableBounds<ConstraintT>& ICPState::getBounds() {
         return mBounds;
     }
 
-    void ICPState::setInterval(carl::Variable var, const IntervalT& interval) {
+    void ICPState::applyContraction(ICPContractionCandidate* cc, IntervalT interval) {
+        addAppliedContractionCandidate(cc);
+        setInterval(cc->getVariable(), interval, cc->getConstraint());
+    }
+
+    void ICPState::setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin) {
         // since we cannot directly set the interval for a variable,
         // we will need to add two constraints. one for the lower and one for the upper bound
         // one advantage of this approach is that we can easily revert a contraction
@@ -61,7 +61,7 @@ namespace smtrat
             intervalConstraints.push_back(lowerBound);
         }
 
-        addAppliedIntervalConstraint(intervalConstraints);
+        addAppliedIntervalConstraint(intervalConstraints, _origin);
     }
 
     IntervalT ICPState::getInterval(carl::Variable var) {
@@ -80,39 +80,35 @@ namespace smtrat
         return mAppliedIntervalConstraints;
     }
     
-    void ICPState::addAppliedIntervalConstraint(const ConstraintT& constraint) {
+    void ICPState::addAppliedIntervalConstraint(const ConstraintT& constraint, const ConstraintT& _origin) {
         vector<ConstraintT> intervalConstraints;
         intervalConstraints.push_back(constraint);
         mAppliedIntervalConstraints.push_back(intervalConstraints);
-        mBounds.addBound(constraint, constraint);
+        mBounds.addBound(constraint, _origin);
     }
 
-    void ICPState::addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound) {
+    void ICPState::addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound, const ConstraintT& _origin) {
         vector<ConstraintT> intervalConstraints;
         intervalConstraints.push_back(lowerBound);
         intervalConstraints.push_back(upperBound);
         mAppliedIntervalConstraints.push_back(intervalConstraints);
-        mBounds.addBound(lowerBound, lowerBound);
-        mBounds.addBound(upperBound, upperBound);
+        mBounds.addBound(lowerBound, _origin);
+        mBounds.addBound(upperBound, _origin);
     }
     
-    void ICPState::addAppliedIntervalConstraint(const vector<ConstraintT>& constraints) {
+    void ICPState::addAppliedIntervalConstraint(const vector<ConstraintT>& constraints, const ConstraintT& _origin) {
         mAppliedIntervalConstraints.push_back(constraints);
         for (const ConstraintT& c : constraints) {
-            mBounds.addBound(c, c);
+            mBounds.addBound(c, _origin);
         }
-    }
-
-    carl::Variable ICPState::getSplitDimension() {
-        return mSplitDimension;
-    }
-
-    void ICPState::setSplitDimension(carl::Variable splitDimension) {
-        mSplitDimension = splitDimension;
     }
 
     std::set<ConstraintT>& ICPState::getConflictingConstraints() {
         return mConflictingConstraints;
+    }
+
+    void ICPState::setConflictingConstraints(const std::set<ConstraintT>& constraints) {
+        mConflictingConstraints = constraints;
     }
 
     void ICPState::addConflictingConstraint(const ConstraintT& constraint) {
@@ -121,5 +117,15 @@ namespace smtrat
 
     bool ICPState::isUnsat() {
         return !mConflictingConstraints.empty();
+    }
+
+    bool ICPState::isTerminationConditionReached() {
+        // TODO
+        return mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions;
+    }
+
+    ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& contractionCandidates) {
+        // TODO
+        return contractionCandidates[0];
     }
 }

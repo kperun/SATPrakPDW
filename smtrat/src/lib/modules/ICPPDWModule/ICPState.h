@@ -50,10 +50,6 @@ namespace smtrat
              */
             vector<vector<ConstraintT>> mAppliedIntervalConstraints;
 
-            // dimension in which the split occurred, if a split occured
-            // TODO optional<carl::Variable>
-            carl::Variable mSplitDimension;
-
             /**
              * In case of UNSAT, this set will contain the reason for unsatisifiabilty.
              */
@@ -70,8 +66,6 @@ namespace smtrat
              */
             ICPState(const vb::VariableBounds<ConstraintT>& parentBounds);
 
-            ~ICPState();
-
             /**
              * Returns the current search box as VariableBounds.
              *
@@ -80,13 +74,23 @@ namespace smtrat
             vb::VariableBounds<ConstraintT>& getBounds();
 
             /**
+             * Applies a contraction to this state.
+             * Internally, mAppliedContractionCandidates and mAppliedIntervalConstraints will be filled.
+             *
+             * @param cc The contraction candidate that has been applied
+             * @param interval The contracted interval that should be applied
+             */
+            void applyContraction(ICPContractionCandidate* cc, IntervalT interval);
+
+            /**
              * Updates the current interval bound for a specific variable.
              * Internally it adds two new constraints for the lower and upper bound.
              *
              * @param var The variable of which the interval should be updated
              * @param interval The new interval for that variable
+             * @param _origin The constraint which caused the new interval
              */
-            void setInterval(carl::Variable var, const IntervalT& interval);
+            void setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin);
 
             /**
              * Returns the current interval bound for a specific variable.
@@ -100,14 +104,12 @@ namespace smtrat
             void addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate);
 
             vector<vector<ConstraintT>>& getAppliedIntervalConstraints();
-            void addAppliedIntervalConstraint(const ConstraintT& constraint);
-            void addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound);
-            void addAppliedIntervalConstraint(const vector<ConstraintT>& constraints);
-
-            carl::Variable getSplitDimension();
-            void setSplitDimension(carl::Variable var);
+            void addAppliedIntervalConstraint(const ConstraintT& constraint, const ConstraintT& _origin);
+            void addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound, const ConstraintT& _origin);
+            void addAppliedIntervalConstraint(const vector<ConstraintT>& constraints, const ConstraintT& _origin);
 
             std::set<ConstraintT>& getConflictingConstraints();
+            void setConflictingConstraints(const std::set<ConstraintT>& constraints);
             void addConflictingConstraint(const ConstraintT& constraint);
 
             /**
@@ -117,5 +119,21 @@ namespace smtrat
              * @return whether this ICP state is unsat
              */
             bool isUnsat();
+
+            /**
+             * Chooses the best contraction candidate.
+             *
+             * @param contractionCandidates A list of available contraction candidates
+             * @return the best contraction candidate
+             */
+            ICPContractionCandidate& getBestContractionCandidate(vector<ICPContractionCandidate>& contractionCandidates);
+
+            /**
+             * Determines whether we should stop contracting.
+             * (e.g. because the target diameter was reached)
+             * 
+             * @return whether the termination condition was reached
+             */
+            bool isTerminationConditionReached();
     };
 }
