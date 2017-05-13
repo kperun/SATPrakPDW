@@ -304,13 +304,16 @@ namespace smtrat
 	template<class Settings>
 	double ICPPDWModule<Settings>::computeGain(smtrat::ICPContractionCandidate& candidate,const vb::VariableBounds<ConstraintT>& _bounds){
         //first compute the new interval
-        std::pair<IntervalT,IntervalT> intervals = candidate.getContractedInterval(_bounds);
+        OptionalInterval intervals = candidate.getContractedInterval(_bounds);
         //then retrieve the old one
         auto& map = _bounds.getIntervalMap();
         IntervalT old_interval = map.at(candidate.getVariable());
         //finally compute the diameter
-        return 1 - (1/old_interval.diameter());
-
+        if(intervals.second){
+            return 1 - ( (intervals.first.diameter()+intervals.second->diameter())/old_interval.diameter());
+        }else{
+            return 1 - ( intervals.first.diameter()/old_interval.diameter());
+        }
 		//Input:  Kriege einen kandidaten, das alte sowie das neue intervall.
 		// 		1. schneide beide intervalle um das neue intervall zu berechnen.
 		//		2. berechne 1- D_new/D_old <- hier müssen die diameter mit .diameter berechnet werden. returne den wert
@@ -318,7 +321,6 @@ namespace smtrat
 			IntervalT new_inteval = evaluateIntervall(candidate);
 			return 1 - (new_inteval.diameter()/old_interval.diameter());
 		*/
-
 	}
 
 	template<class Settings>
