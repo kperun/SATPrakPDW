@@ -35,7 +35,7 @@ namespace smtrat
                 }
                 std::cout << std::endl;
 
-                // TODO: propagate UNSAT if both child trees are unsat 
+                // TODO: propagate UNSAT if both child trees are unsat
                 // or maybe do this in a seperate method
 
                 // we will terminate, but we did not split the search space
@@ -57,7 +57,7 @@ namespace smtrat
                 for (auto& cc : contractionCandidates) {
                     OptionalInterval bounds = cc.getContractedInterval(mCurrentState.getBounds());
                     if(bounds.second){
-                      std::cout << cc << " results in bound: " << bounds.first << ":" << "Second Interval" << std::endl;
+                      std::cout << cc << " results in bound: " << bounds.first << ":" << *(bounds.second) << std::endl;
                     } else {
                       std::cout << cc << " results in bound: " << bounds.first << std::endl;
                     }
@@ -70,17 +70,24 @@ namespace smtrat
                     std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
                 }
 
-                /* TODO: THIS IS NOT WORKING. THIS RESULTS IN DOUBLE FREES. I BET IT'S VARIABLE BOUNDS FAULT!!
+                /* TODO: THIS IS NOT WORKING. THIS RESULTS IN DOUBLE FREES. I BET IT'S VARIABLE BOUNDS FAULT!!*/
                 // We have to pick the best contraction candidate that we want to apply
                 ICPContractionCandidate& bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
-                std::pair<IntervalT, IntervalT> bounds = bestCC.getContractedInterval(mCurrentState.getBounds());
+                OptionalInterval bounds = bestCC.getContractedInterval(mCurrentState.getBounds());
 
-                std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds << std::endl;
+                if(bounds.second){
+                  //std::cout << cc << " results in bound: " << bounds.first << ":" << "Second Interval" << std::endl;
+                  std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << ":" << *(bounds.second) << std::endl;
+                } else {
+                  std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << ":" << "]" << std::endl;
+                }
 
+                //std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds << std::endl;
+                /*
                 // if the contraction results in two intervals, we need to split the search space
                 // TODO: if (split occurred) {
                 if (!bounds.second.isEmpty()) {
-                    
+
                     std::cout << "Split!" << std::endl;
                     // we store the dimension at which we split
                     mSplitDimension = bestCC.getVariable();
@@ -96,7 +103,7 @@ namespace smtrat
                     // on which we apply the second interval
                     mCurrentState.applyContraction(&cc, bounds.second);
                     std::cout << "Added right tree." << std::endl;
-                    
+
                     // since a split occurred, we cannot contract the current ICP node any further
                     return true;
                 }

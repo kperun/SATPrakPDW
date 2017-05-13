@@ -124,11 +124,6 @@ namespace smtrat
         return mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions;
     }
 
-    ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& contractionCandidates) {
-        // TODO
-        return contractionCandidates[0];
-    }
-
     double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
         //first compute the new interval
         OptionalInterval intervals = candidate.getContractedInterval(_bounds);
@@ -143,7 +138,8 @@ namespace smtrat
         }
     }
     //TODO: we are currently assuming that there is at least one candidate
-    ICPContractionCandidate& ICPState::computeBestCandidate(std::list<ICPContractionCandidate>& candidates){
+    ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){
+        std::cout << "----------------------------------------- \n";
         //in the case that the list has only one element, return this one element
         if(candidates.size()==1){
             return candidates.front();//return the first element
@@ -151,19 +147,23 @@ namespace smtrat
         //store the current best candidate
         auto currentBest = std::make_unique<ICPContractionCandidate>(candidates.front());
 
-        double currentBestGain = -1;
+        double currentBestGain = 0;
 
-        for(auto& cur:candidates){
-
+        for(std::vector<ICPContractionCandidate>::iterator it = candidates.begin(); it != candidates.end(); ++it){
+            std::cout << "----------------------------------------- \n";
             std::cout << "Current best gain: "<<currentBestGain << "\n";
+            std::cout << "Current gain: "<< computeGain(*it,mBounds) << "\n";
 
-            if(currentBestGain< computeGain(cur,mBounds)>computeGain(*currentBest,mBounds) ){
+            if(computeGain(*it,mBounds)>computeGain(*currentBest,mBounds)){
                 //now set the new best candidate as current
-                currentBestGain = computeGain(cur,mBounds)>computeGain(*currentBest,mBounds);
-                currentBest = std::make_unique<ICPContractionCandidate>(cur);
+                currentBestGain = computeGain(*it,mBounds);
+                currentBest = std::make_unique<ICPContractionCandidate>(*it);
             }
+
         }
+        std::cout << "-------------------Final----------------- \n";
         std::cout << "Overall best gain: " <<currentBestGain << "\n";
+        std::cout << "----------------------------------------- \n";
         return *currentBest;
     }
 

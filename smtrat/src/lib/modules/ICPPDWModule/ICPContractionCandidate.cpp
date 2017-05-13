@@ -43,11 +43,11 @@ namespace smtrat
         // apply contraction
         // arguments are true because we want to use propagation
     	bool split = mContractor(map, mVariable, resultA, resultB, true, true);
-      if(split){ //Interval was split in two
-        retB = resultB;
-      } else { //only resultA
+        if(split){ //Interval was split in two
+            retB = resultB;
+        } else { //only resultA
 
-      }
+        }
 
         /*
          * The contractor only solves for equality, i.e. it solves polynomial = 0 for the variable.

@@ -116,7 +116,6 @@ namespace smtrat
             * For a given contraction candidate compute the new interval, subsequently the gain by the formula 1- D_new/D_old
             */
 			double computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds);
-			ICPContractionCandidate& computeBestCandidate(std::list<ICPContractionCandidate>& candidates);
 
 
             /**
