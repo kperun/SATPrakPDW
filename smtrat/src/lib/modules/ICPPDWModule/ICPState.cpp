@@ -79,7 +79,7 @@ namespace smtrat
     vector<vector<ConstraintT>>& ICPState::getAppliedIntervalConstraints() {
         return mAppliedIntervalConstraints;
     }
-    
+
     void ICPState::addAppliedIntervalConstraint(const ConstraintT& constraint, const ConstraintT& _origin) {
         vector<ConstraintT> intervalConstraints;
         intervalConstraints.push_back(constraint);
@@ -95,7 +95,7 @@ namespace smtrat
         mBounds.addBound(lowerBound, _origin);
         mBounds.addBound(upperBound, _origin);
     }
-    
+
     void ICPState::addAppliedIntervalConstraint(const vector<ConstraintT>& constraints, const ConstraintT& _origin) {
         mAppliedIntervalConstraints.push_back(constraints);
         for (const ConstraintT& c : constraints) {
@@ -128,4 +128,35 @@ namespace smtrat
         // TODO
         return contractionCandidates[0];
     }
+
+    double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,const vb::VariableBounds<ConstraintT>& _bounds){
+        //first compute the new interval
+        OptionalInterval intervals = candidate.getContractedInterval(_bounds);
+        //then retrieve the old one
+        auto& map = _bounds.getIntervalMap();
+        IntervalT old_interval = map.at(candidate.getVariable());
+        //finally compute the diameter
+        if(intervals.second){
+            return 1 - ( (intervals.first.diameter()+intervals.second->diameter())/old_interval.diameter());
+        }else{
+            return 1 - ( intervals.first.diameter()/old_interval.diameter());
+        }
+        //Input:  Kriege einen kandidaten, das alte sowie das neue intervall.
+        // 		1. schneide beide intervalle um das neue intervall zu berechnen.
+        //		2. berechne 1- D_new/D_old <- hier müssen die diameter mit .diameter berechnet werden. returne den wert
+        /*
+            IntervalT new_inteval = evaluateIntervall(candidate);
+            return 1 - (new_inteval.diameter()/old_interval.diameter());
+        */
+    }
+
+    /*ICPContractionCandidate */ void ICPState::computeBestCandidate(/*std::list<ICPContractionCandidate> candidates*/){
+        //Input: eine Liste an contraction candiate
+        /*TODO:1.gehe durch die liste, für jeden kandiadaten berechne mit computeGain den gain.
+        *	   2.speichere den aktuell größten gain zwischen und den CC zwischen. (als double und pointer)
+        *	   3.wähle variable mit größten gain und gebe sie aus
+        */
+    }
+
+
 }

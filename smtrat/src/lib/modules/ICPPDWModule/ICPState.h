@@ -26,7 +26,7 @@ namespace smtrat
             /**
              * The current search box.
              * VariableBounds internally stores a map from variables to intervals.
-             * It also keeps track of which constraints were the reasons for the 
+             * It also keeps track of which constraints were the reasons for the
              * intervals. This way, we can automatically revert applied constraints.
              */
             vb::VariableBounds<ConstraintT> mBounds;
@@ -41,7 +41,7 @@ namespace smtrat
              * After we apply a contraction candidate, we add the lower and upper
              * bounds of the contracted interval as constraints. Those constraints
              * are stored in this vector.
-             * 
+             *
              * We choose a vector to store constraint pairs instead of std::pair
              * because we might only add one constraint if the interval was unbounded.
              *
@@ -113,9 +113,16 @@ namespace smtrat
             void addConflictingConstraint(const ConstraintT& constraint);
 
             /**
+            * For a given contraction candidate compute the new interval, subsequently the gain by the formula 1- D_new/D_old
+            */
+			double computeGain(smtrat::ICPContractionCandidate& candidate,const vb::VariableBounds<ConstraintT>& _bounds);
+			void computeBestCandidate();
+
+
+            /**
              * Returns whether this ICP state turned out to be unsat.
              * Internally, this means the conflicting constraints set is not empty.
-             * 
+             *
              * @return whether this ICP state is unsat
              */
             bool isUnsat();
@@ -131,7 +138,7 @@ namespace smtrat
             /**
              * Determines whether we should stop contracting.
              * (e.g. because the target diameter was reached)
-             * 
+             *
              * @return whether the termination condition was reached
              */
             bool isTerminationConditionReached();
