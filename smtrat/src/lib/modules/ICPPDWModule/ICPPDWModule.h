@@ -101,7 +101,7 @@ namespace smtrat
 			 */
 			void createAllContractionCandidates();
 
-            
+
 
 		public:
 			typedef Settings SettingsType;

@@ -129,7 +129,7 @@ namespace smtrat
         return contractionCandidates[0];
     }
 
-    double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,const vb::VariableBounds<ConstraintT>& _bounds){
+    double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
         //first compute the new interval
         OptionalInterval intervals = candidate.getContractedInterval(_bounds);
         //then retrieve the old one
@@ -141,21 +141,30 @@ namespace smtrat
         }else{
             return 1 - ( intervals.first.diameter()/old_interval.diameter());
         }
-        //Input:  Kriege einen kandidaten, das alte sowie das neue intervall.
-        // 		1. schneide beide intervalle um das neue intervall zu berechnen.
-        //		2. berechne 1- D_new/D_old <- hier müssen die diameter mit .diameter berechnet werden. returne den wert
-        /*
-            IntervalT new_inteval = evaluateIntervall(candidate);
-            return 1 - (new_inteval.diameter()/old_interval.diameter());
-        */
     }
+    //TODO: we are currently assuming that there is at least one candidate
+    ICPContractionCandidate& ICPState::computeBestCandidate(std::list<ICPContractionCandidate>& candidates){
+        //in the case that the list has only one element, return this one element
+        if(candidates.size()==1){
+            return candidates.front();//return the first element
+        }
+        //store the current best candidate
+        auto currentBest = std::make_unique<ICPContractionCandidate>(candidates.front());
 
-    /*ICPContractionCandidate */ void ICPState::computeBestCandidate(/*std::list<ICPContractionCandidate> candidates*/){
-        //Input: eine Liste an contraction candiate
-        /*TODO:1.gehe durch die liste, für jeden kandiadaten berechne mit computeGain den gain.
-        *	   2.speichere den aktuell größten gain zwischen und den CC zwischen. (als double und pointer)
-        *	   3.wähle variable mit größten gain und gebe sie aus
-        */
+        double currentBestGain = -1;
+
+        for(auto& cur:candidates){
+
+            std::cout << "Current best gain: "<<currentBestGain << "\n";
+
+            if(currentBestGain< computeGain(cur,mBounds)>computeGain(*currentBest,mBounds) ){
+                //now set the new best candidate as current
+                currentBestGain = computeGain(cur,mBounds)>computeGain(*currentBest,mBounds);
+                currentBest = std::make_unique<ICPContractionCandidate>(cur);
+            }
+        }
+        std::cout << "Overall best gain: " <<currentBestGain << "\n";
+        return *currentBest;
     }
 
 
