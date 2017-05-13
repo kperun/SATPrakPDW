@@ -55,8 +55,12 @@ namespace smtrat
                 // and only choose the first interval of a split (no actual splitting)
                 std::cout << "\nContractions: " << std::endl;
                 for (auto& cc : contractionCandidates) {
-                    std::pair<IntervalT, IntervalT> bounds = cc.getContractedInterval(mCurrentState.getBounds());
-                    std::cout << cc << " results in bound: " << bounds << std::endl;
+                    OptionalInterval bounds = cc.getContractedInterval(mCurrentState.getBounds());
+                    if(bounds.second){
+                      std::cout << cc << " results in bound: " << bounds.first << ":" << "Second Interval" << std::endl;
+                    } else {
+                      std::cout << cc << " results in bound: " << bounds.first << std::endl;
+                    }
 
                     // this is incorrect. just for debugging, we always only choose the first interval (no splits)
                     mCurrentState.applyContraction(&cc, bounds.first);

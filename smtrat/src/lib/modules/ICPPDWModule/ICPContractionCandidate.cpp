@@ -30,17 +30,23 @@ namespace smtrat
         return mConstraint;
     }
 
-    std::pair<IntervalT,IntervalT> ICPContractionCandidate::getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds) {
+    OptionalInterval ICPContractionCandidate::getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds) {
         // first retrieve all variables with their respective bounds
     	auto& map = _bounds.getIntervalMap();
 
         // possible are two intervals resulting from a split
         IntervalT originalInterval = map.at(mVariable);
         IntervalT resultA, resultB;
+        std::experimental::optional<IntervalT> retB;
 
         // apply contraction
         // arguments are true because we want to use propagation
     	bool split = mContractor(map, mVariable, resultA, resultB, true, true);
+      if(split){ //Interval was split in two
+        retB = resultB;
+      } else { //only resultA
+
+      }
 
         /*
          * The contractor only solves for equality, i.e. it solves polynomial = 0 for the variable.
@@ -79,11 +85,11 @@ namespace smtrat
             // so there is nothing to do here.
         }
 
-        // finally, we intersect the contracted interval with the original interval    
+        // finally, we intersect the contracted interval with the original interval
         resultA = resultA.intersect(originalInterval);
         resultB = resultB.intersect(originalInterval);
 
-        std::pair <IntervalT,IntervalT> ret(resultA,resultB);
+        OptionalInterval ret(resultA,retB);
         return ret;
     }
 }
