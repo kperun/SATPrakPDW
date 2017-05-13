@@ -39,7 +39,7 @@ namespace smtrat
              * @param _bounds The variable bounds
              * @return a pair of resulting intervals
              *         in case the result is only one interval, the second element of the pair will be an empty interval
-             *         // TODO: use optional for second argument
+             *         // TODO: use optional or variant for second argument
              */
             std::pair<IntervalT,IntervalT> getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds);
 

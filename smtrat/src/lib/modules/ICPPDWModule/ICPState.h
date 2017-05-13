@@ -60,7 +60,16 @@ namespace smtrat
             std::set<ConstraintT> mConflictingConstraints;
 
         public:
+            /**
+             * Default constructor will create an empty state with no variable bounds.
+             */
             ICPState();
+
+            /**
+             * This constructor will initialize the variable bounds with a copy of parentBounds.
+             */
+            ICPState(const vb::VariableBounds<ConstraintT>& parentBounds);
+
             ~ICPState();
 
             /**
@@ -100,5 +109,13 @@ namespace smtrat
 
             std::set<ConstraintT>& getConflictingConstraints();
             void addConflictingConstraint(const ConstraintT& constraint);
+
+            /**
+             * Returns whether this ICP state turned out to be unsat.
+             * Internally, this means the conflicting constraints set is not empty.
+             * 
+             * @return whether this ICP state is unsat
+             */
+            bool isUnsat();
     };
 }

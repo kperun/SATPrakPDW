@@ -19,6 +19,7 @@ namespace smtrat
 		mStatistics(Settings::moduleName),
 #endif
 		mSearchTree(),
+		mLeafNodes(),
 		mOriginalVariables(),
 		mContractionCandidates(),
 		mLinearizations(),
@@ -26,6 +27,7 @@ namespace smtrat
 		mSlackVariables(),
 		mActiveOriginalConstraints()
 	{
+		mLeafNodes.push(&mSearchTree);
 	}
 
 	template<class Settings>
@@ -226,24 +228,66 @@ namespace smtrat
 			}
 		}
 
-		// main loop. for now: hard-coded 10 iterations
-		for (int i = 0; i < 10; i++) {
-			std::cout << "\nICP Iteration #" << i << std::endl;
-			std::cout << "\nContractions: " << std::endl;
-			for (auto& cc : mContractionCandidates) {
-				std::pair<IntervalT, IntervalT> bounds = cc.getContractedInterval(mSearchTree.getCurrentState().getBounds());
-				std::cout << cc << " results in bound: " << bounds << std::endl;
+		// main loop of the algorithm
+		// we can search for a solution as long as there still exist leaf nodes
+		// which have not been fully contracted yet
+		while (!mLeafNodes.empty()) {
+			// simply take the first one and contract it
+			ICPTree* currentNode = mLeafNodes.top();
+			mLeafNodes.pop();
 
-				// this is incorrect. just for debugging, we always only choose the first interval (no splits)
-				mSearchTree.getCurrentState().setInterval(cc.getVariable(), bounds.first);
+			// contract() will contract the node until a split occurs,
+			// or the bounds turn out to be UNSAT,
+			// or some other termination criterium was met (e.g. target diameter of intervals)
+			bool splitOccurred = currentNode->contract(mContractionCandidates);
+
+			if (splitOccurred) {
+				// a split occurred, so add the new child nodes to the leaf nodes stack
+				for (ICPTree& childNode : currentNode->getChildTrees()) {
+					mLeafNodes.push(&childNode);
+				}
+				// and then we continue with some other leaf node in the next iteration
+				// this corresponds to depth-first search
+				// later maybe: use multithreading to contract several leaf nodes at once
 			}
-			std::cout << "\nVariable bounds:" << std::endl;
-			for (const auto& mapEntry : mSearchTree.getCurrentState().getBounds().getIntervalMap()){
-	    		std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+			else {
+				// we stopped not because of a split, but because the bounds
+				// are either UNSAT or some abortion criterium was met
+				if (currentNode->getCurrentState().isUnsat()) {
+					std::cout << "Current ICP State is UNSAT." << std::endl;
+				}
+				else {
+					// a termination criterium was met
+					// so we try to guess a solution
+					// TODO: guess solution
+					/*
+					 * if (satisfiesConstraints(currentNode.guessSolution())) {
+					 *     return Answer::SAT;
+					 * }
+					 * else {
+					 *     // we don't know, since ICP is not complete.
+					 *     // maybe later: call CAD backend
+					 *     // but for now, we simply don't know
+					 *     // if no leaf node knows an answer, we will return UNKNOWN
+					 *     // after this main loop
+					 * }
+					 */
+				}
 			}
 		}
 
-		return Answer::UNKNOWN; // This should be adapted according to your implementation.
+		// we have left the main loop
+		// this means we have fully contracted every ICP node in our search tree
+		// if every node turned out to be UNSAT, the root node will now be UNSAT as well
+		if (mSearchTree.getCurrentState().isUnsat()) {
+			return Answer::UNSAT;
+		}
+		else {
+			// we would have returned SAT within the main loop,
+			// so if after the main loop the problem is not UNSAT,
+			// we simply don't know the answer
+			return Answer::UNKNOWN;
+		}
 	}
 
 
@@ -269,16 +313,6 @@ namespace smtrat
 	    return 0;
 	}
 
-
-	template<class Settings>
-	/*IntervalT*/ void ICPPDWModule<Settings>::evaluateInterval(/*ICPContractionCandidate* candidate, */){
-		//Input: ein Constraint candiadte bestehend aus einer variablen und einen constraint
-		//TODO:1.nehme die variable und stelle im constraint die sachen nach dieser variablen um.
-		//	   2.evaluiere das constraint in dem du die intervalle aller anderen variablen (die in der beobachteten menge)
-		//	     drin sind einsetzt und ausrechnest (mit carl::IntrvalEvaluation::evaluate(candidate.var, candidate.constraint)??)
-		//	   3.gebe zurück ein neues intervall, das jedoch noch nicht geschnitten wurde mit dem alten.
-	}
-
 	template<class Settings>
 	/*ICPContractionCandidate */ void ICPPDWModule<Settings>::computeBestCandidate(/*std::list<ICPContractionCandidate> candidates*/){
 		//Input: eine Liste an contraction candiate
@@ -287,23 +321,6 @@ namespace smtrat
 		*	   3.wähle variable mit größten gain und gebe sie aus
 		*/
 	}
-
-	template<class Settings>
-	/* ConstraintT */ void ICPPDWModule<Settings>::transposeConstraint(/* ConstraintT* constraint, Variable* var */){
-		/* Input: eine ConstraintT und ein Variable object
-			TODO:1. hole das polynom raus mit:  const Poly& polynomial = constraint.lhs();
-				 2. erstelle ein neues poly objekt.
-				 3. prüfe mit constraint->hasVariable(var) ob die variable drin ist nach der man umstellen will
-				 4. stelle von hand um (es gibt keine methode dafür). Vorgehen: gehe durch das constraint, entferne
-				 	die variable die man betrachtet raus, setzte sie auf die rechte seite und invertiere das vorzeichen entsprechend
-				 	in dem man ein neues poly erstellt mit der var und einen - davor.
-				 5. prüfe dass der operator nicht nicht == und nicht != ist, wenn es so ist dann negiere ihn wenn - vor der variable steht.
-		*/
-	}
-
-
-
-
 
 }
 

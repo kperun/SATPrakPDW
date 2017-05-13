@@ -27,8 +27,12 @@ namespace smtrat
 #endif
 			// Members.
 
-			// the ICP search tree
+			// the ICP search tree (root node)
 			ICPTree mSearchTree;
+
+			// the leaf nodes of the search tree
+			// we store them seperately so that we don't have to traverse the tree every time
+			std::stack<ICPTree*> mLeafNodes;
 
 			// the set of original variables
 			std::set<carl::Variable> mOriginalVariables;
@@ -98,9 +102,7 @@ namespace smtrat
 			void createAllContractionCandidates();
 
 			double computeGain();
-			void evaluateInterval();
 			void computeBestCandidate();
-			void transposeConstraint();
 
 		public:
 			typedef Settings SettingsType;

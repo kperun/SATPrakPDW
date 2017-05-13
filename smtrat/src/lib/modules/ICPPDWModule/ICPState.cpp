@@ -12,6 +12,15 @@ namespace smtrat
     {
     }
 
+    ICPState::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds) :
+        mBounds(parentBounds),
+        mAppliedContractionCandidates(),
+        mAppliedIntervalConstraints(),
+        mSplitDimension(),
+        mConflictingConstraints()
+    {
+    }
+
     ICPState::~ICPState() {
     }
 
@@ -108,5 +117,9 @@ namespace smtrat
 
     void ICPState::addConflictingConstraint(const ConstraintT& constraint) {
         mConflictingConstraints.insert(constraint);
+    }
+
+    bool ICPState::isUnsat() {
+        return !mConflictingConstraints.empty();
     }
 }
