@@ -144,27 +144,27 @@ namespace smtrat
         if(candidates.size()==1){
             return candidates.front();//return the first element
         }
-        //store the current best candidate
-        auto currentBest = std::make_unique<ICPContractionCandidate>(candidates.front());
+        //store the current best candidate index
+        int currentBest = 0;
 
         double currentBestGain = 0;
 
-        for(std::vector<ICPContractionCandidate>::iterator it = candidates.begin(); it != candidates.end(); ++it){
+        for (int it = 0; it < (int) candidates.size(); it++) {
             std::cout << "----------------------------------------- \n";
             std::cout << "Current best gain: "<<currentBestGain << "\n";
-            std::cout << "Current gain: "<< computeGain(*it,mBounds) << "\n";
+            std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";
 
-            if(computeGain(*it,mBounds)>computeGain(*currentBest,mBounds)){
+            if(computeGain(candidates[it],mBounds)>computeGain(candidates[currentBest],mBounds)){
                 //now set the new best candidate as current
-                currentBestGain = computeGain(*it,mBounds);
-                currentBest = std::make_unique<ICPContractionCandidate>(*it);
+                currentBestGain = computeGain(candidates[it],mBounds);
+                currentBest = it;
             }
 
         }
         std::cout << "-------------------Final----------------- \n";
         std::cout << "Overall best gain: " <<currentBestGain << "\n";
         std::cout << "----------------------------------------- \n";
-        return *currentBest;
+        return candidates[currentBest];
     }
 
 

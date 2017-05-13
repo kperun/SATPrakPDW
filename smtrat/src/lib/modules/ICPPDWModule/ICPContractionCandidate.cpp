@@ -43,11 +43,6 @@ namespace smtrat
         // apply contraction
         // arguments are true because we want to use propagation
     	bool split = mContractor(map, mVariable, resultA, resultB, true, true);
-        if(split){ //Interval was split in two
-            retB = resultB;
-        } else { //only resultA
-
-        }
 
         /*
          * The contractor only solves for equality, i.e. it solves polynomial = 0 for the variable.
@@ -89,6 +84,12 @@ namespace smtrat
         // finally, we intersect the contracted interval with the original interval
         resultA = resultA.intersect(originalInterval);
         resultB = resultB.intersect(originalInterval);
+        
+        if(split){ //Interval was split in two
+            retB = resultB;
+        } else { //only resultA
+
+        }
 
         OptionalInterval ret(resultA,retB);
         return ret;
