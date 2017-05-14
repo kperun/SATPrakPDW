@@ -188,8 +188,12 @@ namespace smtrat
     }
 
 
-    //TODO: we are currently assuming that there is at least one candidate
+
     ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){
+        if(candidates.size()==0){
+            throw std::invalid_argument( "Candidates vector is empty!" );
+        }
+        
         std::cout << "----------------------------------------- \n";
         //in the case that the list has only one element, return this one element
         if(candidates.size()==1){

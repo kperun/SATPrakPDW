@@ -9,6 +9,7 @@
 #include "ICPContractionCandidate.h"
 #include "ICPPDWSettings.h"
 #include <math.h>
+#include <stdexcept>
 
 namespace smtrat
 {
