@@ -8,6 +8,7 @@
 #include "../../Common.h"
 #include "ICPContractionCandidate.h"
 #include "ICPPDWSettings.h"
+#include <map>
 
 namespace smtrat
 {
@@ -141,5 +142,11 @@ namespace smtrat
              * @return whether the termination condition was reached
              */
             bool isTerminationConditionReached();
+
+            /**
+             * Guesses a solution for the mBonds by choosing some values out of them.
+             * Returns the solution in the form of a map <var,double>
+             */
+            map<carl::Variable,double> guessSolution();
     };
 }

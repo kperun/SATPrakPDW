@@ -167,5 +167,18 @@ namespace smtrat
         return *currentBest;
     }
 
+    map<carl::Variable,double> ICPState::guessSolution(){
+      map<carl::Variable,double> ret;
+      //TODO: This only checks the first of possibly several intervals?
+      const EvalDoubleIntervalMap& bounds = mBounds.getIntervalMap();
+      for(auto& bound : bounds){
+        double mid = (bound.second.diameter()/ 2.0) + bound.second.lower();
+        ret.insert(std::pair<carl::Variable,double>(bound.first,mid));
+      };
 
-}
+      return ret;
+
+  };
+
+};
+

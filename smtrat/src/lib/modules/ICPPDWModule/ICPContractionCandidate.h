@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "ICPPDWSettings.h"
 #include "../../Common.h"
 #include "../../datastructures/VariableBounds.h"
 #include "carl/interval/Contraction.h"
@@ -12,7 +13,6 @@
 
 namespace smtrat
 {
-    typedef DoubleInterval IntervalT;
 
     //Typedef for one or two intervals
     typedef std::pair<IntervalT,std::experimental::optional<IntervalT>> OptionalInterval;

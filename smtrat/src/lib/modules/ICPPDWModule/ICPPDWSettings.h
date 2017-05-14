@@ -8,9 +8,12 @@
 
 #pragma once
 
+#include "../../Common.h"
+
+
 namespace smtrat
 {
-	typedef DoubleInterval IntervalT;
+  typedef DoubleInterval IntervalT;
 
 	struct ICPPDWSettings1
 	{
