@@ -272,6 +272,23 @@ namespace smtrat
 					 *     // after this main loop
 					 * }
 					 */
+          map<carl::Variable,double> sol(currentNode->getCurrentState().guessSolution());
+          Model model;
+          std::cout << "Guessed solution:" << std::endl;
+          for(auto& clause : sol){
+            cout << clause.first << ":" << clause.second << endl;
+            Rational val = carl::rationalize<Rational>(clause.second);
+            cout << clause.first << ":" << val << endl;
+            model.emplace(clause.first, val);
+          }
+          for( const auto& rf : rReceivedFormula() )
+          {
+            cout << rf.formula().constraint() << endl;
+            // TODO: This check is incomplete? Refer to ICPModule
+            unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+            cout << isSatisfied << endl;
+          }
+
 				}
 			}
 		}
