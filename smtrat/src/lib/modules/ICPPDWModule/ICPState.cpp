@@ -121,7 +121,7 @@ namespace smtrat
 
     bool ICPState::isTerminationConditionReached() {
         if(mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions){
-            std::cout << "Termination reached by max iterations\n";
+            std::cout << "Termination reached by max iterations!\n";
             return true;
         }
         //otherwise check if we have reached our desired interval
@@ -133,7 +133,7 @@ namespace smtrat
             }
         }
         //if all intervals are ok, just terminate
-        std::cout << "Termination reached by desired interval\n";
+        std::cout << "Termination reached by desired interval!\n";
         return true;
 
 
@@ -193,13 +193,14 @@ namespace smtrat
         }else{
             oldIntervalUpper = old_interval.upper();
         }
-        if(false){
+        if(true){
+            std::cout<<"<---\n";
             std::cout << "New1: "<< newFirstLower <<" : "<<newFirstUpper<<"\n";
             std::cout << "New2: "<< newSecondLower <<" : "<<newSecondUpper<<"\n";
             std::cout << "Old: "<< oldIntervalLower <<" : "<<oldIntervalUpper<<"\n";
         }
         //return the value
-        return 1 -((newFirstUpper-newFirstLower)+(newSecondUpper-newSecondLower))/(oldIntervalUpper-oldIntervalLower);
+        return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
     }
 
     ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){

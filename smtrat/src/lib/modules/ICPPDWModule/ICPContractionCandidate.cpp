@@ -82,9 +82,12 @@ namespace smtrat
         }
 
         // finally, we intersect the contracted interval with the original interval
+        std::cout<< "before intersection: " <<resultA <<" , old interval: "<< originalInterval <<"\n";
+
         resultA = resultA.intersect(originalInterval);
         resultB = resultB.intersect(originalInterval);
-        
+
+        std::cout<< "after intersection: "<< resultA<<" , old interval: "<< originalInterval <<"\n";
         if(split){ //Interval was split in two
             retB = resultB;
         } else { //only resultA

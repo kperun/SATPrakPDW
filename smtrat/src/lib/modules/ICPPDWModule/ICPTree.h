@@ -49,7 +49,7 @@ namespace smtrat
              *
              * A method caller can determine which of these cases happened through the return value
              * of this method and the isUnsat method of the current ICP state.
-             * 
+             *
              * @param contractionCandidates A set of contraction candidates that can be applied
              * @return whether a split occurred
              */
