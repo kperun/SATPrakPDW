@@ -53,7 +53,7 @@ namespace smtrat
 
                 // For now, apply all contraction candidates
                 // and only choose the first interval of a split (no actual splitting)
-                std::cout << "\nContractions: " << std::endl;
+                /*std::cout << "\nContractions: " << std::endl;
                 for (auto& cc : contractionCandidates) {
                     OptionalInterval bounds = cc.getContractedInterval(mCurrentState.getBounds());
                     if(bounds.second){
@@ -68,7 +68,7 @@ namespace smtrat
                 std::cout << "\nVariable bounds:" << std::endl;
                 for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()){
                     std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
-                }
+                }*/
 
                 /* TODO: THIS IS NOT WORKING. THIS RESULTS IN DOUBLE FREES. I BET IT'S VARIABLE BOUNDS FAULT!!*/
                 // We have to pick the best contraction candidate that we want to apply
@@ -78,8 +78,15 @@ namespace smtrat
                 if(bounds.second){
                   //std::cout << cc << " results in bound: " << bounds.first << ":" << "Second Interval" << std::endl;
                   std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << ":" << *(bounds.second) << std::endl;
+                  mCurrentState.applyContraction(&bestCC, bounds.first);
                 } else {
-                  std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << ":" << "]" << std::endl;
+                  std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << std::endl;
+                  mCurrentState.applyContraction(&bestCC, bounds.first);
+                }
+
+                std::cout << "\nVariable bounds:" << std::endl;
+                for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()){
+                    std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
                 }
 
                 //std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds << std::endl;

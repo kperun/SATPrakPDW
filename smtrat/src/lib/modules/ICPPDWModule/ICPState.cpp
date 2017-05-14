@@ -120,8 +120,23 @@ namespace smtrat
     }
 
     bool ICPState::isTerminationConditionReached() {
-        // TODO
-        return mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions;
+        if(mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions){
+            std::cout << "Termination reached by max iterations!\n";
+            return true;
+        }
+        //otherwise check if we have reached our desired interval
+        auto& map = mBounds.getIntervalMap();
+        //first check if all intervals are inside the desired one
+        for (const auto &keyValue : map ) {
+            if(keyValue.second.diameter()>ICPPDWSettings1::targetInterval){
+                return false;
+            }
+        }
+        //if all intervals are ok, just terminate
+        std::cout << "Termination reached by desired interval!\n";
+        return true;
+
+
     }
 
     double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
@@ -130,41 +145,94 @@ namespace smtrat
         //then retrieve the old one
         auto& map = _bounds.getIntervalMap();
         IntervalT old_interval = map.at(candidate.getVariable());
-        //finally compute the diameter
-        if(intervals.second){
-            return 1 - ( (intervals.first.diameter()+intervals.second->diameter())/old_interval.diameter());
+
+        //in order to avoid manipulation of the existing objects, we work here with retrieved values
+        //moreover, we use a bigM in order to be able to compute with -INF and INF
+        double newFirstLower = 0;
+        double newFirstUpper = 0;
+        double newSecondLower = 0;
+        double newSecondUpper = 0;
+        double oldIntervalLower = 0;
+        double oldIntervalUpper = 0;
+        //first the mandatory first interval
+        if(intervals.first.lowerBoundType()== carl::BoundType::INFTY){
+            newFirstLower = -ICPPDWSettings1::bigM;
         }else{
-            return 1 - ( intervals.first.diameter()/old_interval.diameter());
+            newFirstLower = intervals.first.lower();
         }
+
+        if(intervals.first.upperBoundType()== carl::BoundType::INFTY){
+            newFirstUpper = ICPPDWSettings1::bigM;
+        }else{
+            newFirstUpper = intervals.first.upper();
+        }
+
+        //now the second optional interval
+        if(intervals.second){
+            if((*(intervals.second)).lowerBoundType()== carl::BoundType::INFTY){
+                newSecondLower = -ICPPDWSettings1::bigM;
+            }else{
+                newSecondLower = (*(intervals.second)).lower();
+            }
+
+            if((*(intervals.second)).upperBoundType()== carl::BoundType::INFTY){
+                newSecondUpper = ICPPDWSettings1::bigM;
+            }else{
+                newSecondUpper = (*(intervals.second)).upper();
+            }
+        }
+        //finally the old interval
+        if(old_interval.lowerBoundType()== carl::BoundType::INFTY){
+            oldIntervalLower = -ICPPDWSettings1::bigM;
+        }else{
+            oldIntervalLower = old_interval.lower();
+        }
+
+        if(old_interval.upperBoundType()== carl::BoundType::INFTY){
+            oldIntervalUpper = ICPPDWSettings1::bigM;
+        }else{
+            oldIntervalUpper = old_interval.upper();
+        }
+        if(true){
+            std::cout<<"<---\n";
+            std::cout << "New1: "<< newFirstLower <<" : "<<newFirstUpper<<"\n";
+            std::cout << "New2: "<< newSecondLower <<" : "<<newSecondUpper<<"\n";
+            std::cout << "Old: "<< oldIntervalLower <<" : "<<oldIntervalUpper<<"\n";
+        }
+        //return the value
+        return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
     }
-    //TODO: we are currently assuming that there is at least one candidate
+
     ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){
+        if(candidates.size()==0){
+            throw std::invalid_argument( "Candidates vector is empty!" );
+        }
+
         std::cout << "----------------------------------------- \n";
         //in the case that the list has only one element, return this one element
         if(candidates.size()==1){
             return candidates.front();//return the first element
         }
-        //store the current best candidate
-        auto currentBest = std::make_unique<ICPContractionCandidate>(candidates.front());
+        //store the current best candidate index
+        int currentBest = 0;
 
         double currentBestGain = 0;
 
-        for(std::vector<ICPContractionCandidate>::iterator it = candidates.begin(); it != candidates.end(); ++it){
+        for (int it = 0; it < (int) candidates.size(); it++) {
             std::cout << "----------------------------------------- \n";
             std::cout << "Current best gain: "<<currentBestGain << "\n";
-            std::cout << "Current gain: "<< computeGain(*it,mBounds) << "\n";
+            std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";
 
-            if(computeGain(*it,mBounds)>computeGain(*currentBest,mBounds)){
+            if(computeGain(candidates[it],mBounds)>computeGain(candidates[currentBest],mBounds)){
                 //now set the new best candidate as current
-                currentBestGain = computeGain(*it,mBounds);
-                currentBest = std::make_unique<ICPContractionCandidate>(*it);
+                currentBestGain = computeGain(candidates[it],mBounds);
+                currentBest = it;
             }
-
         }
         std::cout << "-------------------Final----------------- \n";
         std::cout << "Overall best gain: " <<currentBestGain << "\n";
         std::cout << "----------------------------------------- \n";
-        return *currentBest;
+        return candidates[currentBest];
     }
 
     map<carl::Variable,double> ICPState::guessSolution(){

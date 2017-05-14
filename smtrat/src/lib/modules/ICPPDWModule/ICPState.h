@@ -9,6 +9,8 @@
 #include "ICPContractionCandidate.h"
 #include "ICPPDWSettings.h"
 #include <map>
+#include <math.h>
+#include <stdexcept>
 
 namespace smtrat
 {
@@ -24,6 +26,7 @@ namespace smtrat
     class ICPState
     {
         private:
+
             /**
              * The current search box.
              * VariableBounds internally stores a map from variables to intervals.
