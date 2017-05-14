@@ -120,8 +120,23 @@ namespace smtrat
     }
 
     bool ICPState::isTerminationConditionReached() {
-        // TODO
-        return mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions;
+        if(mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions){
+            std::cout << "Termination reached by max iterations\n";
+            return true;
+        }
+        //otherwise check if we have reached our desired interval
+        auto& map = mBounds.getIntervalMap();
+        //first check if all intervals are inside the desired one
+        for (const auto &keyValue : map ) {
+            if(keyValue.second.diameter()>ICPPDWSettings1::targetInterval){
+                return false;
+            }
+        }
+        //if all intervals are ok, just terminate
+        std::cout << "Termination reached by desired interval\n";
+        return true;
+
+
     }
 
     double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
@@ -141,13 +156,13 @@ namespace smtrat
         double oldIntervalUpper = 0;
         //first the mandatory first interval
         if(intervals.first.lowerBoundType()== carl::BoundType::INFTY){
-            newFirstLower = -bigM;
+            newFirstLower = -ICPPDWSettings1::bigM;
         }else{
             newFirstLower = intervals.first.lower();
         }
 
         if(intervals.first.upperBoundType()== carl::BoundType::INFTY){
-            newFirstUpper = bigM;
+            newFirstUpper = ICPPDWSettings1::bigM;
         }else{
             newFirstUpper = intervals.first.upper();
         }
@@ -155,26 +170,26 @@ namespace smtrat
         //now the second optional interval
         if(intervals.second){
             if((*(intervals.second)).lowerBoundType()== carl::BoundType::INFTY){
-                newSecondLower = -bigM;
+                newSecondLower = -ICPPDWSettings1::bigM;
             }else{
                 newSecondLower = (*(intervals.second)).lower();
             }
 
             if((*(intervals.second)).upperBoundType()== carl::BoundType::INFTY){
-                newSecondUpper = bigM;
+                newSecondUpper = ICPPDWSettings1::bigM;
             }else{
                 newSecondUpper = (*(intervals.second)).upper();
             }
         }
         //finally the old interval
         if(old_interval.lowerBoundType()== carl::BoundType::INFTY){
-            oldIntervalLower = -bigM;
+            oldIntervalLower = -ICPPDWSettings1::bigM;
         }else{
             oldIntervalLower = old_interval.lower();
         }
 
         if(old_interval.upperBoundType()== carl::BoundType::INFTY){
-            oldIntervalUpper = bigM;
+            oldIntervalUpper = ICPPDWSettings1::bigM;
         }else{
             oldIntervalUpper = old_interval.upper();
         }
@@ -187,13 +202,11 @@ namespace smtrat
         return 1 -((newFirstUpper-newFirstLower)+(newSecondUpper-newSecondLower))/(oldIntervalUpper-oldIntervalLower);
     }
 
-
-
     ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){
         if(candidates.size()==0){
             throw std::invalid_argument( "Candidates vector is empty!" );
         }
-        
+
         std::cout << "----------------------------------------- \n";
         //in the case that the list has only one element, return this one element
         if(candidates.size()==1){

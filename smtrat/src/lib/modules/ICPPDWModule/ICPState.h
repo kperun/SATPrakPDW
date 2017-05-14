@@ -25,8 +25,7 @@ namespace smtrat
     class ICPState
     {
         private:
-            //we define a big M in order to be able to compute gain in case of inf intervals
-            float bigM = 2000;//twiche the max interval, since we have to consider an intervall [-inf,0] to be better than [1000,0]
+
             /**
              * The current search box.
              * VariableBounds internally stores a map from variables to intervals.
