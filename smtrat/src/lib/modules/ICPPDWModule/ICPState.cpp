@@ -34,8 +34,10 @@ namespace smtrat
         // one advantage of this approach is that we can easily revert a contraction
         // by removing those constraints from the variable bounds
 
-        // since we cannot add unbounded constraints, we will simply ignore them
-        vector<ConstraintT> intervalConstraints;
+        ConstraintT upperBound;
+        bool hasUpper = false;
+        ConstraintT lowerBound;
+        bool hasLower = false;
 
         // if upper bound is infty, the constraint is useless
         if (interval.upperBoundType() != carl::BoundType::INFTY) {
@@ -45,8 +47,8 @@ namespace smtrat
             upperPoly += var;
             upperPoly -= interval.upper();
             carl::Relation upperRelation = (interval.upperBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
-            ConstraintT upperBound(upperPoly, upperRelation);
-            intervalConstraints.push_back(upperBound);
+            upperBound = ConstraintT(upperPoly, upperRelation);
+            hasUpper = true;
         }
 
         // if lower bound is infty, the constraint is useless
@@ -57,11 +59,22 @@ namespace smtrat
             lowerPoly -= var;
             lowerPoly += interval.lower();
             carl::Relation lowerRelation = (interval.lowerBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
-            ConstraintT lowerBound(lowerPoly, lowerRelation);
-            intervalConstraints.push_back(lowerBound);
+            lowerBound = ConstraintT(lowerPoly, lowerRelation);
+            hasLower = true;
         }
 
-        addAppliedIntervalConstraint(intervalConstraints, _origin);
+        if (hasUpper && hasLower) {
+            addAppliedIntervalConstraint(upperBound, lowerBound, _origin);
+        }
+        else if (hasUpper) {
+            addAppliedIntervalConstraint(upperBound, _origin);
+        }
+        else if (hasLower) {
+            addAppliedIntervalConstraint(lowerBound, _origin);
+        }
+        else {
+            // should never happen
+        }
     }
 
     IntervalT ICPState::getInterval(carl::Variable var) {
@@ -76,31 +89,21 @@ namespace smtrat
         mAppliedContractionCandidates.push_back(contractionCandidate);
     }
 
-    vector<vector<ConstraintT>>& ICPState::getAppliedIntervalConstraints() {
+    vector<OneOrTwo<ConstraintT>>& ICPState::getAppliedIntervalConstraints() {
         return mAppliedIntervalConstraints;
     }
 
     void ICPState::addAppliedIntervalConstraint(const ConstraintT& constraint, const ConstraintT& _origin) {
-        vector<ConstraintT> intervalConstraints;
-        intervalConstraints.push_back(constraint);
+        OneOrTwo<ConstraintT> intervalConstraints(constraint, std::experimental::optional<ConstraintT>());
         mAppliedIntervalConstraints.push_back(intervalConstraints);
         mBounds.addBound(constraint, _origin);
     }
 
     void ICPState::addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound, const ConstraintT& _origin) {
-        vector<ConstraintT> intervalConstraints;
-        intervalConstraints.push_back(lowerBound);
-        intervalConstraints.push_back(upperBound);
+        OneOrTwo<ConstraintT> intervalConstraints(lowerBound, upperBound);
         mAppliedIntervalConstraints.push_back(intervalConstraints);
         mBounds.addBound(lowerBound, _origin);
         mBounds.addBound(upperBound, _origin);
-    }
-
-    void ICPState::addAppliedIntervalConstraint(const vector<ConstraintT>& constraints, const ConstraintT& _origin) {
-        mAppliedIntervalConstraints.push_back(constraints);
-        for (const ConstraintT& c : constraints) {
-            mBounds.addBound(c, _origin);
-        }
     }
 
     std::set<ConstraintT>& ICPState::getConflictingConstraints() {
@@ -141,7 +144,7 @@ namespace smtrat
 
     double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
         //first compute the new interval
-        OptionalInterval intervals = candidate.getContractedInterval(_bounds);
+        OneOrTwo<IntervalT> intervals = candidate.getContractedInterval(_bounds);
         //then retrieve the old one
         auto& map = _bounds.getIntervalMap();
         IntervalT old_interval = map.at(candidate.getVariable());
@@ -193,12 +196,12 @@ namespace smtrat
         }else{
             oldIntervalUpper = old_interval.upper();
         }
-        if(true){
+        /*if(true){
             std::cout<<"<---\n";
             std::cout << "New1: "<< newFirstLower <<" : "<<newFirstUpper<<"\n";
             std::cout << "New2: "<< newSecondLower <<" : "<<newSecondUpper<<"\n";
             std::cout << "Old: "<< oldIntervalLower <<" : "<<oldIntervalUpper<<"\n";
-        }
+        }*/
         //return the value
         return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
     }
@@ -219,9 +222,9 @@ namespace smtrat
         double currentBestGain = 0;
 
         for (int it = 0; it < (int) candidates.size(); it++) {
-            std::cout << "----------------------------------------- \n";
+            /*std::cout << "----------------------------------------- \n";
             std::cout << "Current best gain: "<<currentBestGain << "\n";
-            std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";
+            std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";*/
 
             if(computeGain(candidates[it],mBounds)>computeGain(candidates[currentBest],mBounds)){
                 //now set the new best candidate as current
@@ -229,9 +232,9 @@ namespace smtrat
                 currentBest = it;
             }
         }
-        std::cout << "-------------------Final----------------- \n";
+        /*std::cout << "-------------------Final----------------- \n";
         std::cout << "Overall best gain: " <<currentBestGain << "\n";
-        std::cout << "----------------------------------------- \n";
+        std::cout << "----------------------------------------- \n";*/
         return candidates[currentBest];
     }
 

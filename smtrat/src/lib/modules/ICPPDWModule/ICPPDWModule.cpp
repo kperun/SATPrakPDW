@@ -137,6 +137,9 @@ namespace smtrat
         	// linearize the constraints
 			vector<ConstraintT>& newConstraints = linearizeConstraint(constraint, _constraint);
 
+			// TODO (if contraction with INFTY doesn't work)
+			// initSlackBounds() // applies contraction to determine initial slack bounds
+
 			// DEBUG
 			std::cout << "Linearized constraints for " << constraint << ": " << std::endl;
 			for (int i = 0; i < (int) newConstraints.size(); i++) {

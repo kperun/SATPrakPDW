@@ -9,14 +9,9 @@
 #include "../../Common.h"
 #include "../../datastructures/VariableBounds.h"
 #include "carl/interval/Contraction.h"
-#include <experimental/optional>
 
 namespace smtrat
 {
-
-    //Typedef for one or two intervals
-    typedef std::pair<IntervalT,std::experimental::optional<IntervalT>> OptionalInterval;
-
     /**
      * This class represents a contraction candidate (x, c)
      * where x is a variable and c is a constraint.
@@ -45,7 +40,7 @@ namespace smtrat
              *         in case the result is only one interval, the second element of the pair will be an empty interval
              *         // TODO: use optional or variant for second argument
              */
-            OptionalInterval getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds);
+            OneOrTwo<IntervalT> getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds);
 
             carl::Variable getVariable();
             ConstraintT& getConstraint();

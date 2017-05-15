@@ -9,11 +9,15 @@
 #pragma once
 
 #include "../../Common.h"
-
+#include <experimental/optional>
 
 namespace smtrat
 {
-  typedef DoubleInterval IntervalT;
+	typedef DoubleInterval IntervalT;
+
+	//Typedef for one or two things
+	template <class T>
+	using OneOrTwo = std::pair<T,std::experimental::optional<T>>;
 
 	struct ICPPDWSettings1
 	{
