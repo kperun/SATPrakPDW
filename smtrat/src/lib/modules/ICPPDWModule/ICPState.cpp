@@ -236,7 +236,7 @@ namespace smtrat
       const EvalDoubleIntervalMap& bounds = mBounds.getIntervalMap();
       for(auto& bound : bounds){
         double mid = 0; //Default if something goes wrong
-        double epsilon = 0.01; //Some arbitrary small value
+        double epsilon = ICPPDWSettings1::epsilon;
         if(bound.second.isEmpty()){ //No values in interval, should not happen
           mid = 0;
         } else if (bound.second.isInfinite()){//Both are INFTY
