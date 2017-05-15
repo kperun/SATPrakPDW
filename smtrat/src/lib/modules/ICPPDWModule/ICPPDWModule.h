@@ -37,6 +37,9 @@ namespace smtrat
 			// the set of original variables
 			std::set<carl::Variable> mOriginalVariables;
 
+			// the set of all active original constraints
+			std::set<ConstraintT> mActiveOriginalConstraints;
+
 			// all contraction candidates
 			vector<ICPContractionCandidate> mContractionCandidates;
 
@@ -53,8 +56,10 @@ namespace smtrat
 			// the set of newly introduced variables (during the linearization)
 			std::set<carl::Variable> mSlackVariables;
 
-			// the set of all active original constraints
-			std::set<ConstraintT> mActiveOriginalConstraints;
+			// the substitutions that were applied (slack = monomial)
+			std::map<carl::Variable, Poly> mSlackSubstitutions;
+			// a map from slack variables to the constraint of their substitution
+			std::map<carl::Variable, ConstraintT> mSlackSubstitutionConstraints;
 
 
 		private:
@@ -100,6 +105,11 @@ namespace smtrat
 			 * in that constraint, a new constraction candidate will be created and stored in mContractionCandidates.
 			 */
 			void createAllContractionCandidates();
+
+			/**
+			 * Initializes the bounds of all variables.
+			 */
+			void initBounds();
 
 
 

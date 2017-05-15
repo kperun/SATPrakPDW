@@ -79,6 +79,8 @@ namespace smtrat
 
             /**
              * Applies a contraction to this state.
+             * 
+             * The bounds of the contraction candidate variable will be updated to the given inteval.
              * Internally, mAppliedContractionCandidates and mAppliedIntervalConstraints will be filled.
              *
              * @param cc The contraction candidate that has been applied
@@ -93,8 +95,9 @@ namespace smtrat
              * @param var The variable of which the interval should be updated
              * @param interval The new interval for that variable
              * @param _origin The constraint which caused the new interval
+             * @return the constraints that were added to the bounds
              */
-            void setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin);
+            OneOrTwo<ConstraintT> setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin);
 
             /**
              * Returns the current interval bound for a specific variable.
@@ -108,8 +111,7 @@ namespace smtrat
             void addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate);
 
             vector<OneOrTwo<ConstraintT>>& getAppliedIntervalConstraints();
-            void addAppliedIntervalConstraint(const ConstraintT& constraint, const ConstraintT& _origin);
-            void addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound, const ConstraintT& _origin);
+            void addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints);
 
             std::set<ConstraintT>& getConflictingConstraints();
             void setConflictingConstraints(const std::set<ConstraintT>& constraints);

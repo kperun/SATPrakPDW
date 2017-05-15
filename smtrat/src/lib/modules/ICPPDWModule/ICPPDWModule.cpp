@@ -25,7 +25,9 @@ namespace smtrat
 		mLinearizations(),
 		mDeLinearizations(),
 		mSlackVariables(),
-		mActiveOriginalConstraints()
+		mActiveOriginalConstraints(),
+		mSlackSubstitutions(),
+		mSlackSubstitutionConstraints()
 	{
 		mLeafNodes.push(&mSearchTree);
 	}
@@ -81,6 +83,10 @@ namespace smtrat
 
 						// and add that new constraint to the resulting vector
 						linearizedConstraints.push_back(slackConstraint);
+
+						// we also need to store the substitution we made so that we can initialize the slack bounds
+						mSlackSubstitutions[slackVariable] = monomial;
+						mSlackSubstitutionConstraints[slackVariable] = slackConstraint;
 					}
 	            }
 	            else {
@@ -118,6 +124,28 @@ namespace smtrat
 					mContractionCandidates.push_back(ICPContractionCandidate(variable, constraint));
 				}
 			}
+		}
+	}
+
+	template<class Settings>
+	void ICPPDWModule<Settings>::initBounds() {
+		// the bounds for original variables have been added through addCore already
+
+		// we only need to update bounds for slack variables in this method
+		std::cout << "Init bounds: " << std::endl;
+		for (const auto& mapEntry : mSlackSubstitutions) {
+			const carl::Variable slackVar = mapEntry.first;
+			const Poly& monomial = mapEntry.second;
+			const ConstraintT& slackConstraint = mSlackSubstitutionConstraints[slackVar];
+
+			// TODO: just call carl::evaluate? but it says "no matching function"
+			// so we use contraction for now
+			Contractor<carl::SimpleNewton> evaluator(slackConstraint.lhs());
+	        IntervalT initialInterval, ignore;
+	    	bool split = evaluator(mSearchTree.getCurrentState().getBounds().getIntervalMap(), 
+	    		                     slackVar, initialInterval, ignore, true, true);
+
+			mSearchTree.getCurrentState().setInterval(slackVar, initialInterval, slackConstraint);
 		}
 	}
 
@@ -159,6 +187,7 @@ namespace smtrat
 		// DEBUG
 		std::cout << "------------------------------------" << std::endl;
 		std::cout << "All constraints informed.\n" << std::endl;
+
 		std::cout << "Contraction Candidates:" << std::endl;
 		for (const auto& cc : mContractionCandidates) {
 			std::cout << cc << std::endl;
@@ -222,6 +251,13 @@ namespace smtrat
 	template<class Settings>
 	Answer ICPPDWModule<Settings>::checkCore()
 	{
+		// initialize the bounds of all variables
+		// we are initializing them during checkCore and not duringInit,
+		// because we cannot distinguish between constraints that were added by the boolean solver
+		// and might be removed later and constraints which correspond to initial bounds for variables
+		// during checkCore we can be sure that all necessary constraints have been added already
+		initBounds();
+
 		// DEBUG
 		std::cout << "------------------------------------" << std::endl;
 		std::cout << "Check core with the following active constraints:\n" << std::endl;
@@ -283,6 +319,12 @@ namespace smtrat
 		// this means we have fully contracted every ICP node in our search tree
 		// if every node turned out to be UNSAT, the root node will now be UNSAT as well
 		if (mSearchTree.getCurrentState().isUnsat()) {
+			std::cout << "Reasons: " << std::endl;
+            for (const ConstraintT& c : mSearchTree.getCurrentState().getConflictingConstraints()) {
+                std::cout << mDeLinearizations[c] << ", ";
+            }
+            std::cout << std::endl;
+
 			return Answer::UNSAT;
 		}
 		else {
