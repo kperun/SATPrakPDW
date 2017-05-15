@@ -210,16 +210,17 @@ namespace smtrat
         //store the current best candidate index
         int currentBest = 0;
 
-        double currentBestGain = 0;
+        double currentBestGain = computeGain(candidates[currentBest],mBounds);
 
-        for (int it = 0; it < (int) candidates.size(); it++) {
+        for (int it = 1; it < (int) candidates.size(); it++) {
             /*std::cout << "----------------------------------------- \n";
             std::cout << "Current best gain: "<<currentBestGain << "\n";
             std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";*/
 
-            if(computeGain(candidates[it],mBounds)>computeGain(candidates[currentBest],mBounds)){
+            double currentGain = computeGain(candidates[it],mBounds);
+            if(currentGain>currentBestGain){
                 //now set the new best candidate as current
-                currentBestGain = computeGain(candidates[it],mBounds);
+                currentBestGain = currentGain;
                 currentBest = it;
             }
         }

@@ -56,8 +56,6 @@ namespace smtrat
 			// the set of newly introduced variables (during the linearization)
 			std::set<carl::Variable> mSlackVariables;
 
-			// the substitutions that were applied (slack = monomial)
-			std::map<carl::Variable, Poly> mSlackSubstitutions;
 			// a map from slack variables to the constraint of their substitution
 			std::map<carl::Variable, ConstraintT> mSlackSubstitutionConstraints;
 

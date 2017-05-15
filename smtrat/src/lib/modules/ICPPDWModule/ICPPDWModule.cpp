@@ -26,7 +26,6 @@ namespace smtrat
 		mDeLinearizations(),
 		mSlackVariables(),
 		mActiveOriginalConstraints(),
-		mSlackSubstitutions(),
 		mSlackSubstitutionConstraints()
 	{
 		mLeafNodes.push(&mSearchTree);
@@ -85,7 +84,6 @@ namespace smtrat
 						linearizedConstraints.push_back(slackConstraint);
 
 						// we also need to store the substitution we made so that we can initialize the slack bounds
-						mSlackSubstitutions[slackVariable] = monomial;
 						mSlackSubstitutionConstraints[slackVariable] = slackConstraint;
 					}
 	            }
@@ -133,18 +131,14 @@ namespace smtrat
 
 		// we only need to update bounds for slack variables in this method
 		std::cout << "Init bounds: " << std::endl;
-		for (const auto& mapEntry : mSlackSubstitutions) {
+		for (const auto& mapEntry : mSlackSubstitutionConstraints) {
 			const carl::Variable slackVar = mapEntry.first;
-			const Poly& monomial = mapEntry.second;
-			const ConstraintT& slackConstraint = mSlackSubstitutionConstraints[slackVar];
+			const ConstraintT& slackConstraint = mapEntry.second;
 
-			// TODO: just call carl::evaluate? but it says "no matching function"
-			// so we use contraction for now
 			Contractor<carl::SimpleNewton> evaluator(slackConstraint.lhs());
+			// we can ignore the second interval since contracting monome = slack for slack never results in splits
 	        IntervalT initialInterval, ignore;
-	    	bool split = evaluator(mSearchTree.getCurrentState().getBounds().getIntervalMap(), 
-	    		                     slackVar, initialInterval, ignore, true, true);
-
+	    	evaluator(mSearchTree.getCurrentState().getBounds().getIntervalMap(), slackVar, initialInterval, ignore, true, true);
 			mSearchTree.getCurrentState().setInterval(slackVar, initialInterval, slackConstraint);
 		}
 	}
