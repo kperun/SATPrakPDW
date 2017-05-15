@@ -234,7 +234,31 @@ namespace smtrat
       //TODO: This only checks the first of possibly several intervals?
       const EvalDoubleIntervalMap& bounds = mBounds.getIntervalMap();
       for(auto& bound : bounds){
-        double mid = (bound.second.diameter()/ 2.0) + bound.second.lower();
+        double mid = 0; //Default if something goes wrong
+        double epsilon = 0.01; //Some arbitrary small value
+        if(bound.second.isEmpty()){ //No values in interval, should not happen
+          mid = 0;
+        } else if (bound.second.isInfinite()){//Both are INFTY
+          mid = 0;
+        } else if (bound.second.isUnbounded()){//Only one is INFTY
+          if(bound.second.lowerBoundType() == carl::BoundType::INFTY){ //Has upper bound
+            if(bound.second.upperBoundType() == carl::BoundType::STRICT){ //Upper bound is strict
+              mid = bound.second.upper() - epsilon; //Subtract some small epsilon in this case
+            } else {
+              mid = bound.second.upper();
+            }
+          } else if(bound.second.upperBoundType() == carl::BoundType::INFTY){ //Has lower bound
+            if(bound.second.lowerBoundType() == carl::BoundType::STRICT){ //lower bound is strict
+              mid = bound.second.lower() - epsilon; //Subtract some small epsilon in this case
+            } else {
+              mid = bound.second.lower();
+            }
+          } else { //Should never happen
+            mid = 0;
+          }
+        } else {//No INFTY
+          mid = (bound.second.diameter()/ 2.0) + bound.second.lower();
+        }
         ret.insert(std::pair<carl::Variable,double>(bound.first,mid));
       };
 

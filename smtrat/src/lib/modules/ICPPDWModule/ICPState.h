@@ -149,7 +149,7 @@ namespace smtrat
 
             /**
              * Guesses a solution for the mBonds by choosing some values out of them.
-             * Returns the solution in the form of a map <var,double>
+             * @return The solution in the form of a map <carl::Variable,double>
              */
             map<carl::Variable,double> guessSolution();
     };

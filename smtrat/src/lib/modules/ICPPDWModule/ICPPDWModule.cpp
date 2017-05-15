@@ -298,19 +298,38 @@ namespace smtrat
 				else {
 					// a termination criterium was met
 					// so we try to guess a solution
-					// TODO: guess solution
-					/*
-					 * if (satisfiesConstraints(currentNode.guessSolution())) {
-					 *     return Answer::SAT;
-					 * }
-					 * else {
-					 *     // we don't know, since ICP is not complete.
-					 *     // maybe later: call CAD backend
-					 *     // but for now, we simply don't know
-					 *     // if no leaf node knows an answer, we will return UNKNOWN
-					 *     // after this main loop
-					 * }
-					 */
+          map<carl::Variable,double> sol(currentNode->getCurrentState().guessSolution());
+          Model model;
+          std::cout << "Guessed solution:" << std::endl;
+          for(auto& clause : sol){
+            cout << clause.first << ":" << clause.second << endl;
+            Rational val = carl::rationalize<Rational>(clause.second);
+            model.emplace(clause.first, val);
+          }
+          bool doesSat = true;
+          for( const auto& rf : rReceivedFormula() )
+          {
+            cout << rf.formula().constraint() << endl;
+            // TODO: This check is incomplete? Refer to ICPModule
+            unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+            cout << isSatisfied << endl;
+            if(isSatisfied == 0){
+              doesSat = false;
+              break;
+            }
+          }
+          if(doesSat){
+            cout << "Found Model, returning SAT" << endl;
+            return Answer::SAT;
+          } else {
+            // we don't know, since ICP is not complete.
+            // maybe later: call CAD backend
+            // but for now, we simply don't know
+            // if no leaf node knows an answer, we will return UNKNOWN
+            // after this main loop
+            cout << "No Model could be guessed, returning UNKNOWN" << endl;
+            return Answer::UNKNOWN;
+          }
 				}
 			}
 		}
