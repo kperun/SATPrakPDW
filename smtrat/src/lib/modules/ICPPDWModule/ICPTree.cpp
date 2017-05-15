@@ -21,6 +21,11 @@ namespace smtrat
 
     bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
         while(true) {
+            std::cout << "\nVariable bounds:" << std::endl;
+            for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()){
+                std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+            }
+
             // first we need to make sure the bounds are still satisfiable
             // i.e. no variable has an empty interval
             if (mCurrentState.getBounds().isConflicting()) {
@@ -51,46 +56,23 @@ namespace smtrat
             // we can contract
             else {
 
-                // For now, apply all contraction candidates
-                // and only choose the first interval of a split (no actual splitting)
-                /*std::cout << "\nContractions: " << std::endl;
-                for (auto& cc : contractionCandidates) {
-                    OneOrTwo<IntervalT> bounds = cc.getContractedInterval(mCurrentState.getBounds());
-                    if(bounds.second){
-                      std::cout << cc << " results in bound: " << bounds.first << ":" << *(bounds.second) << std::endl;
-                    } else {
-                      std::cout << cc << " results in bound: " << bounds.first << std::endl;
-                    }
-
-                    // this is incorrect. just for debugging, we always only choose the first interval (no splits)
-                    mCurrentState.applyContraction(&cc, bounds.first);
-                }
-                std::cout << "\nVariable bounds:" << std::endl;
-                for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()){
-                    std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
-                }*/
-
-                /* TODO: THIS IS NOT WORKING. THIS RESULTS IN DOUBLE FREES. I BET IT'S VARIABLE BOUNDS FAULT!!*/
                 // We have to pick the best contraction candidate that we want to apply
                 ICPContractionCandidate& bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
                 OneOrTwo<IntervalT> bounds = bestCC.getContractedInterval(mCurrentState.getBounds());
 
                 if(bounds.second){
-                  //std::cout << cc << " results in bound: " << bounds.first << ":" << "Second Interval" << std::endl;
-                  std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << ":" << *(bounds.second) << std::endl;
-                  mCurrentState.applyContraction(&bestCC, bounds.first);
+                    // TODO: Split!
+                    //std::cout << cc << " results in bound: " << bounds.first << ":" << "Second Interval" << std::endl;
+                    std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << ":" << *(bounds.second) << std::endl;
+                    mCurrentState.applyContraction(&bestCC, bounds.first);
                 } else {
-                  std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << std::endl;
-                  mCurrentState.applyContraction(&bestCC, bounds.first);
-                }
-
-                std::cout << "\nVariable bounds:" << std::endl;
-                for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()){
-                    std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+                    // no split, we can simply apply the contraction to the current state
+                    std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << std::endl;
+                    mCurrentState.applyContraction(&bestCC, bounds.first);
                 }
 
                 //std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds << std::endl;
-                /*
+                /*  TODO: THIS IS NOT WORKING. THIS RESULTS IN DOUBLE FREES. I BET IT'S VARIABLE BOUNDS FAULT!!
                 // if the contraction results in two intervals, we need to split the search space
                 // TODO: if (split occurred) {
                 if (!bounds.second.isEmpty()) {
