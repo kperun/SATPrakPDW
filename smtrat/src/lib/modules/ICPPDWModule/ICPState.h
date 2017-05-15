@@ -52,7 +52,7 @@ namespace smtrat
              * The index of applied interval constraints coincides with
              * the index of its contraction candidate in mContractionCandidates.
              */
-            vector<vector<ConstraintT>> mAppliedIntervalConstraints;
+            vector<OneOrTwo<ConstraintT>> mAppliedIntervalConstraints;
 
             /**
              * In case of UNSAT, this set will contain the reason for unsatisifiabilty.
@@ -107,10 +107,9 @@ namespace smtrat
             vector<ICPContractionCandidate*>& getAppliedContractionCandidates();
             void addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate);
 
-            vector<vector<ConstraintT>>& getAppliedIntervalConstraints();
+            vector<OneOrTwo<ConstraintT>>& getAppliedIntervalConstraints();
             void addAppliedIntervalConstraint(const ConstraintT& constraint, const ConstraintT& _origin);
             void addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound, const ConstraintT& _origin);
-            void addAppliedIntervalConstraint(const vector<ConstraintT>& constraints, const ConstraintT& _origin);
 
             std::set<ConstraintT>& getConflictingConstraints();
             void setConflictingConstraints(const std::set<ConstraintT>& constraints);

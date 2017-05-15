@@ -55,7 +55,7 @@ namespace smtrat
                 // and only choose the first interval of a split (no actual splitting)
                 /*std::cout << "\nContractions: " << std::endl;
                 for (auto& cc : contractionCandidates) {
-                    OptionalInterval bounds = cc.getContractedInterval(mCurrentState.getBounds());
+                    OneOrTwo<IntervalT> bounds = cc.getContractedInterval(mCurrentState.getBounds());
                     if(bounds.second){
                       std::cout << cc << " results in bound: " << bounds.first << ":" << *(bounds.second) << std::endl;
                     } else {
@@ -73,7 +73,7 @@ namespace smtrat
                 /* TODO: THIS IS NOT WORKING. THIS RESULTS IN DOUBLE FREES. I BET IT'S VARIABLE BOUNDS FAULT!!*/
                 // We have to pick the best contraction candidate that we want to apply
                 ICPContractionCandidate& bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
-                OptionalInterval bounds = bestCC.getContractedInterval(mCurrentState.getBounds());
+                OneOrTwo<IntervalT> bounds = bestCC.getContractedInterval(mCurrentState.getBounds());
 
                 if(bounds.second){
                   //std::cout << cc << " results in bound: " << bounds.first << ":" << "Second Interval" << std::endl;
