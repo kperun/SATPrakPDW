@@ -31,6 +31,8 @@ namespace smtrat
             if (mCurrentState.getBounds().isConflicting()) {
                 // if the bounds do contain a conflict, this ICP node is unsatisfiable
                 // so we retrieve the set of conflicting constraints and add them to our state
+                // TODO: This method only returns the last constraint that was used
+                //       so implement a method which actually determines the unsat core
                 mCurrentState.setConflictingConstraints(mCurrentState.getBounds().getConflict());
 
                 std::cout << "Bounds are conflicting!" << std::endl;

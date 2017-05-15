@@ -24,11 +24,12 @@ namespace smtrat
     }
 
     void ICPState::applyContraction(ICPContractionCandidate* cc, IntervalT interval) {
+        OneOrTwo<ConstraintT> intervalConstraints = setInterval(cc->getVariable(), interval, cc->getConstraint());
+        addAppliedIntervalConstraint(intervalConstraints);
         addAppliedContractionCandidate(cc);
-        setInterval(cc->getVariable(), interval, cc->getConstraint());
     }
 
-    void ICPState::setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin) {
+    OneOrTwo<ConstraintT> ICPState::setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin) {
         // since we cannot directly set the interval for a variable,
         // we will need to add two constraints. one for the lower and one for the upper bound
         // one advantage of this approach is that we can easily revert a contraction
@@ -49,6 +50,7 @@ namespace smtrat
             carl::Relation upperRelation = (interval.upperBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
             upperBound = ConstraintT(upperPoly, upperRelation);
             hasUpper = true;
+            mBounds.addBound(upperBound, _origin);
         }
 
         // if lower bound is infty, the constraint is useless
@@ -61,19 +63,17 @@ namespace smtrat
             carl::Relation lowerRelation = (interval.lowerBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
             lowerBound = ConstraintT(lowerPoly, lowerRelation);
             hasLower = true;
+            mBounds.addBound(lowerBound, _origin);
         }
 
         if (hasUpper && hasLower) {
-            addAppliedIntervalConstraint(upperBound, lowerBound, _origin);
+            return OneOrTwo<ConstraintT>(upperBound, lowerBound);
         }
         else if (hasUpper) {
-            addAppliedIntervalConstraint(upperBound, _origin);
+            return OneOrTwo<ConstraintT>(upperBound, std::experimental::optional<ConstraintT>());
         }
-        else if (hasLower) {
-            addAppliedIntervalConstraint(lowerBound, _origin);
-        }
-        else {
-            // should never happen
+        else /*if (hasLower)*/ {
+            return OneOrTwo<ConstraintT>(lowerBound, std::experimental::optional<ConstraintT>());
         }
     }
 
@@ -93,17 +93,8 @@ namespace smtrat
         return mAppliedIntervalConstraints;
     }
 
-    void ICPState::addAppliedIntervalConstraint(const ConstraintT& constraint, const ConstraintT& _origin) {
-        OneOrTwo<ConstraintT> intervalConstraints(constraint, std::experimental::optional<ConstraintT>());
-        mAppliedIntervalConstraints.push_back(intervalConstraints);
-        mBounds.addBound(constraint, _origin);
-    }
-
-    void ICPState::addAppliedIntervalConstraint(const ConstraintT& lowerBound, const ConstraintT& upperBound, const ConstraintT& _origin) {
-        OneOrTwo<ConstraintT> intervalConstraints(lowerBound, upperBound);
-        mAppliedIntervalConstraints.push_back(intervalConstraints);
-        mBounds.addBound(lowerBound, _origin);
-        mBounds.addBound(upperBound, _origin);
+    void ICPState::addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints) {
+        mAppliedIntervalConstraints.push_back(constraints);
     }
 
     std::set<ConstraintT>& ICPState::getConflictingConstraints() {
