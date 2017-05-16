@@ -20,7 +20,7 @@ namespace smtrat
             carl::Variable var = mapEntry.first;
             IntervalT interval = mapEntry.second;
 
-            // since the origins are stored in the parent bounds 
+            // since the origins are stored in the parent bounds
             // we will restore them later (during getConflictReasons)
             // but since we need an origin, we simply take the first one
             ConstraintT origin = parentBounds.getOriginsOfBounds(var)[0];
@@ -106,7 +106,7 @@ namespace smtrat
     void ICPState::addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints) {
         mAppliedIntervalConstraints.push_back(constraints);
     }
-    
+
     carl::Variable ICPState::getConflictingVariable() {
         for (const auto& mapEntry : mBounds.getIntervalMap()) {
             if (mapEntry.second.isEmpty()) {
@@ -157,13 +157,21 @@ namespace smtrat
         if(intervals.first.lowerBoundType()== carl::BoundType::INFTY){
             newFirstLower = -ICPPDWSettings1::bigM;
         }else{
-            newFirstLower = intervals.first.lower();
+            if(intervals.first.lowerBoundType()== carl::BoundType::WEAK){
+                newFirstLower = intervals.first.lower();
+            }else{//in case it is scrict, we add a small epsilon to make it better
+                newFirstLower = intervals.first.lower() + ICPPDWSettings1::epsilon;
+            }
         }
 
         if(intervals.first.upperBoundType()== carl::BoundType::INFTY){
             newFirstUpper = ICPPDWSettings1::bigM;
         }else{
-            newFirstUpper = intervals.first.upper();
+            if(intervals.first.upperBoundType()== carl::BoundType::WEAK){
+                newFirstUpper = intervals.first.upper();
+            }else{
+                newFirstUpper = intervals.first.upper() - ICPPDWSettings1::epsilon;
+            }
         }
 
         //now the second optional interval
@@ -171,35 +179,52 @@ namespace smtrat
             if((*(intervals.second)).lowerBoundType()== carl::BoundType::INFTY){
                 newSecondLower = -ICPPDWSettings1::bigM;
             }else{
-                newSecondLower = (*(intervals.second)).lower();
-            }
+                if((*(intervals.second)).lowerBoundType()== carl::BoundType::WEAK){
+                    newSecondLower = (*(intervals.second)).lower();
+                }else{
+                    newSecondLower = (*(intervals.second)).lower() + ICPPDWSettings1::epsilon;
+                }
 
+            }
             if((*(intervals.second)).upperBoundType()== carl::BoundType::INFTY){
                 newSecondUpper = ICPPDWSettings1::bigM;
             }else{
-                newSecondUpper = (*(intervals.second)).upper();
+                if((*(intervals.second)).upperBoundType()== carl::BoundType::WEAK){
+                    newSecondUpper = (*(intervals.second)).upper();
+                }else{
+                    newSecondUpper = (*(intervals.second)).upper() - ICPPDWSettings1::epsilon;
+                }
             }
         }
         //finally the old interval
         if(old_interval.lowerBoundType()== carl::BoundType::INFTY){
             oldIntervalLower = -ICPPDWSettings1::bigM;
         }else{
-            oldIntervalLower = old_interval.lower();
+            if(old_interval.lowerBoundType()== carl::BoundType::WEAK){
+                oldIntervalLower = old_interval.lower();
+            }else{
+                oldIntervalLower = old_interval.lower()+ICPPDWSettings1::epsilon;
+            }
         }
 
         if(old_interval.upperBoundType()== carl::BoundType::INFTY){
             oldIntervalUpper = ICPPDWSettings1::bigM;
         }else{
-            oldIntervalUpper = old_interval.upper();
+            if(old_interval.upperBoundType()== carl::BoundType::WEAK){
+                oldIntervalUpper = old_interval.upper();
+            }else{
+                oldIntervalUpper = old_interval.upper() - ICPPDWSettings1::epsilon;
+            }
         }
-        /*if(true){
+        if(false){
             std::cout<<"<---\n";
             std::cout << "New1: "<< newFirstLower <<" : "<<newFirstUpper<<"\n";
             std::cout << "New2: "<< newSecondLower <<" : "<<newSecondUpper<<"\n";
             std::cout << "Old: "<< oldIntervalLower <<" : "<<oldIntervalUpper<<"\n";
-        }*/
+        }
         //return the value
         return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
+
     }
 
     ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){
@@ -273,4 +298,3 @@ namespace smtrat
   };
 
 };
-
