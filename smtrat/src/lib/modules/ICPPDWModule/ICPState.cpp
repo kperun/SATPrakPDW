@@ -138,7 +138,7 @@ namespace smtrat
 
     }
 
-    std::experimental::optional<double> ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
+    double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
         //first compute the new interval
         OneOrTwo<IntervalT> intervals = candidate.getContractedInterval(_bounds);
         //then retrieve the old one
@@ -223,47 +223,55 @@ namespace smtrat
             std::cout << "Old: "<< oldIntervalLower <<" : "<<oldIntervalUpper<<"\n";
         }
         //return the value
-        float gain =  1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
-
-        if(gain <= ICPPDWSettings1::threshold){
-            return {};
-        }else{
-            return gain;
-        }
-
+        return  1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
     }
 
-    ICPContractionCandidate& ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){
+    std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){
         if(candidates.size()==0){
             throw std::invalid_argument( "Candidates vector is empty!" );
         }
-
-        std::cout << "----------------------------------------- \n";
         //in the case that the list has only one element, return this one element
         if(candidates.size()==1){
-            return candidates.front();//return the first element
+            return 1;//return the first element
         }
         //store the current best candidate index
         int currentBest = 0;
-
         std::experimental::optional<double> currentBestGain = computeGain(candidates[currentBest],mBounds);
-                //TODO: changed from 1 to 2, since 1 is already computed in in the line above
-        for (int it = 2; it < (int) candidates.size(); it++) {
-            /*std::cout << "----------------------------------------- \n";
-            std::cout << "Current best gain: "<<currentBestGain << "\n";
-            std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";*/
 
-            std::experimental::optional<double> currentGain = computeGain(candidates[it],mBounds);
-            if((currentBestGain&&currentGain&&(*currentGain)>(*currentBestGain))||(!currentBestGain&&currentGain)){
+        for (int it = 1; it < (int) candidates.size(); it++) {
+            /*
+            std::cout << "----------------------------------------- \n";
+            std::cout << "Current best gain: "<<currentBestGain << "\n";
+            std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";
+            */
+            double currentGain = computeGain(candidates[it],mBounds);
+            if(currentGain>currentBestGain){
                 //now set the new best candidate as current
-                currentBestGain = *currentGain;
+                currentBestGain = currentGain;
                 currentBest = it;
             }
         }
-        /*std::cout << "-------------------Final----------------- \n";
+        /*
+        std::cout << "-------------------Final----------------- \n";
         std::cout << "Overall best gain: " <<currentBestGain << "\n";
-        std::cout << "----------------------------------------- \n";*/
-        return candidates[currentBest];
+        std::cout << "----------------------------------------- \n";
+        */
+
+        std::experimental::optional<int> ret;
+
+
+        if(currentBestGain>ICPPDWSettings1::threshold){
+            //if the gain is beyond the threshold, return it
+            ret = currentBest;
+            return ret;
+        }
+        else{
+            //otherwise return an optional.empty()
+            std::cout<< "Treshhold reached!\n";
+            return ret;
+        }
+
+
     }
 
     map<carl::Variable,double> ICPState::guessSolution(){

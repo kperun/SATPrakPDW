@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdexcept>
 
+
 namespace smtrat
 {
     /**
@@ -116,7 +117,7 @@ namespace smtrat
             /**
             * For a given contraction candidate compute the new interval, subsequently the gain by the formula 1- D_new/D_old
             */
-			std::experimental::optional<double> computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds);
+			double computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds);
 
             /**
              * Chooses the best contraction candidate.
@@ -124,7 +125,7 @@ namespace smtrat
              * @param contractionCandidates A list of available contraction candidates
              * @return the best contraction candidate
              */
-            ICPContractionCandidate& getBestContractionCandidate(vector<ICPContractionCandidate>& contractionCandidates);
+            std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate>& contractionCandidates);
 
             /**
              * Determines whether we should stop contracting.

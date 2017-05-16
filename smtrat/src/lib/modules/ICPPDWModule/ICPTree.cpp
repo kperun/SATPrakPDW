@@ -68,23 +68,28 @@ namespace smtrat
             else {
 
                 // We have to pick the best contraction candidate that we want to apply
-                ICPContractionCandidate& bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
-                OneOrTwo<IntervalT> bounds = bestCC.getContractedInterval(mCurrentState.getBounds());
+                std::experimental::optional<int> bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
 
-                if(bounds.second){
-                    // We contracted to two intervals, so we need to split 
-                    cout << "Split on " << bestCC.getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl;
-                    split(bestCC.getVariable());
+                if(bestCC){//if a contraction candidate has been found proceed
+                    OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC)).getContractedInterval(mCurrentState.getBounds());
 
-                    // we splitted the tree, now we need to apply the intervals for the children
-                    mLeftChild ->getCurrentState().applyContraction(&bestCC,  bounds.first );
-                    mRightChild->getCurrentState().applyContraction(&bestCC, *bounds.second);
+                    if(bounds.second){
+                        // We contracted to two intervals, so we need to split
+                        cout << "Split on " << contractionCandidates.at((*bestCC)).getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl;
+                        split(contractionCandidates.at((*bestCC)).getVariable());
 
-                    return true;
-                } else {
-                    // no split, we can simply apply the contraction to the current state
-                    std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << std::endl;
-                    mCurrentState.applyContraction(&bestCC, bounds.first);
+                        // we splitted the tree, now we need to apply the intervals for the children
+                        mLeftChild ->getCurrentState().applyContraction(&(contractionCandidates.at((*bestCC))),  bounds.first );
+                        mRightChild->getCurrentState().applyContraction(&(contractionCandidates.at((*bestCC))), *bounds.second);
+                        return true;
+                    } else {
+                        // no split, we can simply apply the contraction to the current state
+                        std::cout << "Contract with " << contractionCandidates.at((*bestCC)) << ", results in bounds: " << bounds.first << std::endl;
+                        mCurrentState.applyContraction(&(contractionCandidates.at((*bestCC))), bounds.first);
+                    }
+                }else{//otherwise terminate and return false
+                    std::cout << "Gain too small -> split\n";
+                    return false;
                 }
             }
         }
@@ -129,7 +134,7 @@ namespace smtrat
         mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds());
         mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds());
     }
-    
+
     std::set<ConstraintT> ICPTree::getConflictReasons(carl::Variable conflictVar) {
         std::set<ConstraintT> conflictReasons;
 
@@ -150,9 +155,9 @@ namespace smtrat
 
     void ICPTree::accumulateConflictReasons() {
         if (mLeftChild && mLeftChild->isUnsat() && mRightChild && mRightChild->isUnsat()) {
-            mConflictingConstraints.insert(mLeftChild->getConflictingConstraints().begin(), 
+            mConflictingConstraints.insert(mLeftChild->getConflictingConstraints().begin(),
                                            mLeftChild->getConflictingConstraints().end());
-            mConflictingConstraints.insert(mRightChild->getConflictingConstraints().begin(), 
+            mConflictingConstraints.insert(mRightChild->getConflictingConstraints().begin(),
                                            mRightChild->getConflictingConstraints().end());
         }
     }
