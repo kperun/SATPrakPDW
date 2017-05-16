@@ -18,9 +18,9 @@ namespace smtrat
 #ifdef SMTRAT_DEVOPTION_Statistics
 		mStatistics(Settings::moduleName),
 #endif
-		mSearchTree(),
 		mLeafNodes(),
 		mOriginalVariables(),
+        mSearchTree(&mOriginalVariables),
 		mContractionCandidates(),
 		mLinearizations(),
 		mDeLinearizations(),

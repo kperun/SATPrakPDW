@@ -16,6 +16,11 @@ namespace smtrat
     class ICPTree
     {
         private:
+            /**in order to find out when to terminate we need to check if the diameter has
+            * been reached. for this purpose a pointer to the initial set of variables is required
+            */
+            std::set<carl::Variable>* mOriginalVariables;
+
             // the current ICP state.
             ICPState mCurrentState;
 
@@ -35,7 +40,8 @@ namespace smtrat
 
         public:
             ICPTree();
-            ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds);
+            ICPTree(std::set<carl::Variable>* originalVariables);
+            ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables);
 
             /**
              * Contracts the current ICP state until either:
@@ -86,9 +92,9 @@ namespace smtrat
 
             /**
              * Retrieves the reasons why the current state is UNSAT.
-             * I.e. retrieves the constraints that were used to contract the 
+             * I.e. retrieves the constraints that were used to contract the
              * given variable to an empty interval.
-             * 
+             *
              * @param conflictVar the variable that has been contracted to an empty interval
              * @return a list of conflict reasons (original constraints)
              */

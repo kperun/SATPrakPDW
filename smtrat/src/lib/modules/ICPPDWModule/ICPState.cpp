@@ -4,16 +4,27 @@
 namespace smtrat
 {
     ICPState::ICPState() :
+        mOriginalVariables(),
         mBounds(),
         mAppliedContractionCandidates(),
         mAppliedIntervalConstraints()
     {
     }
 
-    ICPState::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds) :
+    ICPState::ICPState(std::set<carl::Variable>* originalVariables):
+        mOriginalVariables(originalVariables),
         mBounds(),
         mAppliedContractionCandidates(),
         mAppliedIntervalConstraints()
+    {
+    }
+
+
+    ICPState::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables) :
+        mBounds(),
+        mAppliedContractionCandidates(),
+        mAppliedIntervalConstraints(),
+        mOriginalVariables(originalVariables)
     {
         // copy parentBounds to mBounds
         for (const auto& mapEntry : parentBounds.getIntervalMap()) {
@@ -126,10 +137,11 @@ namespace smtrat
         //otherwise check if we have reached our desired interval
         auto& map = mBounds.getIntervalMap();
         //first check if all intervals are inside the desired one
-        for (const auto &keyValue : map ) {
-            if(keyValue.second.diameter()>ICPPDWSettings1::targetInterval){
+        for (auto key: (*mOriginalVariables) ) {
+            if(map.find(key)->second.diameter()>ICPPDWSettings1::targetInterval){
                 return false;
             }
+
         }
         //if all intervals are ok, just terminate
         std::cout << "Termination reached by desired interval!\n";
@@ -267,7 +279,7 @@ namespace smtrat
         }
         else{
             //otherwise return an optional.empty()
-            std::cout<< "Treshhold reached!\n";
+            std::cout<< "Threshold reached!\n";
             return ret;
         }
 

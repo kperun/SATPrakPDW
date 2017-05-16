@@ -9,18 +9,31 @@ namespace smtrat
         mLeftChild(),
         mRightChild(),
         mSplitDimension(),
-        mConflictingConstraints()
+        mConflictingConstraints(),
+        mOriginalVariables()
     {
     }
 
-    ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds) :
-        mCurrentState(parentBounds),
+    ICPTree::ICPTree(std::set<carl::Variable>* originalVariables):
+        mCurrentState(originalVariables),
+        mParentTree(),
+        mLeftChild(),
+        mRightChild(),
+        mSplitDimension(),
+        mConflictingConstraints(),
+        mOriginalVariables(originalVariables)
+    {
+    }
+
+    ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables) :
+        mCurrentState(parentBounds,originalVariables),
         mParentTree(parent),
         mLeftChild(),
         mRightChild(),
         mSplitDimension(),
         mConflictingConstraints()
     {
+        mOriginalVariables = originalVariables;
     }
 
     bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
@@ -131,8 +144,8 @@ namespace smtrat
         mSplitDimension = var;
 
         // we create two new search trees with copies of the original bounds
-        mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds());
-        mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds());
+        mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds(),mOriginalVariables);
+        mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds(),mOriginalVariables);
     }
 
     std::set<ConstraintT> ICPTree::getConflictReasons(carl::Variable conflictVar) {

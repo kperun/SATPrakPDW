@@ -27,6 +27,10 @@ namespace smtrat
     class ICPState
     {
         private:
+            /**in order to find out when to terminate we need to check if the diameter has
+            * been reached. for this purpose a pointer to the initial set of variables is required
+            */
+            std::set<carl::Variable>* mOriginalVariables;
 
             /**
              * The current search box.
@@ -62,9 +66,14 @@ namespace smtrat
             ICPState();
 
             /**
+             * Behaves the samme way as the default custuctor, but sets the point to the set of variables
+             */
+            ICPState(std::set<carl::Variable>* originalVariables);
+
+            /**
              * This constructor will initialize the variable bounds with a copy of parentBounds.
              */
-            ICPState(const vb::VariableBounds<ConstraintT>& parentBounds);
+            ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables);
 
             /**
              * Returns the current search box as VariableBounds.

@@ -28,7 +28,7 @@ namespace smtrat
 		static const int maxContractions = 20;
 
         // desired interval
-        static constexpr double targetInterval = 2;
+        static constexpr double targetInterval = 10;
 
         //we define a big M in order to be able to compute gain in case of inf intervals
         static const int bigM = 2000;//twiche the max interval, since we have to consider an intervall [-inf,0] to be better than [1000,0]
