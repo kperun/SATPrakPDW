@@ -12,11 +12,31 @@ namespace smtrat
     }
 
     ICPState::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds) :
-        mBounds(parentBounds),
+        mBounds(),
         mAppliedContractionCandidates(),
         mAppliedIntervalConstraints(),
         mConflictingConstraints()
     {
+        // copy parentBounds to mBounds
+        for (const auto& mapEntry : parentBounds.getIntervalMap()) {
+            carl::Variable var = mapEntry.first;
+            IntervalT interval = mapEntry.second;
+            vector<ConstraintT> origins = parentBounds.getOriginsOfBounds(var);
+
+            // TODO: which origin to choose?
+            std::cout << "Copying mBounds. Origins of " << var << std::endl;
+            for (const auto& c : origins) {
+                std::cout << c << std::endl;
+            }
+
+            if (origins.size() >= 1) {
+                setInterval(var, interval, origins[0]);
+            }
+            else {
+                assert(false);
+                setInterval(var, interval, ConstraintT());
+            }
+        }
     }
 
     vb::VariableBounds<ConstraintT>& ICPState::getBounds() {

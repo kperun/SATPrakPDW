@@ -28,7 +28,8 @@ namespace smtrat
             carl::Variable mSplitDimension;
 
             // the child states
-            vector<ICPTree> mChildTrees;
+            unique_ptr<ICPTree> mLeftChild;
+            unique_ptr<ICPTree> mRightChild;
 
         public:
             ICPTree();
@@ -63,7 +64,15 @@ namespace smtrat
             carl::Variable getSplitDimension();
             void setSplitDimension(carl::Variable var);
 
-            vector<ICPTree>& getChildTrees();
+            ICPTree* getLeftChild();
+            ICPTree* getRightChild();
             bool isLeaf();
+
+        private:
+            /**
+             * Splits the search tree.
+             * @param var the split dimension
+             */
+            void split(carl::Variable var);
     };
 }

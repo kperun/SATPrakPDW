@@ -276,9 +276,9 @@ namespace smtrat
 
 			if (splitOccurred) {
 				// a split occurred, so add the new child nodes to the leaf nodes stack
-				for (ICPTree& childNode : currentNode->getChildTrees()) {
-					mLeafNodes.push(&childNode);
-				}
+				mLeafNodes.push(currentNode->getLeftChild());
+				mLeafNodes.push(currentNode->getRightChild());
+
 				// and then we continue with some other leaf node in the next iteration
 				// this corresponds to depth-first search
 				// later maybe: use multithreading to contract several leaf nodes at once
@@ -307,7 +307,8 @@ namespace smtrat
             // TODO: This check is incomplete? Refer to ICPModule
             unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
             cout << isSatisfied << endl;
-            if(isSatisfied == 0){
+            assert(isSatisfied != 2);
+            if(isSatisfied == 0 || isSatisfied == 2){
               doesSat = false;
               break;
             }
@@ -322,7 +323,6 @@ namespace smtrat
             // if no leaf node knows an answer, we will return UNKNOWN
             // after this main loop
             cout << "No Model could be guessed, returning UNKNOWN" << endl;
-            return Answer::UNKNOWN;
           }
 				}
 			}

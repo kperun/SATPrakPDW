@@ -6,16 +6,18 @@ namespace smtrat
     ICPTree::ICPTree() :
         mCurrentState(),
         mParentTree(nullptr),
-        mChildTrees(),
-        mSplitDimension()
+        mSplitDimension(),
+        mLeftChild(),
+        mRightChild()
     {
     }
 
     ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds) :
         mCurrentState(parentBounds),
         mParentTree(parent),
-        mChildTrees(),
-        mSplitDimension()
+        mSplitDimension(),
+        mLeftChild(),
+        mRightChild()
     {
     }
 
@@ -33,6 +35,8 @@ namespace smtrat
                 // so we retrieve the set of conflicting constraints and add them to our state
                 // TODO: This method only returns the last constraint that was used
                 //       so implement a method which actually determines the unsat core
+                //       Idea: use mCurrentState.getBounds().getOriginsOfBounds(var) to find all 
+                //             constraints which were involved in achieving the bounds for a variable
                 mCurrentState.setConflictingConstraints(mCurrentState.getBounds().getConflict());
 
                 std::cout << "Bounds are conflicting!" << std::endl;
@@ -63,48 +67,30 @@ namespace smtrat
                 OneOrTwo<IntervalT> bounds = bestCC.getContractedInterval(mCurrentState.getBounds());
 
                 if(bounds.second){
-                    // TODO: Split!
-                    //std::cout << cc << " results in bound: " << bounds.first << ":" << "Second Interval" << std::endl;
-                    std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << ":" << *(bounds.second) << std::endl;
-                    mCurrentState.applyContraction(&bestCC, bounds.first);
+                    // We contracted to two intervals, so we need to split 
+                    cout << "Split on " << bestCC.getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl;
+                    split(bestCC.getVariable());
+
+                    // we splitted the tree, now we need to apply the intervals for the children
+                    mLeftChild ->getCurrentState().applyContraction(&bestCC,  bounds.first );
+                    mRightChild->getCurrentState().applyContraction(&bestCC, *bounds.second);
+
+                    return true;
                 } else {
                     // no split, we can simply apply the contraction to the current state
                     std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds.first << std::endl;
                     mCurrentState.applyContraction(&bestCC, bounds.first);
                 }
-
-                //std::cout << "Contract with " << bestCC << ", results in bounds: " << bounds << std::endl;
-                /*  TODO: THIS IS NOT WORKING. THIS RESULTS IN DOUBLE FREES. I BET IT'S VARIABLE BOUNDS FAULT!!
-                // if the contraction results in two intervals, we need to split the search space
-                // TODO: if (split occurred) {
-                if (!bounds.second.isEmpty()) {
-
-                    std::cout << "Split!" << std::endl;
-                    // we store the dimension at which we split
-                    mSplitDimension = bestCC.getVariable();
-
-                    // we create one ICP child tree
-                    mChildTrees.push_back(ICPTree(this, mCurrentState.getBounds()));
-                    // on which we apply the first interval
-                    mCurrentState.applyContraction(&cc, bounds.first);
-                    std::cout << "Added left tree." << std::endl;
-
-                    // and another ICP child tree
-                    mChildTrees.push_back(ICPTree(this, mCurrentState.getBounds()));
-                    // on which we apply the second interval
-                    mCurrentState.applyContraction(&cc, bounds.second);
-                    std::cout << "Added right tree." << std::endl;
-
-                    // since a split occurred, we cannot contract the current ICP node any further
-                    return true;
-                }
-                else {
-                    // no split occurred, so we apply the only contracted interval
-                    mCurrentState.applyContraction(&cc, bounds.first);
-                }
-                */
             }
         }
+    }
+
+    void ICPTree::split(carl::Variable var) {
+        mSplitDimension = var;
+
+        // we create two new search trees with copies of the original bounds
+        mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds());
+        mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds());
     }
 
     ICPState& ICPTree::getCurrentState() {
@@ -127,11 +113,15 @@ namespace smtrat
         mSplitDimension = splitDimension;
     }
 
-    vector<ICPTree>& ICPTree::getChildTrees() {
-        return mChildTrees;
+    ICPTree* ICPTree::getLeftChild() {
+        return mLeftChild.get();
+    }
+
+    ICPTree* ICPTree::getRightChild() {
+        return mRightChild.get();
     }
 
     bool ICPTree::isLeaf() {
-        return mChildTrees.empty();
+        return (!mLeftChild && !mRightChild);
     }
 }
