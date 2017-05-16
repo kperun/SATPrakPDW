@@ -6,36 +6,26 @@ namespace smtrat
     ICPState::ICPState() :
         mBounds(),
         mAppliedContractionCandidates(),
-        mAppliedIntervalConstraints(),
-        mConflictingConstraints()
+        mAppliedIntervalConstraints()
     {
     }
 
     ICPState::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds) :
         mBounds(),
         mAppliedContractionCandidates(),
-        mAppliedIntervalConstraints(),
-        mConflictingConstraints()
+        mAppliedIntervalConstraints()
     {
         // copy parentBounds to mBounds
         for (const auto& mapEntry : parentBounds.getIntervalMap()) {
             carl::Variable var = mapEntry.first;
             IntervalT interval = mapEntry.second;
-            vector<ConstraintT> origins = parentBounds.getOriginsOfBounds(var);
 
-            // TODO: which origin to choose?
-            std::cout << "Copying mBounds. Origins of " << var << std::endl;
-            for (const auto& c : origins) {
-                std::cout << c << std::endl;
-            }
+            // since the origins are stored in the parent bounds 
+            // we will restore them later (during getConflictReasons)
+            // but since we need an origin, we simply take the first one
+            ConstraintT origin = parentBounds.getOriginsOfBounds(var)[0];
 
-            if (origins.size() >= 1) {
-                setInterval(var, interval, origins[0]);
-            }
-            else {
-                assert(false);
-                setInterval(var, interval, ConstraintT());
-            }
+            setInterval(var, interval, origin);
         }
     }
 
@@ -116,21 +106,16 @@ namespace smtrat
     void ICPState::addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints) {
         mAppliedIntervalConstraints.push_back(constraints);
     }
+    
+    carl::Variable ICPState::getConflictingVariable() {
+        for (const auto& mapEntry : mBounds.getIntervalMap()) {
+            if (mapEntry.second.isEmpty()) {
+                return mapEntry.first;
+            }
+        }
 
-    std::set<ConstraintT>& ICPState::getConflictingConstraints() {
-        return mConflictingConstraints;
-    }
-
-    void ICPState::setConflictingConstraints(const std::set<ConstraintT>& constraints) {
-        mConflictingConstraints = constraints;
-    }
-
-    void ICPState::addConflictingConstraint(const ConstraintT& constraint) {
-        mConflictingConstraints.insert(constraint);
-    }
-
-    bool ICPState::isUnsat() {
-        return !mConflictingConstraints.empty();
+        assert(false);
+        return carl::freshRealVariable();
     }
 
     bool ICPState::isTerminationConditionReached() {

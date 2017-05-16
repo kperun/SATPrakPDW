@@ -54,11 +54,6 @@ namespace smtrat
              */
             vector<OneOrTwo<ConstraintT>> mAppliedIntervalConstraints;
 
-            /**
-             * In case of UNSAT, this set will contain the reason for unsatisifiabilty.
-             */
-            std::set<ConstraintT> mConflictingConstraints;
-
         public:
             /**
              * Default constructor will create an empty state with no variable bounds.
@@ -113,23 +108,15 @@ namespace smtrat
             vector<OneOrTwo<ConstraintT>>& getAppliedIntervalConstraints();
             void addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints);
 
-            std::set<ConstraintT>& getConflictingConstraints();
-            void setConflictingConstraints(const std::set<ConstraintT>& constraints);
-            void addConflictingConstraint(const ConstraintT& constraint);
+            /**
+             * @return the variable that has an empty interval.
+             */
+            carl::Variable getConflictingVariable();
 
             /**
             * For a given contraction candidate compute the new interval, subsequently the gain by the formula 1- D_new/D_old
             */
 			double computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds);
-
-
-            /**
-             * Returns whether this ICP state turned out to be unsat.
-             * Internally, this means the conflicting constraints set is not empty.
-             *
-             * @return whether this ICP state is unsat
-             */
-            bool isUnsat();
 
             /**
              * Chooses the best contraction candidate.

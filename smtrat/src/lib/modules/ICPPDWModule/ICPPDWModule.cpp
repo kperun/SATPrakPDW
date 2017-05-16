@@ -286,7 +286,7 @@ namespace smtrat
 			else {
 				// we stopped not because of a split, but because the bounds
 				// are either UNSAT or some abortion criterium was met
-				if (currentNode->getCurrentState().isUnsat()) {
+				if (currentNode->isUnsat()) {
 					std::cout << "Current ICP State is UNSAT." << std::endl;
 				}
 				else {
@@ -315,6 +315,8 @@ namespace smtrat
           }
           if(doesSat){
             cout << "Found Model, returning SAT" << endl;
+            std::cout << "\n------------------------------" << std::endl;
+            std::cout << "Final Answer: SAT." << std::endl;
             return Answer::SAT;
           } else {
             // we don't know, since ICP is not complete.
@@ -331,19 +333,23 @@ namespace smtrat
 		// we have left the main loop
 		// this means we have fully contracted every ICP node in our search tree
 		// if every node turned out to be UNSAT, the root node will now be UNSAT as well
-		if (mSearchTree.getCurrentState().isUnsat()) {
+		if (mSearchTree.isUnsat()) {
 			std::cout << "Reasons: " << std::endl;
-            for (const ConstraintT& c : mSearchTree.getCurrentState().getConflictingConstraints()) {
+            for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
                 std::cout << mDeLinearizations[c] << ", ";
             }
             std::cout << std::endl;
 
+            std::cout << "\n------------------------------" << std::endl;
+            std::cout << "Final Answer: UNSAT." << std::endl;
 			return Answer::UNSAT;
 		}
 		else {
 			// we would have returned SAT within the main loop,
 			// so if after the main loop the problem is not UNSAT,
 			// we simply don't know the answer
+            std::cout << "\n------------------------------" << std::endl;
+            std::cout << "Final Answer: UNKNOWN." << std::endl;
 			return Answer::UNKNOWN;
 		}
 	}

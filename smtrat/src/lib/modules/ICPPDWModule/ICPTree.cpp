@@ -5,19 +5,21 @@ namespace smtrat
 
     ICPTree::ICPTree() :
         mCurrentState(),
-        mParentTree(nullptr),
-        mSplitDimension(),
+        mParentTree(),
         mLeftChild(),
-        mRightChild()
+        mRightChild(),
+        mSplitDimension(),
+        mConflictingConstraints()
     {
     }
 
     ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds) :
         mCurrentState(parentBounds),
         mParentTree(parent),
-        mSplitDimension(),
         mLeftChild(),
-        mRightChild()
+        mRightChild(),
+        mSplitDimension(),
+        mConflictingConstraints()
     {
     }
 
@@ -33,21 +35,24 @@ namespace smtrat
             if (mCurrentState.getBounds().isConflicting()) {
                 // if the bounds do contain a conflict, this ICP node is unsatisfiable
                 // so we retrieve the set of conflicting constraints and add them to our state
-                // TODO: This method only returns the last constraint that was used
-                //       so implement a method which actually determines the unsat core
-                //       Idea: use mCurrentState.getBounds().getOriginsOfBounds(var) to find all 
-                //             constraints which were involved in achieving the bounds for a variable
-                mCurrentState.setConflictingConstraints(mCurrentState.getBounds().getConflict());
+
+                carl::Variable conflictVar = mCurrentState.getConflictingVariable();
+                mConflictingConstraints = getConflictReasons(conflictVar);
 
                 std::cout << "Bounds are conflicting!" << std::endl;
                 std::cout << "Reasons: " << std::endl;
-                for (const ConstraintT& c : mCurrentState.getConflictingConstraints()) {
+                for (const ConstraintT& c : mConflictingConstraints) {
                     std::cout << c << ", ";
                 }
                 std::cout << std::endl;
 
-                // TODO: propagate UNSAT if both child trees are unsat
-                // or maybe do this in a seperate method
+                // we have determined that this ICP search tree is unsatisfiable
+                // if this tree was the last child of the parent, then this could mean that
+                // every child of the parent is unsat, and thus, the parent is unsat
+                // if that is the case, we need to propagate and accumulate the conflicting reasons
+                if (mParentTree) {
+                    (*mParentTree)->accumulateConflictReasons();
+                }
 
                 // we will terminate, but we did not split the search space
                 return false;
@@ -85,32 +90,12 @@ namespace smtrat
         }
     }
 
-    void ICPTree::split(carl::Variable var) {
-        mSplitDimension = var;
-
-        // we create two new search trees with copies of the original bounds
-        mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds());
-        mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds());
-    }
-
     ICPState& ICPTree::getCurrentState() {
         return mCurrentState;
     }
 
-    void ICPTree::setCurrentState(const ICPState& state) {
-        mCurrentState = state;
-    }
-
-    ICPTree* ICPTree::getParentTree() {
+    std::experimental::optional<ICPTree*> ICPTree::getParentTree() {
         return mParentTree;
-    }
-
-    carl::Variable ICPTree::getSplitDimension() {
-        return mSplitDimension;
-    }
-
-    void ICPTree::setSplitDimension(carl::Variable splitDimension) {
-        mSplitDimension = splitDimension;
     }
 
     ICPTree* ICPTree::getLeftChild() {
@@ -123,5 +108,52 @@ namespace smtrat
 
     bool ICPTree::isLeaf() {
         return (!mLeftChild && !mRightChild);
+    }
+
+    carl::Variable ICPTree::getSplitDimension() {
+        return mSplitDimension;
+    }
+
+    std::set<ConstraintT>& ICPTree::getConflictingConstraints() {
+        return mConflictingConstraints;
+    }
+
+    bool ICPTree::isUnsat() {
+        return !mConflictingConstraints.empty();
+    }
+
+    void ICPTree::split(carl::Variable var) {
+        mSplitDimension = var;
+
+        // we create two new search trees with copies of the original bounds
+        mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds());
+        mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds());
+    }
+    
+    std::set<ConstraintT> ICPTree::getConflictReasons(carl::Variable conflictVar) {
+        std::set<ConstraintT> conflictReasons;
+
+        // retrieve all constraints that have been used to contract this variable (in the current ICP state)
+        vector<ICPContractionCandidate*> appliedCCs = mCurrentState.getAppliedContractionCandidates();
+        for (ICPContractionCandidate* cc : appliedCCs) {
+            conflictReasons.insert(cc->getConstraint());
+        }
+
+        // retrieve all constraints that have been used to contract this variable (in all parent states)
+        if(mParentTree) {
+            std::set<ConstraintT> parentReasons = (*mParentTree)->getConflictReasons(conflictVar);
+            conflictReasons.insert(parentReasons.begin(), parentReasons.end());
+        }
+
+        return conflictReasons;
+    }
+
+    void ICPTree::accumulateConflictReasons() {
+        if (mLeftChild && mLeftChild->isUnsat() && mRightChild && mRightChild->isUnsat()) {
+            mConflictingConstraints.insert(mLeftChild->getConflictingConstraints().begin(), 
+                                           mLeftChild->getConflictingConstraints().end());
+            mConflictingConstraints.insert(mRightChild->getConflictingConstraints().begin(), 
+                                           mRightChild->getConflictingConstraints().end());
+        }
     }
 }
