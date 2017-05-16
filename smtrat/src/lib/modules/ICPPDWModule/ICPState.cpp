@@ -138,7 +138,7 @@ namespace smtrat
 
     }
 
-    double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
+    std::experimental::optional<double> ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
         //first compute the new interval
         OneOrTwo<IntervalT> intervals = candidate.getContractedInterval(_bounds);
         //then retrieve the old one
@@ -223,7 +223,13 @@ namespace smtrat
             std::cout << "Old: "<< oldIntervalLower <<" : "<<oldIntervalUpper<<"\n";
         }
         //return the value
-        return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
+        float gain =  1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
+
+        if(gain <= ICPPDWSettings1::threshold){
+            return {};
+        }else{
+            return gain;
+        }
 
     }
 
@@ -240,17 +246,17 @@ namespace smtrat
         //store the current best candidate index
         int currentBest = 0;
 
-        double currentBestGain = computeGain(candidates[currentBest],mBounds);
-
-        for (int it = 1; it < (int) candidates.size(); it++) {
+        std::experimental::optional<double> currentBestGain = computeGain(candidates[currentBest],mBounds);
+                //TODO: changed from 1 to 2, since 1 is already computed in in the line above
+        for (int it = 2; it < (int) candidates.size(); it++) {
             /*std::cout << "----------------------------------------- \n";
             std::cout << "Current best gain: "<<currentBestGain << "\n";
             std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";*/
 
-            double currentGain = computeGain(candidates[it],mBounds);
-            if(currentGain>currentBestGain){
+            std::experimental::optional<double> currentGain = computeGain(candidates[it],mBounds);
+            if((currentBestGain&&currentGain&&(*currentGain)>(*currentBestGain))||(!currentBestGain&&currentGain)){
                 //now set the new best candidate as current
-                currentBestGain = currentGain;
+                currentBestGain = *currentGain;
                 currentBest = it;
             }
         }

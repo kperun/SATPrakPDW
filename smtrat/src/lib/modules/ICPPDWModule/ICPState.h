@@ -74,7 +74,7 @@ namespace smtrat
 
             /**
              * Applies a contraction to this state.
-             * 
+             *
              * The bounds of the contraction candidate variable will be updated to the given inteval.
              * Internally, mAppliedContractionCandidates and mAppliedIntervalConstraints will be filled.
              *
@@ -116,7 +116,7 @@ namespace smtrat
             /**
             * For a given contraction candidate compute the new interval, subsequently the gain by the formula 1- D_new/D_old
             */
-			double computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds);
+			std::experimental::optional<double> computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds);
 
             /**
              * Chooses the best contraction candidate.
