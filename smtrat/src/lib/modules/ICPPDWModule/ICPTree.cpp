@@ -101,7 +101,7 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                                         mCurrentState.applyContraction(&(contractionCandidates.at((*bestCC))), bounds.first);
                                 }
                         }else{ //otherwise terminate and return false
-                                std::cout << "Gain too small -> split\n";
+                                std::cout << "Gain too small (TODO: split)\n";
                                 return false;
                         }
                 }

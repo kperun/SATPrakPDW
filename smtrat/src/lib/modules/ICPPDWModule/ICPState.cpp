@@ -139,13 +139,12 @@ bool ICPState::isTerminationConditionReached() {
         //first check if all intervals are inside the desired one
         for (auto key : (*mOriginalVariables) ) {
                 if(map.find(key)->second.diameter()>ICPPDWSettings1::targetInterval) {
-                        std::cout << "Termination not reached, diameter of " << key << " is to large.\n";
                         return false;
                 }
 
         }
         //if all intervals are ok, just terminate
-        std::cout << "Termination reached by desired interval!\n";
+        std::cout << "Termination reached by desired interval diameter!\n";
         return true;
 
 
