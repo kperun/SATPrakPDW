@@ -18,7 +18,7 @@ namespace smtrat
 	//Typedef for one or two things
 	template <class T>
 	using OneOrTwo = std::pair<T,std::experimental::optional<T>>;
-
+    
 	struct ICPPDWSettings1
 	{
 		/// Name of the Module

@@ -27,6 +27,10 @@ namespace smtrat
 #endif
 			// Members.
 
+            //if a model existis, it should be stored here
+            std::experimental::optional<Model> mModelPointer;
+
+
 			// the ICP search tree (root node)
 			ICPTree mSearchTree;
 
