@@ -28,8 +28,10 @@ namespace smtrat
 			// Members.
 
             //if a model existis, it should be stored here
-            std::experimental::optional<Model> mModelPointer;
+            std::experimental::optional<Model> mFoundModel;
 
+            // a map from constraints to formulas as required for the mInfeasibleSubset
+            std::unordered_map<ConstraintT,FormulaT> mConstraintFormula;
 
 			// the ICP search tree (root node)
 			ICPTree mSearchTree;

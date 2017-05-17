@@ -19,6 +19,8 @@ ICPPDWModule<Settings>::ICPPDWModule(const ModuleInput* _formula, RuntimeSetting
         mStatistics(Settings::moduleName),
 #endif
         mLeafNodes(),
+        mFoundModel(),
+        mConstraintFormula(),
         mOriginalVariables(),
         mSearchTree(&mOriginalVariables),
         mContractionCandidates(),
@@ -196,6 +198,8 @@ bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
         // we only consider actual constraints
         if (formula.getType() == carl::FormulaType::CONSTRAINT) {
                 const ConstraintT& constraint = formula.constraint();
+                //first add it to the map between constraints and formulas
+                mConstraintFormula[constraint] = formula;
 
                 // A constraint was activated
                 mActiveOriginalConstraints.insert(constraint);
@@ -218,6 +222,8 @@ void ICPPDWModule<Settings>::removeCore( ModuleInput::const_iterator _subformula
         // we only consider actual constraints
         if (formula.getType() == carl::FormulaType::CONSTRAINT) {
                 const ConstraintT& constraint = formula.constraint();
+                //first delete the constraint-formula relation
+                mConstraintFormula.erase(constraint);
 
                 // A constraint was de-activated
                 mActiveOriginalConstraints.erase(constraint);
@@ -238,7 +244,7 @@ void ICPPDWModule<Settings>::updateModel() const {
         mModel.clear();
         if( solverState() == Answer::SAT ) { //if a solution has been found by the guess routine
                 //update the model by the currently stored one
-                mModel.update((*mModelPointer)); //there is a second argument for update -> TODO: what does the second argument do
+                mModel.update((*mFoundModel)); //there is a second argument for update -> TODO: what does the second argument do
         }
 }
 
@@ -315,7 +321,7 @@ Answer ICPPDWModule<Settings>::checkCore(){
                                         std::cout << "\n------------------------------" << std::endl;
                                         std::cout << "Final Answer: SAT." << std::endl;
                                         //now it is sat, thus store a pointer to the model
-                                        mModelPointer = model;
+                                        mFoundModel = model;
                                         return Answer::SAT;
                                 } else {
                                         // we don't know, since ICP is not complete.
@@ -336,6 +342,19 @@ Answer ICPPDWModule<Settings>::checkCore(){
                 std::cout << "Reasons: " << std::endl;
                 for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
                         std::cout << mDeLinearizations[c] << ", ";
+                }
+                //now we have a set of conflicting constraints representing the infeasable set (TODO:minimal subset??)
+                //store it in the variable "mInfeasibleSubsets"
+                FormulaSetT infeasibleSubset; //a set of formulas which result in an UNSAT situtation
+                for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
+                        //get de-linearized constraints and their corresponding formulas, add them to the set
+                        //of infeasiable constraints
+                        infeasibleSubset.insert(mConstraintFormula[mDeLinearizations[c]]);
+                }
+                //if at least one constraint has been found, store it in the mInfeasibleSubset variables as inspected by
+                //the governing algomithm
+                if(!infeasibleSubset.empty()) {
+                        mInfeasibleSubsets.push_back(infeasibleSubset);
                 }
                 std::cout << std::endl;
                 std::cout << "\n------------------------------" << std::endl;
