@@ -115,7 +115,19 @@ namespace smtrat
 			 */
 			void initBounds();
 
+			/**
+			 * Tries to guess a solution and checks if all constraints are satisfied by that model.
+			 *
+			 * @param currentNode the ICP state of which a solution should be guessed
+			 * @return A correct model or optional empty
+			 */
+			std::experimental::optional<Model> guessAndCheckSolution(ICPTree* currentNode);
 
+			/**
+			 * Creates an infeasable subset if the problem is unsat.
+			 * The infeasable subset will added to the mInfeasableSubsets member.
+			 */
+			void createInfeasableSubset();
 
 		public:
 			typedef Settings SettingsType;
