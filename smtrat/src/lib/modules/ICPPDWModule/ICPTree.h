@@ -32,8 +32,7 @@ namespace smtrat
             unique_ptr<ICPTree> mRightChild;
 
             // dimension in which the split occurred, if a split occured
-            // TODO optional<carl::Variable>
-            carl::Variable mSplitDimension;
+            std::experimental::optional<carl::Variable> mSplitDimension;
 
             // In case of UNSAT, this set will contain the reason for unsatisifiabilty.
             std::set<ConstraintT> mConflictingConstraints;
@@ -74,7 +73,7 @@ namespace smtrat
 
             bool isLeaf();
 
-            carl::Variable getSplitDimension();
+            std::experimental::optional<carl::Variable> getSplitDimension();
 
             std::set<ConstraintT>& getConflictingConstraints();
 

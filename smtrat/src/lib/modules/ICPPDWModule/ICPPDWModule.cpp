@@ -296,9 +296,8 @@ Answer ICPPDWModule<Settings>::checkCore(){
                         else {
                                 // a termination criterium was met
                                 // so we try to guess a solution
-                                std::experimental::optional<Model> model = guessAndCheckSolution(currentNode);
+                                std::experimental::optional<Model> model = getSolution(currentNode);
                                 if(model) {
-                                        cout << "Found Model, returning SAT" << endl;
                                         std::cout << "\n------------------------------" << std::endl;
                                         std::cout << "Final Answer: SAT." << std::endl;
                                         //now it is sat, thus store a pointer to the model
@@ -324,7 +323,6 @@ Answer ICPPDWModule<Settings>::checkCore(){
                 // otherwise the sat solver will not determine UNSAT
                 createInfeasableSubset();
 
-                std::cout << std::endl;
                 std::cout << "\n------------------------------" << std::endl;
                 std::cout << "Final Answer: UNSAT." << std::endl;
                 return Answer::UNSAT;
@@ -341,54 +339,54 @@ Answer ICPPDWModule<Settings>::checkCore(){
 
 template<class Settings>
 void ICPPDWModule<Settings>::createInfeasableSubset() {
-    std::cout << "Reasons: " << std::endl;
+        std::cout << "Reasons: " << std::endl;
+            for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
+            std::cout << mDeLinearizations[c] << ", ";
+        }
+        //now we have a set of conflicting constraints representing the infeasable set (TODO:minimal subset??)
+        //store it in the variable "mInfeasibleSubsets"
+        FormulaSetT infeasibleSubset; //a set of formulas which result in an UNSAT situtation
         for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
-        std::cout << mDeLinearizations[c] << ", ";
-    }
-    //now we have a set of conflicting constraints representing the infeasable set (TODO:minimal subset??)
-    //store it in the variable "mInfeasibleSubsets"
-    FormulaSetT infeasibleSubset; //a set of formulas which result in an UNSAT situtation
-    for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
-            //get de-linearized constraints and their corresponding formulas, add them to the set
-            //of infeasiable constraints
-            infeasibleSubset.insert(mConstraintFormula[mDeLinearizations[c]]);
-    }
-    //if at least one constraint has been found, store it in the mInfeasibleSubset variables as inspected by
-    //the governing algomithm
-    if(!infeasibleSubset.empty()) {
-            mInfeasibleSubsets.push_back(infeasibleSubset);
-    }
+                //get de-linearized constraints and their corresponding formulas, add them to the set
+                //of infeasiable constraints
+                infeasibleSubset.insert(mConstraintFormula[mDeLinearizations[c]]);
+        }
+        //if at least one constraint has been found, store it in the mInfeasibleSubset variables as inspected by
+        //the governing algomithm
+        if(!infeasibleSubset.empty()) {
+                mInfeasibleSubsets.push_back(infeasibleSubset);
+        }
 }
 
 template<class Settings>
-std::experimental::optional<Model> ICPPDWModule<Settings>::guessAndCheckSolution(ICPTree* currentNode) {
-    map<carl::Variable,double> sol(currentNode->getCurrentState().guessSolution());
-    Model model;
-    std::cout << "Guessed solution:" << std::endl;
-    for(auto& clause : sol) {
-            cout << clause.first << ":" << clause.second << endl;
-            Rational val = carl::rationalize<Rational>(clause.second);
-            model.emplace(clause.first, val);
-    }
-    bool doesSat = true;
-    for( const auto& rf : rReceivedFormula() ) {
-            cout << rf.formula().constraint() << endl;
-            // TODO: This check is incomplete? Refer to ICPModule
-            unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
-            cout << isSatisfied << endl;
-            assert(isSatisfied != 2);
-            if(isSatisfied == 0 || isSatisfied == 2) {
-                    doesSat = false;
-                    break;
-            }
-    }
-    
-    if (doesSat) {
-        return model;
-    }
-    else {
-        return std::experimental::optional<Model>();
-    }
+std::experimental::optional<Model> ICPPDWModule<Settings>::getSolution(ICPTree* currentNode) {
+        map<carl::Variable,double> sol(currentNode->getCurrentState().guessSolution());
+        Model model;
+        std::cout << "Guessed solution:" << std::endl;
+        for(auto& clause : sol) {
+                cout << clause.first << ":" << clause.second << endl;
+                Rational val = carl::rationalize<Rational>(clause.second);
+                model.emplace(clause.first, val);
+        }
+        bool doesSat = true;
+        for( const auto& rf : rReceivedFormula() ) {
+                cout << rf.formula().constraint() << endl;
+                // TODO: This check is incomplete? Refer to ICPModule
+                unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+                cout << isSatisfied << endl;
+                assert(isSatisfied != 2);
+                if(isSatisfied == 0 || isSatisfied == 2) {
+                        doesSat = false;
+                        break;
+                }
+        }
+        
+        if (doesSat) {
+            return model;
+        }
+        else {
+            return std::experimental::optional<Model>();
+        }
 }
 
 

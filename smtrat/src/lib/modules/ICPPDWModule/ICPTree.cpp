@@ -128,7 +128,7 @@ bool ICPTree::isLeaf() {
         return (!mLeftChild && !mRightChild);
 }
 
-carl::Variable ICPTree::getSplitDimension() {
+std::experimental::optional<carl::Variable> ICPTree::getSplitDimension() {
         return mSplitDimension;
 }
 
