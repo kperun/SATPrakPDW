@@ -101,8 +101,19 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                                         mCurrentState.applyContraction(&(contractionCandidates.at((*bestCC))), bounds.first);
                                 }
                         }else{ //otherwise terminate and return false
-                                std::cout << "Gain too small (TODO: split)\n";
-                                return false;
+                            std::cout << "Gain too small (TODO: split)\n";
+                            //First extract the best variable for splitting
+                            //carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
+                            carl::Variable splittingVar = (*(*mOriginalVariables).begin());
+                            IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
+                            IntervalT firstNewInterval(oldInterval.lower(), oldInterval.lowerBoundType(), oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::WEAK);
+                            IntervalT secondNewInterval(oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::STRICT, oldInterval.upper(), oldInterval.upperBoundType());
+                            cout << firstNewInterval << ":" << secondNewInterval << endl;
+                            split(splittingVar);
+                            //TODO: Think about origins
+                            mLeftChild->getCurrentState().setInterval(splittingVar, firstNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);
+                            mRightChild->getCurrentState().setInterval(splittingVar, secondNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);
+                            return true;
                         }
                 }
         }

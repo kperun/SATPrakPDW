@@ -34,7 +34,7 @@ namespace smtrat
         static const int bigM = 2000;//twiche the max interval, since we have to consider an intervall [-inf,0] to be better than [1000,0]
 
         //gain threshold
-        static constexpr double threshold = 0.01;
+        static constexpr double threshold = 0.1;
 
         //Small value
         static constexpr double epsilon = 0.001;
