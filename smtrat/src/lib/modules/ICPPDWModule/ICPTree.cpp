@@ -101,10 +101,9 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                                         mCurrentState.applyContraction(&(contractionCandidates.at((*bestCC))), bounds.first);
                                 }
                         }else{ //otherwise terminate and return false
-                                SMTRAT_LOG_INFO("smtrat.module","Gain too small (TODO: split)\n");
+                                SMTRAT_LOG_INFO("smtrat.module","Gain too small -> split!\n");
                                 //First extract the best variable for splitting
-                                //carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
-                                carl::Variable splittingVar = (*(*mOriginalVariables).begin());
+                                carl::Variable splittingVar = mCurrentState.getBestSplitVariable(contractionCandidates);
                                 IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
                                 IntervalT firstNewInterval(oldInterval.lower(), oldInterval.lowerBoundType(), oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::WEAK);
                                 IntervalT secondNewInterval(oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::STRICT, oldInterval.upper(), oldInterval.upperBoundType());

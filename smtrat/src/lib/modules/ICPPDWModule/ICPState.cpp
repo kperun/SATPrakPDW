@@ -324,6 +324,30 @@ map<carl::Variable,double> ICPState::guessSolution(){
 
         return ret;
 
-};
+}
+
+carl::Variable ICPState::getBestSplitVariable(vector<ICPContractionCandidate>& candidates){
+        OneOrTwo<IntervalT> intervals;
+        double currentInterval = 0;
+        double bestSplitInterval = 0;
+        double bestSplitCandidate = 0;
+        SMTRAT_LOG_INFO("smtrat.module","Split candidate computation started:\n");
+        auto& map = mBounds.getIntervalMap();
+
+        for (int it = 1; it < (int) candidates.size(); it++) {
+                //first compute the diameter of a variable
+                currentInterval = map.at(candidates[it].getVariable()).diameter();
+                //now check if the new interval is "bigger"
+                if(bestSplitInterval<currentInterval) {
+                        bestSplitCandidate = it;
+                        bestSplitInterval = currentInterval;
+                }
+        }
+        SMTRAT_LOG_INFO("smtrat.module","Best split variable: " <<
+                        candidates[bestSplitCandidate].getVariable() <<" of size: "<<currentInterval<<endl);
+        //finally return the variable of the biggest interval
+        return candidates[bestSplitCandidate].getVariable();
+}
+
 
 };

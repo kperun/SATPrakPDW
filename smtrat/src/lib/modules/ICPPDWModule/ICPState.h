@@ -149,5 +149,12 @@ namespace smtrat
              * @return The solution in the form of a map <carl::Variable,double>
              */
             map<carl::Variable,double> guessSolution();
+
+            /**
+             * For all stored variables and intervals, find a variable whose contraction
+             * results in a split, and return the variable where this split results in the biggest
+             */
+            carl::Variable getBestSplitVariable(vector<ICPContractionCandidate>& candidates);
+
     };
 }
