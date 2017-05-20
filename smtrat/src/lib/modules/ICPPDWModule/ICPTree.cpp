@@ -38,10 +38,11 @@ ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentB
 
 bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
         while(true) {
-                SMTRAT_LOG_INFO("smtrat.module","Variable bounds:" << std::endl);
+                SMTRAT_LOG_INFO("smtrat.module","Variable bounds:");
                 for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
-                        SMTRAT_LOG_INFO("smtrat.module",mapEntry.first << " in " << mapEntry.second << std::endl);
+                        SMTRAT_LOG_INFO("smtrat.module",mapEntry.first << " in " << mapEntry.second);
                 }
+                SMTRAT_LOG_INFO("smtrat.module",std::endl);
 
                 // first we need to make sure the bounds are still satisfiable
                 // i.e. no variable has an empty interval
@@ -53,7 +54,7 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                         mConflictingConstraints = getConflictReasons(conflictVar);
 
                         SMTRAT_LOG_INFO("smtrat.module","Bounds are conflicting!" << std::endl
-                                                                                  << "Reasons: " << std::endl);
+                                                                                  << "Reasons: ");
                         for (const ConstraintT& c : mConflictingConstraints) {
                                 SMTRAT_LOG_INFO("smtrat.module",c << ", ");
                         }
@@ -107,7 +108,8 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                                 IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
                                 IntervalT firstNewInterval(oldInterval.lower(), oldInterval.lowerBoundType(), oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::WEAK);
                                 IntervalT secondNewInterval(oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::STRICT, oldInterval.upper(), oldInterval.upperBoundType());
-                                SMTRAT_LOG_INFO("smtrat.module",firstNewInterval << ":" << secondNewInterval << endl);
+                                SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: " 
+                                                                             << firstNewInterval << " and " << secondNewInterval << endl);
                                 split(splittingVar);
                                 //TODO: Think about origins
                                 mLeftChild->getCurrentState().setInterval(splittingVar, firstNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);

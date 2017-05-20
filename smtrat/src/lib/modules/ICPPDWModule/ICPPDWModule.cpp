@@ -364,7 +364,7 @@ std::experimental::optional<Model> ICPPDWModule<Settings>::getSolution(ICPTree* 
         Model model;
         SMTRAT_LOG_INFO("smtrat.module","Guessed solution:" << std::endl);
         for(auto& clause : sol) {
-                SMTRAT_LOG_INFO("smtrat.module",clause.first << ":" << clause.second << endl);
+                SMTRAT_LOG_INFO("smtrat.module",clause.first << ":" << clause.second);
                 Rational val = carl::rationalize<Rational>(clause.second);
                 model.emplace(clause.first, val);
         }
@@ -372,7 +372,7 @@ std::experimental::optional<Model> ICPPDWModule<Settings>::getSolution(ICPTree* 
         for( const auto& rf : rReceivedFormula() ) {
                 // TODO: This check is incomplete? Refer to ICPModule
                 unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
-                SMTRAT_LOG_INFO("smtrat.module",rf.formula().constraint() << "?" << isSatisfied << endl);
+                SMTRAT_LOG_INFO("smtrat.module",rf.formula().constraint() << "?" << isSatisfied);
                 assert(isSatisfied != 2);
                 if(isSatisfied == 0 || isSatisfied == 2) {
                         doesSat = false;

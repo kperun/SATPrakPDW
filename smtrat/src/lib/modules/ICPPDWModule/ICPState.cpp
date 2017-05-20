@@ -229,10 +229,7 @@ double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::Vari
                         oldIntervalUpper = old_interval.upper() - ICPPDWSettings1::epsilon;
                 }
         }
-        SMTRAT_LOG_INFO("smtrat.module","Gain computation started:\n"
-                        << "New1: "<< newFirstLower <<":"<<newFirstUpper<<"; "
-                        << "New2: "<< newSecondLower <<":"<<newSecondUpper<<"; "
-                        << "Old: "<< oldIntervalLower <<":"<<oldIntervalUpper<<"\n");
+
         //return the value
         return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
 }
@@ -248,27 +245,13 @@ std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<IC
 //store the current best candidate index
         int currentBest = 0;
         std::experimental::optional<double> currentBestGain = computeGain(candidates[currentBest],mBounds);
-        SMTRAT_LOG_INFO("smtrat.module","-----------Best gain computation started--------\n");
         for (int it = 1; it < (int) candidates.size(); it++) {
-                if(currentBestGain) {
-                        SMTRAT_LOG_INFO("smtrat.module","Current best gain: "<<(*currentBestGain)<< "\n");
-                }
-                SMTRAT_LOG_INFO("smtrat.module","Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n");
-
                 double currentGain = computeGain(candidates[it],mBounds);
                 if(currentGain>currentBestGain) {
                         //now set the new best candidate as current
                         currentBestGain = currentGain;
                         currentBest = it;
                 }
-        }
-        if(currentBestGain) {
-                SMTRAT_LOG_INFO("smtrat.module","-------------------Final----------------- \n"
-                                << "Overall best gain: " <<(*currentBestGain) << "\n"
-                                << "----------------------------------------- \n");
-        }else{
-                SMTRAT_LOG_INFO("smtrat.module","-------------------Final----------------- \n"
-                                << "No candidate found!");
         }
 
 
@@ -282,7 +265,6 @@ std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<IC
         }
         else{
                 //otherwise return an optional.empty()
-                SMTRAT_LOG_INFO("smtrat.module","Threshold reached!\n");
                 return ret;
         }
 
@@ -331,7 +313,6 @@ carl::Variable ICPState::getBestSplitVariable(vector<ICPContractionCandidate>& c
         double currentInterval = 0;
         double bestSplitInterval = 0;
         double bestSplitCandidate = 0;
-        SMTRAT_LOG_INFO("smtrat.module","Split candidate computation started:\n");
         auto& map = mBounds.getIntervalMap();
 
         for (int it = 1; it < (int) candidates.size(); it++) {
@@ -343,8 +324,7 @@ carl::Variable ICPState::getBestSplitVariable(vector<ICPContractionCandidate>& c
                         bestSplitInterval = currentInterval;
                 }
         }
-        SMTRAT_LOG_INFO("smtrat.module","Best split variable: " <<
-                        candidates[bestSplitCandidate].getVariable() <<" of size: "<<currentInterval<<endl);
+        
         //finally return the variable of the biggest interval
         return candidates[bestSplitCandidate].getVariable();
 }
