@@ -133,7 +133,7 @@ void ICPPDWModule<Settings>::initBounds() {
         // the bounds for original variables have been added through addCore already
 
         // we only need to update bounds for slack variables in this method
-        std::cout << "Init bounds: " << std::endl;
+        SMTRAT_LOG_INFO("smtrat.module","Init bounds: " << std::endl);
         for (const auto& mapEntry : mSlackSubstitutionConstraints) {
                 const carl::Variable slackVar = mapEntry.first;
                 const ConstraintT& slackConstraint = mapEntry.second;
@@ -166,9 +166,9 @@ bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
                 // initSlackBounds() // applies contraction to determine initial slack bounds
 
                 // DEBUG
-                std::cout << "Linearized constraints for " << constraint << ": " << std::endl;
+                SMTRAT_LOG_INFO("smtrat.module","Linearized constraints for " << constraint << ": " << std::endl);
                 for (int i = 0; i < (int) newConstraints.size(); i++) {
-                        std::cout << newConstraints[i] << std::endl;
+                        SMTRAT_LOG_INFO("smtrat.module",newConstraints[i] << std::endl);
                 }
         }
         return true; // This should be adapted according to your implementation.
@@ -182,12 +182,11 @@ void ICPPDWModule<Settings>::init()
         createAllContractionCandidates();
 
         // DEBUG
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << "All constraints informed.\n" << std::endl;
-
-        std::cout << "Contraction Candidates:" << std::endl;
+        SMTRAT_LOG_INFO("smtrat.module", "------------------------------------" << std::endl
+                                                                                << "All constraints informed.\n" << std::endl
+                                                                                << "Contraction Candidates:" << std::endl);
         for (const auto& cc : mContractionCandidates) {
-                std::cout << cc << std::endl;
+                SMTRAT_LOG_INFO("smtrat.module",cc << std::endl);
         }
 }
 
@@ -258,11 +257,11 @@ Answer ICPPDWModule<Settings>::checkCore(){
         initBounds();
 
         // DEBUG
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << "Check core with the following active constraints:\n" << std::endl;
+        SMTRAT_LOG_INFO("smtrat.module","------------------------------------" << std::endl
+                                                                               << "Check core with the following active constraints:\n");
         for (const auto& c : mActiveOriginalConstraints) {
                 for (const auto& lC : mLinearizations[c]) {
-                        std::cout << lC << std::endl;
+                        SMTRAT_LOG_INFO("smtrat.module",lC << std::endl);
                 }
         }
 
@@ -291,15 +290,15 @@ Answer ICPPDWModule<Settings>::checkCore(){
                         // we stopped not because of a split, but because the bounds
                         // are either UNSAT or some abortion criterium was met
                         if (currentNode->isUnsat()) {
-                                std::cout << "Current ICP State is UNSAT." << std::endl;
+                                SMTRAT_LOG_INFO("smtrat.module","Current ICP State is UNSAT." << std::endl);
                         }
                         else {
                                 // a termination criterium was met
                                 // so we try to guess a solution
                                 std::experimental::optional<Model> model = getSolution(currentNode);
                                 if(model) {
-                                        std::cout << "\n------------------------------" << std::endl;
-                                        std::cout << "Final Answer: SAT." << std::endl;
+                                        SMTRAT_LOG_INFO("smtrat.module","------------------------------" << std::endl
+                                                                                                         << "Final Answer: SAT." << std::endl);
                                         //now it is sat, thus store a pointer to the model
                                         mFoundModel = *model;
                                         return Answer::SAT;
@@ -309,7 +308,8 @@ Answer ICPPDWModule<Settings>::checkCore(){
                                         // but for now, we simply don't know
                                         // if no leaf node knows an answer, we will return UNKNOWN
                                         // after this main loop
-                                        cout << "No Model could be guessed, returning UNKNOWN" << endl;
+                                        SMTRAT_LOG_INFO("smtrat.module","No Model could be guessed, returning UNKNOWN" << std::endl
+                                                                                                                       << "------------------------------\n");
                                 }
                         }
                 }
@@ -323,25 +323,25 @@ Answer ICPPDWModule<Settings>::checkCore(){
                 // otherwise the sat solver will not determine UNSAT
                 createInfeasableSubset();
 
-                std::cout << "\n------------------------------" << std::endl;
-                std::cout << "Final Answer: UNSAT." << std::endl;
+                SMTRAT_LOG_INFO("smtrat.module","------------------------------" << std::endl
+                                                                                 << "Final Answer: UNSAT." << std::endl);
                 return Answer::UNSAT;
         }
         else {
                 // we would have returned SAT within the main loop,
                 // so if after the main loop the problem is not UNSAT,
                 // we simply don't know the answer
-                std::cout << "\n------------------------------" << std::endl;
-                std::cout << "Final Answer: UNKNOWN." << std::endl;
+                SMTRAT_LOG_INFO("smtrat.module","------------------------------" << std::endl
+                                                                                 << "Final Answer: UNKNOWN." << std::endl);
                 return Answer::UNKNOWN;
         }
 }
 
 template<class Settings>
 void ICPPDWModule<Settings>::createInfeasableSubset() {
-        std::cout << "Reasons: " << std::endl;
-            for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
-            std::cout << mDeLinearizations[c] << ", ";
+        SMTRAT_LOG_INFO("smtrat.module","Reasons: " << std::endl);
+        for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
+                SMTRAT_LOG_INFO("smtrat.module",mDeLinearizations[c] << ", ");
         }
         //now we have a set of conflicting constraints representing the infeasable set (TODO:minimal subset??)
         //store it in the variable "mInfeasibleSubsets"
@@ -362,30 +362,29 @@ template<class Settings>
 std::experimental::optional<Model> ICPPDWModule<Settings>::getSolution(ICPTree* currentNode) {
         map<carl::Variable,double> sol(currentNode->getCurrentState().guessSolution());
         Model model;
-        std::cout << "Guessed solution:" << std::endl;
+        SMTRAT_LOG_INFO("smtrat.module","Guessed solution:" << std::endl);
         for(auto& clause : sol) {
-                cout << clause.first << ":" << clause.second << endl;
+                SMTRAT_LOG_INFO("smtrat.module",clause.first << ":" << clause.second << endl);
                 Rational val = carl::rationalize<Rational>(clause.second);
                 model.emplace(clause.first, val);
         }
         bool doesSat = true;
         for( const auto& rf : rReceivedFormula() ) {
-                cout << rf.formula().constraint() << endl;
                 // TODO: This check is incomplete? Refer to ICPModule
                 unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
-                cout << isSatisfied << endl;
+                SMTRAT_LOG_INFO("smtrat.module",rf.formula().constraint() << "?" << isSatisfied << endl);
                 assert(isSatisfied != 2);
                 if(isSatisfied == 0 || isSatisfied == 2) {
                         doesSat = false;
                         break;
                 }
         }
-        
+
         if (doesSat) {
-            return model;
+                return model;
         }
         else {
-            return std::experimental::optional<Model>();
+                return std::experimental::optional<Model>();
         }
 }
 

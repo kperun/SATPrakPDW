@@ -38,9 +38,9 @@ ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentB
 
 bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
         while(true) {
-                std::cout << "\nVariable bounds:" << std::endl;
+                SMTRAT_LOG_INFO("smtrat.module","Variable bounds:" << std::endl);
                 for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
-                        std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+                        SMTRAT_LOG_INFO("smtrat.module",mapEntry.first << " in " << mapEntry.second << std::endl);
                 }
 
                 // first we need to make sure the bounds are still satisfiable
@@ -52,12 +52,12 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                         carl::Variable conflictVar = mCurrentState.getConflictingVariable();
                         mConflictingConstraints = getConflictReasons(conflictVar);
 
-                        std::cout << "Bounds are conflicting!" << std::endl;
-                        std::cout << "Reasons: " << std::endl;
+                        SMTRAT_LOG_INFO("smtrat.module","Bounds are conflicting!" << std::endl
+                                                                                  << "Reasons: " << std::endl);
                         for (const ConstraintT& c : mConflictingConstraints) {
-                                std::cout << c << ", ";
+                                SMTRAT_LOG_INFO("smtrat.module",c << ", ");
                         }
-                        std::cout << std::endl;
+                        SMTRAT_LOG_INFO("smtrat.module",std::endl);
 
                         // we have determined that this ICP search tree is unsatisfiable
                         // if this tree was the last child of the parent, then this could mean that
@@ -72,7 +72,7 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                 }
                 // if we met some other termination condition (e.g. target diameter reached
                 else if (mCurrentState.isTerminationConditionReached()) {
-                        std::cout << "Termination condition reached." << std::endl;
+                        SMTRAT_LOG_INFO("smtrat.module","Termination condition reached." << std::endl);
 
                         // we will terminate, but we did not split the search space
                         return false;
@@ -88,7 +88,7 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
 
                                 if(bounds.second) {
                                         // We contracted to two intervals, so we need to split
-                                        cout << "Split on " << contractionCandidates.at((*bestCC)).getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl;
+                                        SMTRAT_LOG_INFO("smtrat.module","Split on " << contractionCandidates.at((*bestCC)).getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl);
                                         split(contractionCandidates.at((*bestCC)).getVariable());
 
                                         // we splitted the tree, now we need to apply the intervals for the children
@@ -97,23 +97,23 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                                         return true;
                                 } else {
                                         // no split, we can simply apply the contraction to the current state
-                                        std::cout << "Contract with " << contractionCandidates.at((*bestCC)) << ", results in bounds: " << bounds.first << std::endl;
+                                        SMTRAT_LOG_INFO("smtrat.module","Contract with " << contractionCandidates.at((*bestCC)) << ", results in bounds: " << bounds.first << std::endl);
                                         mCurrentState.applyContraction(&(contractionCandidates.at((*bestCC))), bounds.first);
                                 }
                         }else{ //otherwise terminate and return false
-                            std::cout << "Gain too small (TODO: split)\n";
-                            //First extract the best variable for splitting
-                            //carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
-                            carl::Variable splittingVar = (*(*mOriginalVariables).begin());
-                            IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
-                            IntervalT firstNewInterval(oldInterval.lower(), oldInterval.lowerBoundType(), oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::WEAK);
-                            IntervalT secondNewInterval(oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::STRICT, oldInterval.upper(), oldInterval.upperBoundType());
-                            cout << firstNewInterval << ":" << secondNewInterval << endl;
-                            split(splittingVar);
-                            //TODO: Think about origins
-                            mLeftChild->getCurrentState().setInterval(splittingVar, firstNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);
-                            mRightChild->getCurrentState().setInterval(splittingVar, secondNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);
-                            return true;
+                                SMTRAT_LOG_INFO("smtrat.module","Gain too small (TODO: split)\n");
+                                //First extract the best variable for splitting
+                                //carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
+                                carl::Variable splittingVar = (*(*mOriginalVariables).begin());
+                                IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
+                                IntervalT firstNewInterval(oldInterval.lower(), oldInterval.lowerBoundType(), oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::WEAK);
+                                IntervalT secondNewInterval(oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::STRICT, oldInterval.upper(), oldInterval.upperBoundType());
+                                SMTRAT_LOG_INFO("smtrat.module",firstNewInterval << ":" << secondNewInterval << endl);
+                                split(splittingVar);
+                                //TODO: Think about origins
+                                mLeftChild->getCurrentState().setInterval(splittingVar, firstNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);
+                                mRightChild->getCurrentState().setInterval(splittingVar, secondNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);
+                                return true;
                         }
                 }
         }

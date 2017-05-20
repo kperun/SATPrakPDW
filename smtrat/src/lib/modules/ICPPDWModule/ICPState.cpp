@@ -1,5 +1,6 @@
 #include "ICPState.h"
 #include "ICPContractionCandidate.h"
+#include "../../logging.h"
 
 namespace smtrat
 {
@@ -131,7 +132,7 @@ carl::Variable ICPState::getConflictingVariable() {
 
 bool ICPState::isTerminationConditionReached() {
         if(mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions) {
-                std::cout << "Termination reached by max iterations!\n";
+                SMTRAT_LOG_INFO("smtrat.module","Termination reached by max iterations!\n");
                 return true;
         }
         //otherwise check if we have reached our desired interval
@@ -144,7 +145,7 @@ bool ICPState::isTerminationConditionReached() {
 
         }
         //if all intervals are ok, just terminate
-        std::cout << "Termination reached by desired interval diameter!\n";
+        SMTRAT_LOG_INFO("smtrat.module","Termination reached by desired interval diameter!\n");
         return true;
 
 
@@ -228,12 +229,10 @@ double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::Vari
                         oldIntervalUpper = old_interval.upper() - ICPPDWSettings1::epsilon;
                 }
         }
-        if(false) {
-                std::cout<<"<---\n";
-                std::cout << "New1: "<< newFirstLower <<" : "<<newFirstUpper<<"\n";
-                std::cout << "New2: "<< newSecondLower <<" : "<<newSecondUpper<<"\n";
-                std::cout << "Old: "<< oldIntervalLower <<" : "<<oldIntervalUpper<<"\n";
-        }
+        SMTRAT_LOG_INFO("smtrat.module","Gain computation started:\n"
+                        << "New1: "<< newFirstLower <<":"<<newFirstUpper<<"; "
+                        << "New2: "<< newSecondLower <<":"<<newSecondUpper<<"; "
+                        << "Old: "<< oldIntervalLower <<":"<<oldIntervalUpper<<"\n");
         //return the value
         return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
 }
@@ -242,20 +241,20 @@ std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<IC
         if(candidates.size()==0) {
                 throw std::invalid_argument( "Candidates vector is empty!" );
         }
-        //in the case that the list has only one element, return this one element
+//in the case that the list has only one element, return this one element
         if(candidates.size()==1) {
                 return 0; //return the first element
         }
-        //store the current best candidate index
+//store the current best candidate index
         int currentBest = 0;
         std::experimental::optional<double> currentBestGain = computeGain(candidates[currentBest],mBounds);
-
+        SMTRAT_LOG_INFO("smtrat.module","-----------Best gain computation started--------\n");
         for (int it = 1; it < (int) candidates.size(); it++) {
-                /*
-                   std::cout << "----------------------------------------- \n";
-                   std::cout << "Current best gain: "<<currentBestGain << "\n";
-                   std::cout << "Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n";
-                 */
+                if(currentBestGain) {
+                        SMTRAT_LOG_INFO("smtrat.module","Current best gain: "<<(*currentBestGain)<< "\n");
+                }
+                SMTRAT_LOG_INFO("smtrat.module","Current gain for " << candidates[it] << ": "<< computeGain(candidates[it],mBounds) << "\n");
+
                 double currentGain = computeGain(candidates[it],mBounds);
                 if(currentGain>currentBestGain) {
                         //now set the new best candidate as current
@@ -263,11 +262,15 @@ std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<IC
                         currentBest = it;
                 }
         }
-        /*
-           std::cout << "-------------------Final----------------- \n";
-           std::cout << "Overall best gain: " <<currentBestGain << "\n";
-           std::cout << "----------------------------------------- \n";
-         */
+        if(currentBestGain) {
+                SMTRAT_LOG_INFO("smtrat.module","-------------------Final----------------- \n"
+                                << "Overall best gain: " <<(*currentBestGain) << "\n"
+                                << "----------------------------------------- \n");
+        }else{
+                SMTRAT_LOG_INFO("smtrat.module","-------------------Final----------------- \n"
+                                << "No candidate found!");
+        }
+
 
         std::experimental::optional<int> ret;
 
@@ -279,7 +282,7 @@ std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<IC
         }
         else{
                 //otherwise return an optional.empty()
-                std::cout<< "Threshold reached!\n";
+                SMTRAT_LOG_INFO("smtrat.module","Threshold reached!\n");
                 return ret;
         }
 
