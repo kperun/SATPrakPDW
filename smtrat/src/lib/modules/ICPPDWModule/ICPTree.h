@@ -92,6 +92,8 @@ namespace smtrat
              */
             void printVariableBounds();
 
+            int getNumberOfSplits();
+
         private:
             /**
              * Splits the search tree.
@@ -115,5 +117,14 @@ namespace smtrat
              * If at least one of the children is not unsat, this method does nothing.
              */
             void accumulateConflictReasons();
+            /**
+            * Returns the root of the overall tree. Required for counting number of splits.
+            */
+            ICPTree* getRoot();
+            /**
+            * Traverses the tree and retrieves the number of performed splits.
+            */
+            int getNumberOfSplitsRecursive();
+
     };
 }

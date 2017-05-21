@@ -4,28 +4,31 @@
 
 namespace smtrat
 {
-ICPState::ICPState() :
+ICPState::ICPState(ICPTree* correspondingTree) :
         mOriginalVariables(),
         mBounds(),
         mAppliedContractionCandidates(),
-        mAppliedIntervalConstraints()
+        mAppliedIntervalConstraints(),
+        mCorrespondingTree(correspondingTree)
 {
 }
 
-ICPState::ICPState(std::set<carl::Variable>* originalVariables) :
+ICPState::ICPState(std::set<carl::Variable>* originalVariables,ICPTree* correspondingTree) :
         mOriginalVariables(originalVariables),
         mBounds(),
         mAppliedContractionCandidates(),
-        mAppliedIntervalConstraints()
+        mAppliedIntervalConstraints(),
+        mCorrespondingTree(correspondingTree)
 {
 }
 
 
-ICPState::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables) :
+ICPState::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree* correspondingTree) :
         mBounds(),
         mAppliedContractionCandidates(),
         mAppliedIntervalConstraints(),
-        mOriginalVariables(originalVariables)
+        mOriginalVariables(originalVariables),
+        mCorrespondingTree(correspondingTree)
 {
         // copy parentBounds to mBounds
         for (const auto& mapEntry : parentBounds.getIntervalMap()) {
@@ -143,11 +146,20 @@ bool ICPState::isTerminationConditionReached() {
                 }
 
         }
+        // no check if maximum number of splits has been reached and terminate
+        if(computeNumberOfSplits()>ICPPDWSettings1::maxSplitNumber) {
+                SMTRAT_LOG_INFO("smtrat.module","Termination reached by maximal number of splits!\n");
+        }
+
         //if all intervals are ok, just terminate
         SMTRAT_LOG_INFO("smtrat.module","Termination reached by desired interval diameter!\n");
         return true;
 
 
+}
+
+int ICPState::computeNumberOfSplits(){
+        return 1; //(*mCorrespondingTree).getNumberOfSplits();
 }
 
 double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
@@ -321,7 +333,7 @@ carl::Variable ICPState::getBestSplitVariable(vector<ICPContractionCandidate*>& 
                         bestSplitInterval = currentInterval;
                 }
         }
-        
+
         //finally return the variable of the biggest interval
         return candidates[bestSplitCandidate]->getVariable();
 }

@@ -18,7 +18,7 @@ namespace smtrat
 	//Typedef for one or two things
 	template <class T>
 	using OneOrTwo = std::pair<T,std::experimental::optional<T>>;
-    
+
 	struct ICPPDWSettings1
 	{
 		/// Name of the Module
@@ -29,6 +29,9 @@ namespace smtrat
 
         // desired interval
         static constexpr double targetInterval = 1;
+
+        // maximal number of splits allowed
+        static constexpr int maxSplitNumber = 1;
 
         //we define a big M in order to be able to compute gain in case of inf intervals
         static constexpr int bigM = 2000; //twice the max interval, since we have to consider an intervall [-inf,0] to be better than [1000,0]

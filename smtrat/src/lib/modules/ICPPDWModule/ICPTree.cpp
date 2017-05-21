@@ -4,7 +4,7 @@ namespace smtrat
 {
 
 ICPTree::ICPTree() :
-        mCurrentState(),
+        mCurrentState(this),
         mParentTree(),
         mLeftChild(),
         mRightChild(),
@@ -15,7 +15,7 @@ ICPTree::ICPTree() :
 }
 
 ICPTree::ICPTree(std::set<carl::Variable>* originalVariables) :
-        mCurrentState(originalVariables),
+        mCurrentState(originalVariables,this),
         mParentTree(),
         mLeftChild(),
         mRightChild(),
@@ -26,7 +26,7 @@ ICPTree::ICPTree(std::set<carl::Variable>* originalVariables) :
 }
 
 ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables) :
-        mCurrentState(parentBounds,originalVariables),
+        mCurrentState(parentBounds,originalVariables,this),
         mParentTree(parent),
         mLeftChild(),
         mRightChild(),
@@ -47,7 +47,7 @@ void ICPTree::printVariableBounds() {
 bool ICPTree::contract(vector<ICPContractionCandidate*>& contractionCandidates) {
         while(true) {
                 printVariableBounds();
-                
+
                 // first we need to make sure the bounds are still satisfiable
                 // i.e. no variable has an empty interval
                 if (mCurrentState.getBounds().isConflicting()) {
@@ -116,7 +116,7 @@ bool ICPTree::contract(vector<ICPContractionCandidate*>& contractionCandidates) 
                                 IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
                                 IntervalT firstNewInterval(oldInterval.lower(), oldInterval.lowerBoundType(), oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::WEAK);
                                 IntervalT secondNewInterval(oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::STRICT, oldInterval.upper(), oldInterval.upperBoundType());
-                                SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: " 
+                                SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: "
                                                                              << firstNewInterval << " and " << secondNewInterval << endl);
                                 split(splittingVar);
                                 //TODO: Think about origins
@@ -149,22 +149,22 @@ bool ICPTree::isLeaf() {
 }
 
 vector<ICPTree*> ICPTree::getLeafNodes() {
-    vector<ICPTree*> leafNodes;
-    if (isLeaf()) {
-        leafNodes.push_back(this);
-    }
-    else {
-        if (mLeftChild) {
-            vector<ICPTree*> leftLeafNodes = mLeftChild->getLeafNodes();
-            leafNodes.insert(leafNodes.end(), leftLeafNodes.begin(), leftLeafNodes.end());
+        vector<ICPTree*> leafNodes;
+        if (isLeaf()) {
+                leafNodes.push_back(this);
         }
-        if (mRightChild) {
-            vector<ICPTree*> rightLeafNodes = mRightChild->getLeafNodes();
-            leafNodes.insert(leafNodes.end(), rightLeafNodes.begin(), rightLeafNodes.end());
+        else {
+                if (mLeftChild) {
+                        vector<ICPTree*> leftLeafNodes = mLeftChild->getLeafNodes();
+                        leafNodes.insert(leafNodes.end(), leftLeafNodes.begin(), leftLeafNodes.end());
+                }
+                if (mRightChild) {
+                        vector<ICPTree*> rightLeafNodes = mRightChild->getLeafNodes();
+                        leafNodes.insert(leafNodes.end(), rightLeafNodes.begin(), rightLeafNodes.end());
+                }
         }
-    }
 
-    return leafNodes;
+        return leafNodes;
 }
 
 std::experimental::optional<carl::Variable> ICPTree::getSplitDimension() {
@@ -213,4 +213,27 @@ void ICPTree::accumulateConflictReasons() {
                                                mRightChild->getConflictingConstraints().end());
         }
 }
+
+int ICPTree::getNumberOfSplits(){
+        return getRoot()->getNumberOfSplitsRecursive();
+}
+
+ICPTree* ICPTree::getRoot(){
+        if(mParentTree) {
+                return (*mParentTree)->getRoot();
+        }
+        return this;
+}
+
+int ICPTree::getNumberOfSplitsRecursive(){
+        int ret = 0;
+        if(mLeftChild) {
+                ret +=1 + (*mLeftChild).getNumberOfSplitsRecursive();
+        }
+        if(mRightChild) {
+                ret +=1 + (*mRightChild).getNumberOfSplitsRecursive();
+        }
+        return ret;
+}
+
 }

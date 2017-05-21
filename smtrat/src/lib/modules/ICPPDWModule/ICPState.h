@@ -15,6 +15,8 @@
 
 namespace smtrat
 {
+
+    class ICPTree;//in order to avoid circular dependencies
     /**
      * Represents a state of the ICP algorithm.
      *
@@ -31,6 +33,11 @@ namespace smtrat
             * been reached. for this purpose a pointer to the initial set of variables is required
             */
             std::set<carl::Variable>* mOriginalVariables;
+
+            /**In order to get the number of already performed splittings it is mandatory to store
+            * a pointer to the current tree.
+            */
+            ICPTree* mCorrespondingTree;
 
             /**
              * The current search box.
@@ -63,17 +70,17 @@ namespace smtrat
             /**
              * Default constructor will create an empty state with no variable bounds.
              */
-            ICPState();
+            ICPState(ICPTree* correspondingTree);
 
             /**
              * Behaves the samme way as the default custuctor, but sets the point to the set of variables
              */
-            ICPState(std::set<carl::Variable>* originalVariables);
+            ICPState(std::set<carl::Variable>* originalVariables,ICPTree* correspondingTree);
 
             /**
              * This constructor will initialize the variable bounds with a copy of parentBounds.
              */
-            ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables);
+            ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree* correspondingTree);
 
             /**
              * Returns the current search box as VariableBounds.
@@ -155,6 +162,11 @@ namespace smtrat
              * results in a split, and return the variable where this split results in the biggest
              */
             carl::Variable getBestSplitVariable(vector<ICPContractionCandidate*>& candidates);
+
+            /**
+            * Return the number of splits performed.
+            */
+            int computeNumberOfSplits();
 
     };
 }
