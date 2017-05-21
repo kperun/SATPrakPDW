@@ -25,22 +25,18 @@ namespace smtrat
 		static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettings1>";
 
 		// number of maximal contraction per ICP state
-		static const int maxContractions = 30;
+		static constexpr int maxContractions = 30;
 
         // desired interval
         static constexpr double targetInterval = 1;
 
         //we define a big M in order to be able to compute gain in case of inf intervals
-        static const int bigM = 2000;//twiche the max interval, since we have to consider an intervall [-inf,0] to be better than [1000,0]
+        static constexpr int bigM = 2000; //twice the max interval, since we have to consider an intervall [-inf,0] to be better than [1000,0]
 
         //gain threshold
         static constexpr double threshold = 0.01;
 
         //Small value
         static constexpr double epsilon = 0.001;
-		/**
-		 * Example for a setting.
-		 */
-		static const bool example_setting = true;
 	};
 }

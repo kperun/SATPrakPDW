@@ -36,14 +36,18 @@ ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentB
         mOriginalVariables = originalVariables;
 }
 
-bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
-        while(true) {
-                SMTRAT_LOG_INFO("smtrat.module","Variable bounds:");
-                for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
-                        SMTRAT_LOG_INFO("smtrat.module",mapEntry.first << " in " << mapEntry.second);
-                }
-                SMTRAT_LOG_INFO("smtrat.module",std::endl);
+void ICPTree::printVariableBounds() {
+        SMTRAT_LOG_INFO("smtrat.module","Variable bounds:");
+        for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
+                SMTRAT_LOG_INFO("smtrat.module",mapEntry.first << " in " << mapEntry.second);
+        }
+        SMTRAT_LOG_INFO("smtrat.module",std::endl);
+}
 
+bool ICPTree::contract(vector<ICPContractionCandidate*>& contractionCandidates) {
+        while(true) {
+                printVariableBounds();
+                
                 // first we need to make sure the bounds are still satisfiable
                 // i.e. no variable has an empty interval
                 if (mCurrentState.getBounds().isConflicting()) {
@@ -82,24 +86,28 @@ bool ICPTree::contract(vector<ICPContractionCandidate>& contractionCandidates) {
                 else {
 
                         // We have to pick the best contraction candidate that we want to apply
+                        // if we have nothing to contract, we cannot use this method
+                        if (contractionCandidates.empty()) {
+                                return false;
+                        }
                         std::experimental::optional<int> bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
 
                         if(bestCC) { //if a contraction candidate has been found proceed
-                                OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC)).getContractedInterval(mCurrentState.getBounds());
+                                OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getBounds());
 
                                 if(bounds.second) {
                                         // We contracted to two intervals, so we need to split
-                                        SMTRAT_LOG_INFO("smtrat.module","Split on " << contractionCandidates.at((*bestCC)).getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl);
-                                        split(contractionCandidates.at((*bestCC)).getVariable());
+                                        SMTRAT_LOG_INFO("smtrat.module","Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl);
+                                        split(contractionCandidates.at((*bestCC))->getVariable());
 
                                         // we splitted the tree, now we need to apply the intervals for the children
-                                        mLeftChild->getCurrentState().applyContraction(&(contractionCandidates.at((*bestCC))),  bounds.first );
-                                        mRightChild->getCurrentState().applyContraction(&(contractionCandidates.at((*bestCC))), *bounds.second);
+                                        mLeftChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)),  bounds.first );
+                                        mRightChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)), *bounds.second);
                                         return true;
                                 } else {
                                         // no split, we can simply apply the contraction to the current state
-                                        SMTRAT_LOG_INFO("smtrat.module","Contract with " << contractionCandidates.at((*bestCC)) << ", results in bounds: " << bounds.first << std::endl);
-                                        mCurrentState.applyContraction(&(contractionCandidates.at((*bestCC))), bounds.first);
+                                        SMTRAT_LOG_INFO("smtrat.module","Contract with " << *(contractionCandidates.at((*bestCC))) << ", results in bounds: " << bounds.first << std::endl);
+                                        mCurrentState.applyContraction(contractionCandidates.at((*bestCC)), bounds.first);
                                 }
                         }else{ //otherwise terminate and return false
                                 SMTRAT_LOG_INFO("smtrat.module","Gain too small -> split!\n");
@@ -138,6 +146,25 @@ ICPTree* ICPTree::getRightChild() {
 
 bool ICPTree::isLeaf() {
         return (!mLeftChild && !mRightChild);
+}
+
+vector<ICPTree*> ICPTree::getLeafNodes() {
+    vector<ICPTree*> leafNodes;
+    if (isLeaf()) {
+        leafNodes.push_back(this);
+    }
+    else {
+        if (mLeftChild) {
+            vector<ICPTree*> leftLeafNodes = mLeftChild->getLeafNodes();
+            leafNodes.insert(leafNodes.end(), leftLeafNodes.begin(), leftLeafNodes.end());
+        }
+        if (mRightChild) {
+            vector<ICPTree*> rightLeafNodes = mRightChild->getLeafNodes();
+            leafNodes.insert(leafNodes.end(), rightLeafNodes.begin(), rightLeafNodes.end());
+        }
+    }
+
+    return leafNodes;
 }
 
 std::experimental::optional<carl::Variable> ICPTree::getSplitDimension() {

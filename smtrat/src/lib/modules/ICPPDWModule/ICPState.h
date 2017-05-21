@@ -134,7 +134,7 @@ namespace smtrat
              * @param contractionCandidates A list of available contraction candidates
              * @return the best contraction candidate
              */
-            std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate>& contractionCandidates);
+            std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate*>& contractionCandidates);
 
             /**
              * Determines whether we should stop contracting.
@@ -154,7 +154,7 @@ namespace smtrat
              * For all stored variables and intervals, find a variable whose contraction
              * results in a split, and return the variable where this split results in the biggest
              */
-            carl::Variable getBestSplitVariable(vector<ICPContractionCandidate>& candidates);
+            carl::Variable getBestSplitVariable(vector<ICPContractionCandidate*>& candidates);
 
     };
 }

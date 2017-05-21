@@ -36,7 +36,6 @@ namespace smtrat
     	auto& map = _bounds.getIntervalMap();
 
         // possible are two intervals resulting from a split
-        IntervalT originalInterval = map.at(mVariable);
         IntervalT resultA, resultB;
         std::experimental::optional<IntervalT> retB;
 
@@ -82,6 +81,7 @@ namespace smtrat
         }
 
         // finally, we intersect the contracted interval with the original interval
+        IntervalT originalInterval = _bounds.getDoubleInterval(mVariable);
         resultA = resultA.intersect(originalInterval);
         resultB = resultB.intersect(originalInterval);
 

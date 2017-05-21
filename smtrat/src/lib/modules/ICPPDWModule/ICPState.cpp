@@ -136,10 +136,9 @@ bool ICPState::isTerminationConditionReached() {
                 return true;
         }
         //otherwise check if we have reached our desired interval
-        auto& map = mBounds.getIntervalMap();
         //first check if all intervals are inside the desired one
         for (auto key : (*mOriginalVariables) ) {
-                if(map.find(key)->second.diameter()>ICPPDWSettings1::targetInterval) {
+                if(mBounds.getDoubleInterval(key).diameter()>ICPPDWSettings1::targetInterval) {
                         return false;
                 }
 
@@ -155,8 +154,7 @@ double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::Vari
         //first compute the new interval
         OneOrTwo<IntervalT> intervals = candidate.getContractedInterval(_bounds);
         //then retrieve the old one
-        auto& map = _bounds.getIntervalMap();
-        IntervalT old_interval = map.at(candidate.getVariable());
+        IntervalT old_interval = _bounds.getDoubleInterval(candidate.getVariable());
 
         //in order to avoid manipulation of the existing objects, we work here with retrieved values
         //moreover, we use a bigM in order to be able to compute with -INF and INF
@@ -234,7 +232,7 @@ double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::Vari
         return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
 }
 
-std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<ICPContractionCandidate>& candidates){
+std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<ICPContractionCandidate*>& candidates){
         if(candidates.size()==0) {
                 throw std::invalid_argument( "Candidates vector is empty!" );
         }
@@ -244,9 +242,9 @@ std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<IC
         }
 //store the current best candidate index
         int currentBest = 0;
-        std::experimental::optional<double> currentBestGain = computeGain(candidates[currentBest],mBounds);
+        std::experimental::optional<double> currentBestGain = computeGain(*(candidates[currentBest]),mBounds);
         for (int it = 1; it < (int) candidates.size(); it++) {
-                double currentGain = computeGain(candidates[it],mBounds);
+                double currentGain = computeGain(*(candidates[it]), mBounds);
                 if(currentGain>currentBestGain) {
                         //now set the new best candidate as current
                         currentBestGain = currentGain;
@@ -308,16 +306,15 @@ map<carl::Variable,double> ICPState::guessSolution(){
 
 }
 
-carl::Variable ICPState::getBestSplitVariable(vector<ICPContractionCandidate>& candidates){
+carl::Variable ICPState::getBestSplitVariable(vector<ICPContractionCandidate*>& candidates){
         OneOrTwo<IntervalT> intervals;
         double currentInterval = 0;
         double bestSplitInterval = 0;
         double bestSplitCandidate = 0;
-        auto& map = mBounds.getIntervalMap();
 
         for (int it = 1; it < (int) candidates.size(); it++) {
                 //first compute the diameter of a variable
-                currentInterval = map.at(candidates[it].getVariable()).diameter();
+                currentInterval = mBounds.getDoubleInterval(candidates[it]->getVariable()).diameter();
                 //now check if the new interval is "bigger"
                 if(bestSplitInterval<currentInterval) {
                         bestSplitCandidate = it;
@@ -326,7 +323,7 @@ carl::Variable ICPState::getBestSplitVariable(vector<ICPContractionCandidate>& c
         }
         
         //finally return the variable of the biggest interval
-        return candidates[bestSplitCandidate].getVariable();
+        return candidates[bestSplitCandidate]->getVariable();
 }
 
 

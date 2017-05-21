@@ -28,7 +28,8 @@ ICPPDWModule<Settings>::ICPPDWModule(const ModuleInput* _formula, RuntimeSetting
         mDeLinearizations(),
         mSlackVariables(),
         mActiveOriginalConstraints(),
-        mSlackSubstitutionConstraints()
+        mSlackSubstitutionConstraints(),
+        mActiveContractionCandidates()
 {
         mLeafNodes.push(&mSearchTree);
 }
@@ -133,7 +134,6 @@ void ICPPDWModule<Settings>::initBounds() {
         // the bounds for original variables have been added through addCore already
 
         // we only need to update bounds for slack variables in this method
-        SMTRAT_LOG_INFO("smtrat.module","Init bounds: " << std::endl);
         for (const auto& mapEntry : mSlackSubstitutionConstraints) {
                 const carl::Variable slackVar = mapEntry.first;
                 const ConstraintT& slackConstraint = mapEntry.second;
@@ -141,6 +141,8 @@ void ICPPDWModule<Settings>::initBounds() {
                 Contractor<carl::SimpleNewton> evaluator(slackConstraint.lhs());
                 // we can ignore the second interval since contracting monome = slack for slack never results in splits
                 IntervalT initialInterval, ignore;
+                // we add the constraint by itself to the bound so that the VariableBounds object knows about our variables
+                mSearchTree.getCurrentState().getBounds().addBound(slackConstraint, slackConstraint);
                 evaluator(mSearchTree.getCurrentState().getBounds().getIntervalMap(), slackVar, initialInterval, ignore, true, true);
                 mSearchTree.getCurrentState().setInterval(slackVar, initialInterval, slackConstraint);
         }
@@ -154,6 +156,9 @@ bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
         if (_constraint.getType() == carl::FormulaType::CONSTRAINT) {
                 const ConstraintT& constraint = _constraint.constraint();
 
+                //first add it to the map between constraints and formulas
+                mConstraintFormula[constraint] = _constraint;
+
                 // store all variables we see for book-keeping purposes
                 for (const auto& var : constraint.variables()) {
                         mOriginalVariables.insert(var);
@@ -162,14 +167,12 @@ bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
                 // linearize the constraints
                 vector<ConstraintT>& newConstraints = linearizeConstraint(constraint, _constraint);
 
-                // TODO (if contraction with INFTY doesn't work)
-                // initSlackBounds() // applies contraction to determine initial slack bounds
-
                 // DEBUG
-                SMTRAT_LOG_INFO("smtrat.module","Linearized constraints for " << constraint << ": " << std::endl);
+                SMTRAT_LOG_INFO("smtrat.module","Linearized constraints for " << constraint << ": ");
                 for (int i = 0; i < (int) newConstraints.size(); i++) {
-                        SMTRAT_LOG_INFO("smtrat.module",newConstraints[i] << std::endl);
+                        SMTRAT_LOG_INFO("smtrat.module",newConstraints[i]);
                 }
+                SMTRAT_LOG_INFO("smtrat.module", "");
         }
         return true; // This should be adapted according to your implementation.
 }
@@ -182,12 +185,13 @@ void ICPPDWModule<Settings>::init()
         createAllContractionCandidates();
 
         // DEBUG
-        SMTRAT_LOG_INFO("smtrat.module", "------------------------------------" << std::endl
-                                                                                << "All constraints informed.\n" << std::endl
-                                                                                << "Contraction Candidates:" << std::endl);
+        SMTRAT_LOG_INFO("smtrat.module", "------------------------------------\nAll constraints informed.\n" << std::endl);
+
+        SMTRAT_LOG_INFO("smtrat.module", "Contraction Candidates:");
         for (const auto& cc : mContractionCandidates) {
-                SMTRAT_LOG_INFO("smtrat.module",cc << std::endl);
+                SMTRAT_LOG_INFO("smtrat.module", cc);
         }
+        SMTRAT_LOG_INFO("smtrat.module", std::endl);
 }
 
 template<class Settings>
@@ -197,8 +201,8 @@ bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
         // we only consider actual constraints
         if (formula.getType() == carl::FormulaType::CONSTRAINT) {
                 const ConstraintT& constraint = formula.constraint();
-                //first add it to the map between constraints and formulas
-                mConstraintFormula[constraint] = formula;
+
+                SMTRAT_LOG_INFO("smtrat.module", "Adding core: " << constraint);
 
                 // A constraint was activated
                 mActiveOriginalConstraints.insert(constraint);
@@ -207,7 +211,19 @@ bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
                 // since we linearized the constraints, we actually need to activate
                 // the linearized constraints instead of the original one
                 for (const auto& lC : mLinearizations[constraint]) {
+                        for (auto& cc : mContractionCandidates) {
+                                if (cc.getConstraint() == lC) {
+                                        mActiveContractionCandidates.push_back(&cc);
+                                }
+                        }
                         addConstraintToBounds(lC, constraint);
+                }
+
+                // add all leaf nodes to the search tree
+                // so that we can continue the search for a solution
+                vector<ICPTree*> leafNodes = mSearchTree.getLeafNodes();
+                for (ICPTree* i : leafNodes) {
+                    mLeafNodes.push(i);
                 }
         }
 
@@ -221,16 +237,27 @@ void ICPPDWModule<Settings>::removeCore( ModuleInput::const_iterator _subformula
         // we only consider actual constraints
         if (formula.getType() == carl::FormulaType::CONSTRAINT) {
                 const ConstraintT& constraint = formula.constraint();
-                //first delete the constraint-formula relation
-                mConstraintFormula.erase(constraint);
+
+                SMTRAT_LOG_INFO("smtrat.module", "Removing core: " << constraint);
 
                 // A constraint was de-activated
-                mActiveOriginalConstraints.erase(constraint);
+                auto cIt = std::find(mActiveOriginalConstraints.begin(), mActiveOriginalConstraints.end(), constraint);
+                if (cIt != mActiveOriginalConstraints.end()) {
+                        mActiveOriginalConstraints.erase(cIt);
+                }
 
                 // we need to de-activate the bounds for that constraint
                 // since we linearized the constraints, we actually need to remove
                 // the linearized constraints instead of the original one
                 for (const auto& lC : mLinearizations[constraint]) {
+                        for (auto& cc : mContractionCandidates) {
+                                if (cc.getConstraint() == lC) {
+                                        auto ccIt = std::find(mActiveContractionCandidates.begin(), mActiveContractionCandidates.end(), &cc);
+                                        if (ccIt != mActiveContractionCandidates.end()) {
+                                                mActiveContractionCandidates.erase(ccIt);
+                                        }
+                                }
+                        }
                         removeConstraintFromBounds(lC, constraint);
                 }
 
@@ -243,27 +270,35 @@ void ICPPDWModule<Settings>::updateModel() const {
         mModel.clear();
         if( solverState() == Answer::SAT ) { //if a solution has been found by the guess routine
                 //update the model by the currently stored one
-                mModel.update((*mFoundModel)); //there is a second argument for update -> TODO: what does the second argument do
+                mModel.update((*mFoundModel));
         }
 }
 
 template<class Settings>
 Answer ICPPDWModule<Settings>::checkCore(){
+        SMTRAT_LOG_INFO("smtrat.module","------------------------------------");
+
+
+        SMTRAT_LOG_INFO("smtrat.module", "Check core with the following active original constraints:");
+        for (const auto& c : mActiveOriginalConstraints) {
+                for (const auto& lC : mLinearizations[c]) {
+                        SMTRAT_LOG_INFO("smtrat.module", lC);
+                }
+        }
+        SMTRAT_LOG_INFO("smtrat.module", "");
+
+        SMTRAT_LOG_INFO("smtrat.module", "Check core with the following active contraction candidates:");
+        for (const auto& cc : mActiveContractionCandidates) {
+                SMTRAT_LOG_INFO("smtrat.module", *cc);
+        }
+        SMTRAT_LOG_INFO("smtrat.module", "");
+
         // initialize the bounds of all variables
         // we are initializing them during checkCore and not duringInit,
         // because we cannot distinguish between constraints that were added by the boolean solver
         // and might be removed later and constraints which correspond to initial bounds for variables
         // during checkCore we can be sure that all necessary constraints have been added already
         initBounds();
-
-        // DEBUG
-        SMTRAT_LOG_INFO("smtrat.module","------------------------------------" << std::endl
-                                                                               << "Check core with the following active constraints:\n");
-        for (const auto& c : mActiveOriginalConstraints) {
-                for (const auto& lC : mLinearizations[c]) {
-                        SMTRAT_LOG_INFO("smtrat.module",lC << std::endl);
-                }
-        }
 
         // main loop of the algorithm
         // we can search for a solution as long as there still exist leaf nodes
@@ -276,7 +311,7 @@ Answer ICPPDWModule<Settings>::checkCore(){
                 // contract() will contract the node until a split occurs,
                 // or the bounds turn out to be UNSAT,
                 // or some other termination criterium was met (e.g. target diameter of intervals)
-                bool splitOccurred = currentNode->contract(mContractionCandidates);
+                bool splitOccurred = currentNode->contract(mActiveContractionCandidates);
 
                 if (splitOccurred) {
                         // a split occurred, so add the new child nodes to the leaf nodes stack

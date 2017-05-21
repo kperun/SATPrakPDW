@@ -58,10 +58,10 @@ namespace smtrat
              * A method caller can determine which of these cases happened through the return value
              * of this method and the isUnsat method of the current ICP state.
              *
-             * @param contractionCandidates A set of contraction candidates that can be applied
+             * @param contractionCandidates A set of pointers to contraction candidates that can be applied
              * @return whether a split occurred
              */
-            bool contract(vector<ICPContractionCandidate>& contractionCandidates);
+            bool contract(vector<ICPContractionCandidate*>& contractionCandidates);
 
             ICPState& getCurrentState();
 
@@ -73,6 +73,11 @@ namespace smtrat
 
             bool isLeaf();
 
+            /**
+             * @return a list of leaf nodes of this search tree
+             */
+            vector<ICPTree*> getLeafNodes();
+
             std::experimental::optional<carl::Variable> getSplitDimension();
 
             std::set<ConstraintT>& getConflictingConstraints();
@@ -81,6 +86,11 @@ namespace smtrat
              * @return whether the search on this tree has led to an empty interval
              */
             bool isUnsat();
+
+            /**
+             * Logs all current variable bounds.
+             */
+            void printVariableBounds();
 
         private:
             /**
