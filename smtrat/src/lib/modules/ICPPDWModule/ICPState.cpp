@@ -1,5 +1,6 @@
 #include "ICPState.h"
 #include "ICPContractionCandidate.h"
+#include "ICPTree.h"
 #include "../../logging.h"
 
 namespace smtrat
@@ -149,6 +150,7 @@ bool ICPState::isTerminationConditionReached() {
         // no check if maximum number of splits has been reached and terminate
         if(computeNumberOfSplits()>ICPPDWSettings1::maxSplitNumber) {
                 SMTRAT_LOG_INFO("smtrat.module","Termination reached by maximal number of splits!\n");
+                return true;
         }
 
         //if all intervals are ok, just terminate
@@ -159,7 +161,7 @@ bool ICPState::isTerminationConditionReached() {
 }
 
 int ICPState::computeNumberOfSplits(){
-        return 1; //(*mCorrespondingTree).getNumberOfSplits();
+        return mCorrespondingTree->getNumberOfSplits();
 }
 
 double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){

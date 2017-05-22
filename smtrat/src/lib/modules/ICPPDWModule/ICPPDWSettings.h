@@ -31,7 +31,7 @@ namespace smtrat
         static constexpr double targetInterval = 1;
 
         // maximal number of splits allowed
-        static constexpr int maxSplitNumber = 1;
+        static constexpr int maxSplitNumber = 100;
 
         //we define a big M in order to be able to compute gain in case of inf intervals
         static constexpr int bigM = 2000; //twice the max interval, since we have to consider an intervall [-inf,0] to be better than [1000,0]

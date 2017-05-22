@@ -227,11 +227,14 @@ ICPTree* ICPTree::getRoot(){
 
 int ICPTree::getNumberOfSplitsRecursive(){
         int ret = 0;
+        if(mLeftChild&&mRightChild) {
+                ret +=1;
+        }
         if(mLeftChild) {
-                ret +=1 + (*mLeftChild).getNumberOfSplitsRecursive();
+                ret +=(*mLeftChild).getNumberOfSplitsRecursive();
         }
         if(mRightChild) {
-                ret +=1 + (*mRightChild).getNumberOfSplitsRecursive();
+                ret +=(*mRightChild).getNumberOfSplitsRecursive();
         }
         return ret;
 }
