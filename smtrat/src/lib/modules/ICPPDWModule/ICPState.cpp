@@ -259,28 +259,28 @@ std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<IC
         int currentBest = 0;
         std::experimental::optional<double> currentBestGain = computeGain(*(candidates[currentBest]),mBounds);
         for (int it = 1; it < (int) candidates.size(); it++) {
-                double currentGain = computeGain(*(candidates[it]), mBounds);
-                if(currentGain>currentBestGain) {
-                        //now set the new best candidate as current
-                        currentBestGain = currentGain;
-                        currentBest = it;
-                }
+          //if((*mOriginalVariables).find(candidates[it]->getVariable()) != (*mOriginalVariables).end()){
+            double currentGain = computeGain(*(candidates[it]), mBounds);
+            if(currentGain>currentBestGain) {
+              //now set the new best candidate as current
+              currentBestGain = currentGain;
+              currentBest = it;
+            }
+          //}
         }
-
 
         std::experimental::optional<int> ret;
 
 
         if(currentBestGain>ICPPDWSettings1::gainThreshold) {
-                //if the gain is beyond the threshold, return it
-                ret = currentBest;
-                return ret;
+          //if the gain is beyond the threshold, return it
+          ret = currentBest;
+          return ret;
         }
         else{
-                //otherwise return an optional.empty()
-                return ret;
+          //otherwise return an optional.empty()
+          return ret;
         }
-
 
 }
 
