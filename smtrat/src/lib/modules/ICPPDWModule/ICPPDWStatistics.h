@@ -14,30 +14,30 @@
 
 namespace smtrat
 {
-	class ICPPDWStatistics : public Statistics
-	{
-	private:
-		// Members.
-		/**
-		 * Example for a statistic.
-		 */
-		size_t mExampleStatistic;
-	public:
-		// Override Statistics::collect.
-		void collect()
-		{
-		   Statistics::addKeyValuePair( "example_statistic", mExampleStatistic );
-		}
-		void foo()
-		{
-			++mExampleStatistic;
-		}
-		ICPPDWStatistics( const std::string& _statisticName ):
-			Statistics( _statisticName, this ),
-			mExampleStatistic( 0 )
-		{}
-		~ICPPDWStatistics() {}
-	};
+  class ICPPDWStatistics : public Statistics
+  {
+    private:
+      // Members.
+      /**
+       * Example for a statistic.
+       */
+      size_t mExampleStatistic;
+    public:
+      // Override Statistics::collect.
+      void collect()
+      {
+        Statistics::addKeyValuePair( "example_statistic", mExampleStatistic );
+      }
+      void foo()
+      {
+        ++mExampleStatistic;
+      }
+      ICPPDWStatistics( const std::string& _statisticName ):
+        Statistics( _statisticName, this ),
+        mExampleStatistic( 0 )
+    {}
+      ~ICPPDWStatistics() {}
+  };
 }
 
 #endif
