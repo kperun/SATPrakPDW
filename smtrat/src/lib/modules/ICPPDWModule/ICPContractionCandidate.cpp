@@ -36,6 +36,7 @@ namespace smtrat
     auto& map = _bounds.getIntervalMap();
 
     // possible are two intervals resulting from a split
+    IntervalT originalInterval = _bounds.getDoubleInterval(mVariable);
     IntervalT resultA, resultB;
     std::experimental::optional<IntervalT> retB;
 
@@ -65,13 +66,29 @@ namespace smtrat
       if (coefficient > 0) {
         // the constraint is truly a <= or < relation
         // so we take (-inf, upper bound]
-        resultA = IntervalT(0.0, carl::BoundType::INFTY, resultA.upper(), boundType);
+
+        // TODO: write own contractor (?)
+        // if result is empty interval, the contractor might have done some weird stuff
+        // because it already intersected with the original interval.
+        // we use a workaround by simply using the original upper bound then
+        if (resultA.isEmpty()) {
+          resultA = IntervalT(0.0, carl::BoundType::INFTY, originalInterval.upper(), boundType);
+        }
+        else {
+          resultA = IntervalT(0.0, carl::BoundType::INFTY, resultA.upper(), boundType);
+        }
+
         // we can ignore resultB, since linear polynomials will never lead to two intervals
       }
       else {
         // the constraint is actually a >= or > relation
         // so we take [lower bound, inf)
-        resultA = IntervalT(resultA.lower(), boundType, 0.0, carl::BoundType::INFTY);
+        if (resultA.isEmpty()) {
+          resultA = IntervalT(originalInterval.lower(), boundType, 0.0, carl::BoundType::INFTY);
+        }
+        else {
+          resultA = IntervalT(resultA.lower(), boundType, 0.0, carl::BoundType::INFTY);
+        }
         // we can ignore resultB, since linear polynomials will never lead to two intervals
       }
     }
@@ -81,7 +98,6 @@ namespace smtrat
     }
 
     // finally, we intersect the contracted interval with the original interval
-    IntervalT originalInterval = _bounds.getDoubleInterval(mVariable);
     resultA = resultA.intersect(originalInterval);
     resultB = resultB.intersect(originalInterval);
 
