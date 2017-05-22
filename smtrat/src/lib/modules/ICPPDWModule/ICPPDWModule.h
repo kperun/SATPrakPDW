@@ -36,10 +36,6 @@ namespace smtrat
       // the ICP search tree (root node)
       ICPTree mSearchTree;
 
-      // the leaf nodes of the search tree
-      // we store them seperately so that we don't have to traverse the tree every time
-      std::stack<ICPTree*> mLeafNodes;
-
       // the set of original variables
       std::set<carl::Variable> mOriginalVariables;
 
@@ -70,6 +66,9 @@ namespace smtrat
 
 
     private:
+      // stores whether the check core has been called yet
+      bool mIsFirstCheckCore;
+
       /**
        * Linearizes a constraint.
        *
@@ -86,24 +85,6 @@ namespace smtrat
        *         This vector is actually stored in the mLinearizations map.
        */
       vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin);
-
-      /**
-       * Informs the current variable bounds about a new constraint.
-       * The variable bounds will then be re-calculated to include that new constraint.
-       *
-       * @param _constraint The new constraint
-       * @param _origin The formula where the constraint originates from
-       */
-      void addConstraintToBounds(const ConstraintT& _constraint, const ConstraintT& _origin );
-
-      /**
-       * Removes a constraint from the current variable bounds.
-       * The variable bounds will then be re-calculated to exclude that new constraint.
-       *
-       * @param _constraint The new constraint
-       * @param _origin The formula where the constraint originates from
-       */
-      void removeConstraintFromBounds(const ConstraintT& _constraint, const ConstraintT& _origin );
 
       /**
        * Creates all contraction candidates.

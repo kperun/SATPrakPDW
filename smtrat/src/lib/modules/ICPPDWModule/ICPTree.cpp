@@ -238,5 +238,39 @@ namespace smtrat
     }
     return ret;
   }
+  
+  bool ICPTree::addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
+    mCurrentState.getBounds().addBound(_constraint, _origin);
+    
+    // we need to add the constraint to all children as well
+    // otherwise the leaf nodes will not know about the new constraint
+    bool isLeftConflicting = false;
+    if (mLeftChild) {
+      isLeftConflicting = !mLeftChild->addConstraint(_constraint, _origin);
+    }
 
+    bool isRightConflicting = false;
+    if (mRightChild) {
+      isRightConflicting = !mRightChild->addConstraint(_constraint, _origin);
+    }
+
+    if (isLeftConflicting || isRightConflicting || mCurrentState.getBounds().isConflicting()) {
+      // the added constraint is already conflicting with other bounds, so we return false
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
+
+  void ICPTree::removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
+    // TODO
+    mCurrentState.getBounds().removeBound(_constraint, _origin);
+    if (mLeftChild) {
+      mLeftChild->removeConstraint(_constraint, _origin);
+    }
+    if (mRightChild) {
+      mRightChild->removeConstraint(_constraint, _origin);
+    }
+  }
 }

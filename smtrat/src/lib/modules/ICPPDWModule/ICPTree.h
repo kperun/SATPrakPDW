@@ -92,7 +92,29 @@ namespace smtrat
        */
       void printVariableBounds();
 
+      /**
+       * @return the number of splits that occurred
+       */
       int getNumberOfSplits();
+
+      /**
+       * Informs the current variable bounds about a new constraint.
+       * The variable bounds will then be re-calculated to include that new constraint.
+       *
+       * @param _constraint The new constraint
+       * @param _origin The formula where the constraint originates from
+       * @return true if the new constraint immediatly caused conflicting bounds
+       */
+      bool addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin );
+
+      /**
+       * Removes a constraint from the current search tree.
+       * The variable bounds and tree structure will then be re-calculated to exclude that new constraint.
+       *
+       * @param _constraint The new constraint
+       * @param _origin The formula where the constraint originates from
+       */
+      void removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin );
 
     private:
       /**

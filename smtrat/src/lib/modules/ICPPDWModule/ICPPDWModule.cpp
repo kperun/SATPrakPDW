@@ -18,7 +18,6 @@ namespace smtrat
 #ifdef SMTRAT_DEVOPTION_Statistics
       mStatistics(Settings::moduleName),
 #endif
-      mLeafNodes(),
       mFoundModel(),
       mConstraintFormula(),
       mOriginalVariables(),
@@ -29,9 +28,9 @@ namespace smtrat
       mSlackVariables(),
       mActiveOriginalConstraints(),
       mSlackSubstitutionConstraints(),
-      mActiveContractionCandidates()
+      mActiveContractionCandidates(),
+      mIsFirstCheckCore(true)
       {
-        mLeafNodes.push(&mSearchTree);
       }
 
   template<class Settings>
@@ -104,9 +103,14 @@ namespace smtrat
       // after we generated all constraints that will actually be used
       // we store the mapping of original constraint to linearized constraints
       mLinearizations[constraint] = linearizedConstraints;
+
+      // and for convenience also a mapping of linearized constraints to original constraints
       for (const auto& lC : linearizedConstraints) {
         mDeLinearizations[lC] = constraint;
       }
+      // also, to make the code more robust and easier to use, we define 
+      // the de-linearization of an original constraint to be the constraint itself
+      mDeLinearizations[constraint] = constraint;
 
       return mLinearizations[constraint];
     }
@@ -198,7 +202,9 @@ namespace smtrat
     bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
     {
       const FormulaT& formula = _subformula->formula();
+      
       // we only consider actual constraints
+      bool causesConflict = false;
       if (formula.getType() == carl::FormulaType::CONSTRAINT) {
         const ConstraintT& constraint = formula.constraint();
 
@@ -216,18 +222,14 @@ namespace smtrat
               mActiveContractionCandidates.push_back(&cc);
             }
           }
-          addConstraintToBounds(lC, constraint);
-        }
 
-        // add all leaf nodes to the search tree
-        // so that we can continue the search for a solution
-        vector<ICPTree*> leafNodes = mSearchTree.getLeafNodes();
-        for (ICPTree* i : leafNodes) {
-          mLeafNodes.push(i);
+          if(!mSearchTree.addConstraint(lC, constraint)) {
+            causesConflict = true;
+          }
         }
       }
 
-      return true; // This should be adapted according to your implementation.
+      return !causesConflict;
     }
 
   template<class Settings>
@@ -258,10 +260,8 @@ namespace smtrat
               }
             }
           }
-          removeConstraintFromBounds(lC, constraint);
+          mSearchTree.removeConstraint(lC, constraint);
         }
-
-        // TODO: go through the search tree and remove sub-trees where this constraint was used
       }
     }
 
@@ -298,15 +298,27 @@ namespace smtrat
       // because we cannot distinguish between constraints that were added by the boolean solver
       // and might be removed later and constraints which correspond to initial bounds for variables
       // during checkCore we can be sure that all necessary constraints have been added already
-      initBounds();
+      // but we will call this method only in the very first checkCore call
+      if(mIsFirstCheckCore) {
+        initBounds();
+        mIsFirstCheckCore = false;
+      }
+
+      // we need to search through all leaf nodes of the search tree
+      std::stack<ICPTree*> searchStack;
+      vector<ICPTree*> leafNodes = mSearchTree.getLeafNodes();
+      for (ICPTree* i : leafNodes) {
+        searchStack.push(i);
+      }
 
       // main loop of the algorithm
       // we can search for a solution as long as there still exist leaf nodes
       // which have not been fully contracted yet
-      while (!mLeafNodes.empty()) {
+      while (!searchStack.empty()) {
         // simply take the first one and contract it
-        ICPTree* currentNode = mLeafNodes.top();
-        mLeafNodes.pop();
+        SMTRAT_LOG_INFO("smtrat.module","ICPStates left to check: " << searchStack.size());
+        ICPTree* currentNode = searchStack.top();
+        searchStack.pop();
 
         // contract() will contract the node until a split occurs,
         // or the bounds turn out to be UNSAT,
@@ -315,8 +327,8 @@ namespace smtrat
 
         if (splitOccurred) {
           // a split occurred, so add the new child nodes to the leaf nodes stack
-          mLeafNodes.push(currentNode->getLeftChild());
-          mLeafNodes.push(currentNode->getRightChild());
+          searchStack.push(currentNode->getLeftChild());
+          searchStack.push(currentNode->getRightChild());
 
           // and then we continue with some other leaf node in the next iteration
           // this corresponds to depth-first search
@@ -421,17 +433,6 @@ namespace smtrat
       else {
         return std::experimental::optional<Model>();
       }
-    }
-
-
-  template<class Settings>
-    void ICPPDWModule<Settings>::addConstraintToBounds(const ConstraintT& _constraint, const ConstraintT& _origin ){
-      mSearchTree.getCurrentState().getBounds().addBound(_constraint,_origin);
-    }
-
-  template<class Settings>
-    void ICPPDWModule<Settings>::removeConstraintFromBounds(const ConstraintT& _constraint, const ConstraintT& _origin ){
-      mSearchTree.getCurrentState().getBounds().removeBound(_constraint,_origin);
     }
 }
 
