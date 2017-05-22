@@ -1,6 +1,7 @@
 #include "ICPState.h"
 #include "ICPContractionCandidate.h"
 #include "ICPTree.h"
+#include "ICPPDWModule.h"
 #include "../../logging.h"
 
 namespace smtrat
@@ -142,7 +143,7 @@ bool ICPState::isTerminationConditionReached() {
         //otherwise check if we have reached our desired interval
         //first check if all intervals are inside the desired one
         for (auto key : (*mOriginalVariables) ) {
-                if(mBounds.getDoubleInterval(key).diameter()>ICPPDWSettings1::targetInterval) {
+                if(mBounds.getDoubleInterval(key).diameter()>ICPPDWSettings1::targetDiameter) {
                         return false;
                 }
 
@@ -270,7 +271,7 @@ std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<IC
         std::experimental::optional<int> ret;
 
 
-        if(currentBestGain>ICPPDWSettings1::threshold) {
+        if(currentBestGain>ICPPDWSettings1::gainThreshold) {
                 //if the gain is beyond the threshold, return it
                 ret = currentBest;
                 return ret;
