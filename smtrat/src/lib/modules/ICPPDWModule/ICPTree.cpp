@@ -45,7 +45,6 @@ namespace smtrat
     mOriginalVariables = originalVariables;
   }
 
-  template ICPTree<ICPPDWSettings1>::ICPTree(ICPTree<ICPPDWSettings1>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables);
 
   template<class Settings>
   void ICPTree<Settings>::printVariableBounds() {
