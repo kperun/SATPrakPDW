@@ -349,7 +349,6 @@ namespace smtrat
     double currentInterval = 0;
     double bestSplitInterval = 0;
     carl::Variable bestSplitVariable;
-    cout << "Splitting" << endl;
 
     for (carl::Variable var : *mOriginalVariables) {
       //first compute the diameter of a variable
