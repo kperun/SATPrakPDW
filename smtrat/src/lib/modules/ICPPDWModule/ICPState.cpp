@@ -160,25 +160,29 @@ namespace smtrat
       SMTRAT_LOG_INFO("smtrat.module","Termination reached by max iterations!\n");
       return true;
     }
-    //otherwise check if we have reached our desired interval
-    //first check if all intervals are inside the desired one
-    for (auto key : (*mOriginalVariables) ) {
-      if(mBounds.getDoubleInterval(key).diameter()>Settings::targetDiameter) {
-        return false;
-      }
 
-    }
-    // no check if maximum number of splits has been reached and terminate
+    // check if maximum number of splits has been reached and terminate
     if(computeNumberOfSplits()>Settings::maxSplitNumber) {
       SMTRAT_LOG_INFO("smtrat.module","Termination reached by maximal number of splits!\n");
       return true;
     }
 
-    //if all intervals are ok, just terminate
-    SMTRAT_LOG_INFO("smtrat.module","Termination reached by desired interval diameter!\n");
-    return true;
+    //otherwise check if we have reached our desired interval
+    //first check if all intervals are inside the desired one
+    bool isTargetDiameterReached = true;
+    for (auto key : (*mOriginalVariables) ) {
+      if(mBounds.getDoubleInterval(key).isUnbounded() || mBounds.getDoubleInterval(key).diameter()>Settings::targetDiameter) {
+        isTargetDiameterReached = false;
+        break;
+      }
+    }
+    if (isTargetDiameterReached) {
+      //if all intervals are ok, just terminate
+      SMTRAT_LOG_INFO("smtrat.module","Termination reached by desired interval diameter!\n");
+      return true;
+    }
 
-
+    return false;
   }
 
   template<class Settings>

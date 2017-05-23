@@ -128,7 +128,7 @@ namespace smtrat
           carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
           IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
           
-          std::pair<IntervalT, IntervalT> newIntervals = ICPUtil::splitInterval(oldInterval);
+          std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
 
           SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: "
               << newIntervals.first << " and " << newIntervals.second << endl);

@@ -12,6 +12,7 @@ namespace smtrat
   /**
    * A collection of utility functions.
    */
+  template<class Settings>
   class ICPUtil
   {
     public:
@@ -41,11 +42,11 @@ namespace smtrat
         if (interval.isHalfBounded()) {
           if (interval.lowerBoundType() == carl::BoundType::INFTY) {
             // (-inf, upper]
-            midpoint = interval.upper() - ICPPDWSettings1::maxOriginalVarBound;
+            midpoint = interval.upper() - Settings::maxOriginalVarBound;
           }
           else {
             // [lower, inf)
-            midpoint = interval.lower() + ICPPDWSettings1::maxOriginalVarBound;
+            midpoint = interval.lower() + Settings::maxOriginalVarBound;
           }
         }
         else if (interval.isInfinite()) {

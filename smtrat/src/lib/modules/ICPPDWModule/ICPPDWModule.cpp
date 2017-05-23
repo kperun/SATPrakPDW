@@ -421,7 +421,7 @@ namespace smtrat
       for (const ConstraintT& c : mActiveSimpleBounds) {
         // we actually only need to add those simple bounds where the variable was used
         // during one of the contraction steps
-        if (ICPUtil::occursVariableInConstraints(*(c.variables().begin()), conflictingConstraints)) {
+        if (ICPUtil<Settings>::occursVariableInConstraints(*(c.variables().begin()), conflictingConstraints)) {
           conflictingConstraints.insert(c);
         }
       }
