@@ -13,6 +13,7 @@ namespace smtrat
   /**
    * Represents the ICP search tree.
    */
+  template<typename Settings>
   class ICPTree
   {
     private:
@@ -22,14 +23,14 @@ namespace smtrat
       std::set<carl::Variable>* mOriginalVariables;
 
       // the current ICP state.
-      ICPState mCurrentState;
+      ICPState<Settings> mCurrentState;
 
       // the parent ICP state
-      std::experimental::optional<ICPTree*> mParentTree;
+      std::experimental::optional<ICPTree<Settings>*> mParentTree;
 
       // the child states
-      unique_ptr<ICPTree> mLeftChild;
-      unique_ptr<ICPTree> mRightChild;
+      unique_ptr<ICPTree<Settings>> mLeftChild;
+      unique_ptr<ICPTree<Settings>> mRightChild;
 
       // dimension in which the split occurred, if a split occured
       std::experimental::optional<carl::Variable> mSplitDimension;
@@ -43,7 +44,7 @@ namespace smtrat
     public:
       ICPTree();
       ICPTree(std::set<carl::Variable>* originalVariables);
-      ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables);
+      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables);
 
       /**
        * Contracts the current ICP state until either:
@@ -66,20 +67,20 @@ namespace smtrat
        */
       bool contract(vector<ICPContractionCandidate*>& contractionCandidates);
 
-      ICPState& getCurrentState();
+      ICPState<Settings>& getCurrentState();
 
-      std::experimental::optional<ICPTree*> getParentTree();
+      std::experimental::optional<ICPTree<Settings>*> getParentTree();
 
-      ICPTree* getLeftChild();
+      ICPTree<Settings>* getLeftChild();
 
-      ICPTree* getRightChild();
+      ICPTree<Settings>* getRightChild();
 
       bool isLeaf();
 
       /**
        * @return a list of leaf nodes of this search tree
        */
-      vector<ICPTree*> getLeafNodes();
+      vector<ICPTree<Settings>*> getLeafNodes();
 
       std::experimental::optional<carl::Variable> getSplitDimension();
 
@@ -145,7 +146,7 @@ namespace smtrat
       /**
        * Returns the root of the overall tree. Required for counting number of splits.
        */
-      ICPTree* getRoot();
+      ICPTree<Settings>* getRoot();
       /**
        * Traverses the tree and retrieves the number of performed splits.
        */

@@ -331,9 +331,9 @@ namespace smtrat
       }*/
 
       // we need to search through all leaf nodes of the search tree
-      std::stack<ICPTree*> searchStack;
-      vector<ICPTree*> leafNodes = mSearchTree.getLeafNodes();
-      for (ICPTree* i : leafNodes) {
+      std::stack<ICPTree<Settings>*> searchStack;
+      vector<ICPTree<Settings>*> leafNodes = mSearchTree.getLeafNodes();
+      for (ICPTree<Settings>* i : leafNodes) {
         searchStack.push(i);
       }
 
@@ -343,7 +343,7 @@ namespace smtrat
       while (!searchStack.empty()) {
         // simply take the first one and contract it
         SMTRAT_LOG_INFO("smtrat.module","ICPStates left to check: " << searchStack.size());
-        ICPTree* currentNode = searchStack.top();
+        ICPTree<Settings>* currentNode = searchStack.top();
         searchStack.pop();
 
         // contract() will contract the node until a split occurs,
@@ -446,7 +446,7 @@ namespace smtrat
     }
 
   template<class Settings>
-    std::experimental::optional<Model> ICPPDWModule<Settings>::getSolution(ICPTree* currentNode) {
+    std::experimental::optional<Model> ICPPDWModule<Settings>::getSolution(ICPTree<Settings>* currentNode) {
       map<carl::Variable,double> sol(currentNode->getCurrentState().guessSolution());
       Model model;
       SMTRAT_LOG_INFO("smtrat.module","Guessed solution:" << std::endl);

@@ -34,7 +34,7 @@ namespace smtrat
       std::unordered_map<ConstraintT,FormulaT> mConstraintFormula;
 
       // the ICP search tree (root node)
-      ICPTree mSearchTree;
+      ICPTree<Settings> mSearchTree;
 
       // the set of original variables
       std::set<carl::Variable> mOriginalVariables;
@@ -109,7 +109,7 @@ namespace smtrat
        * @param currentNode the ICP state of which a solution should be guessed
        * @return A correct model or optional empty
        */
-      std::experimental::optional<Model> getSolution(ICPTree* currentNode);
+      std::experimental::optional<Model> getSolution(ICPTree<Settings>* currentNode);
 
       /**
        * Creates an infeasable subset if the problem is unsat.

@@ -16,6 +16,7 @@
 namespace smtrat
 {
 
+  template<typename Settings>
   class ICPTree;//in order to avoid circular dependencies
   /**
    * Represents a state of the ICP algorithm.
@@ -26,6 +27,7 @@ namespace smtrat
    * In case of a split, the state stores the dimension (i.e. variable) in which the split occurred.
    * In case of unsatisfiability, this state stores the reasons (i.e. constraints).
    */
+  template<typename Settings>
   class ICPState
   {
     private:
@@ -37,7 +39,7 @@ namespace smtrat
       /**In order to get the number of already performed splittings it is mandatory to store
        * a pointer to the current tree.
        */
-      ICPTree* mCorrespondingTree;
+      ICPTree<Settings>* mCorrespondingTree;
 
       /**
        * The current search box.
@@ -70,17 +72,17 @@ namespace smtrat
       /**
        * Default constructor will create an empty state with no variable bounds.
        */
-      ICPState(ICPTree* correspondingTree);
+      ICPState(ICPTree<Settings>* correspondingTree);
 
       /**
        * Behaves the samme way as the default custuctor, but sets the point to the set of variables
        */
-      ICPState(std::set<carl::Variable>* originalVariables,ICPTree* correspondingTree);
+      ICPState(std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree);
 
       /**
        * This constructor will initialize the variable bounds with a copy of parentBounds.
        */
-      ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree* correspondingTree);
+      ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree);
 
       /**
        * Returns the current search box as VariableBounds.

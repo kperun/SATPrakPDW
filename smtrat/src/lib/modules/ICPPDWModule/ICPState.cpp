@@ -6,7 +6,8 @@
 
 namespace smtrat
 {
-  ICPState::ICPState(ICPTree* correspondingTree) :
+  template<class Settings>
+  ICPState<Settings>::ICPState(ICPTree<Settings>* correspondingTree) :
     mOriginalVariables(),
     mBounds(),
     mAppliedContractionCandidates(),
@@ -15,7 +16,8 @@ namespace smtrat
   {
   }
 
-  ICPState::ICPState(std::set<carl::Variable>* originalVariables,ICPTree* correspondingTree) :
+  template<class Settings>
+  ICPState<Settings>::ICPState(std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree) :
     mOriginalVariables(originalVariables),
     mBounds(),
     mAppliedContractionCandidates(),
@@ -24,7 +26,8 @@ namespace smtrat
   {
   }
 
-  ICPState::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree* correspondingTree) :
+  template<class Settings>
+  ICPState<Settings>::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree) :
     mBounds(),
     mAppliedContractionCandidates(),
     mAppliedIntervalConstraints(),
@@ -50,17 +53,20 @@ namespace smtrat
     }
   }
 
-  vb::VariableBounds<ConstraintT>& ICPState::getBounds() {
+  template<class Settings>
+  vb::VariableBounds<ConstraintT>& ICPState<Settings>::getBounds() {
     return mBounds;
   }
 
-  void ICPState::applyContraction(ICPContractionCandidate* cc, IntervalT interval) {
+  template<class Settings>
+  void ICPState<Settings>::applyContraction(ICPContractionCandidate* cc, IntervalT interval) {
     OneOrTwo<ConstraintT> intervalConstraints = setInterval(cc->getVariable(), interval, cc->getConstraint());
     addAppliedIntervalConstraint(intervalConstraints);
     addAppliedContractionCandidate(cc);
   }
 
-  OneOrTwo<ConstraintT> ICPState::setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin) {
+  template<class Settings>
+  OneOrTwo<ConstraintT> ICPState<Settings>::setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin) {
     // since we cannot directly set the interval for a variable,
     // we will need to add two constraints. one for the lower and one for the upper bound
     // one advantage of this approach is that we can easily revert a contraction
@@ -108,27 +114,33 @@ namespace smtrat
     }
   }
 
-  IntervalT ICPState::getInterval(carl::Variable var) {
+  template<class Settings>
+  IntervalT ICPState<Settings>::getInterval(carl::Variable var) {
     mBounds.getInterval(var);
   }
 
-  vector<ICPContractionCandidate*>& ICPState::getAppliedContractionCandidates() {
+  template<class Settings>
+  vector<ICPContractionCandidate*>& ICPState<Settings>::getAppliedContractionCandidates() {
     return mAppliedContractionCandidates;
   }
 
-  void ICPState::addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate) {
+  template<class Settings>
+  void ICPState<Settings>::addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate) {
     mAppliedContractionCandidates.push_back(contractionCandidate);
   }
 
-  vector<OneOrTwo<ConstraintT> >& ICPState::getAppliedIntervalConstraints() {
+  template<class Settings>
+  vector<OneOrTwo<ConstraintT> >& ICPState<Settings>::getAppliedIntervalConstraints() {
     return mAppliedIntervalConstraints;
   }
 
-  void ICPState::addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints) {
+  template<class Settings>
+  void ICPState<Settings>::addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints) {
     mAppliedIntervalConstraints.push_back(constraints);
   }
 
-  carl::Variable ICPState::getConflictingVariable() {
+  template<class Settings>
+  carl::Variable ICPState<Settings>::getConflictingVariable() {
     for (const auto& mapEntry : mBounds.getIntervalMap()) {
       if (mapEntry.second.isEmpty()) {
         return mapEntry.first;
@@ -139,7 +151,8 @@ namespace smtrat
     return carl::freshRealVariable();
   }
 
-  bool ICPState::isTerminationConditionReached() {
+  template<class Settings>
+  bool ICPState<Settings>::isTerminationConditionReached() {
     if(mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions) {
       SMTRAT_LOG_INFO("smtrat.module","Termination reached by max iterations!\n");
       return true;
@@ -165,11 +178,13 @@ namespace smtrat
 
   }
 
-  int ICPState::computeNumberOfSplits(){
+  template<class Settings>
+  int ICPState<Settings>::computeNumberOfSplits(){
     return mCorrespondingTree->getNumberOfSplits();
   }
 
-  double ICPState::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
+  template<class Settings>
+  double ICPState<Settings>::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
     //first compute the new interval
     OneOrTwo<IntervalT> intervals = candidate.getContractedInterval(_bounds);
     //then retrieve the old one
@@ -251,7 +266,8 @@ namespace smtrat
     return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
   }
 
-  std::experimental::optional<int> ICPState::getBestContractionCandidate(vector<ICPContractionCandidate*>& candidates){
+  template<class Settings>
+  std::experimental::optional<int> ICPState<Settings>::getBestContractionCandidate(vector<ICPContractionCandidate*>& candidates){
     if(candidates.size()==0) {
       throw std::invalid_argument( "Candidates vector is empty!" );
     }
@@ -286,7 +302,8 @@ namespace smtrat
 
   }
 
-  map<carl::Variable,double> ICPState::guessSolution(){
+  template<class Settings>
+  map<carl::Variable,double> ICPState<Settings>::guessSolution(){
     map<carl::Variable,double> ret;
     //TODO: This only checks the first of possibly several intervals?
     const EvalDoubleIntervalMap& bounds = mBounds.getIntervalMap();
@@ -323,7 +340,8 @@ namespace smtrat
 
   }
 
-  carl::Variable ICPState::getBestSplitVariable(){
+  template<class Settings>
+  carl::Variable ICPState<Settings>::getBestSplitVariable(){
     OneOrTwo<IntervalT> intervals;
     double currentInterval = 0;
     double bestSplitInterval = 0;

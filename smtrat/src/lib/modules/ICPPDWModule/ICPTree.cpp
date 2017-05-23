@@ -4,7 +4,8 @@
 namespace smtrat
 {
 
-  ICPTree::ICPTree() :
+  template<class Settings>
+  ICPTree<Settings>::ICPTree() :
     mCurrentState(this),
     mParentTree(),
     mLeftChild(),
@@ -16,7 +17,8 @@ namespace smtrat
   {
   }
 
-  ICPTree::ICPTree(std::set<carl::Variable>* originalVariables) :
+  template<class Settings>
+  ICPTree<Settings>::ICPTree(std::set<carl::Variable>* originalVariables) :
     mCurrentState(originalVariables,this),
     mParentTree(),
     mLeftChild(),
@@ -28,7 +30,8 @@ namespace smtrat
   {
   }
 
-  ICPTree::ICPTree(ICPTree* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables) :
+  template<class Settings>
+  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables) :
     mCurrentState(parentBounds,originalVariables,this),
     mParentTree(parent),
     mLeftChild(),
@@ -40,7 +43,8 @@ namespace smtrat
     mOriginalVariables = originalVariables;
   }
 
-  void ICPTree::printVariableBounds() {
+  template<class Settings>
+  void ICPTree<Settings>::printVariableBounds() {
     SMTRAT_LOG_INFO("smtrat.module","Variable bounds:");
     for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
       SMTRAT_LOG_INFO("smtrat.module",mapEntry.first << " in " << mapEntry.second);
@@ -48,7 +52,8 @@ namespace smtrat
     SMTRAT_LOG_INFO("smtrat.module",std::endl);
   }
 
-  bool ICPTree::contract(vector<ICPContractionCandidate*>& contractionCandidates) {
+  template<class Settings>
+  bool ICPTree<Settings>::contract(vector<ICPContractionCandidate*>& contractionCandidates) {
     while(true) {
       printVariableBounds();
 
@@ -134,38 +139,44 @@ namespace smtrat
     }
   }
 
-  ICPState& ICPTree::getCurrentState() {
+  template<class Settings>
+  ICPState<Settings>& ICPTree<Settings>::getCurrentState() {
     return mCurrentState;
   }
 
-  std::experimental::optional<ICPTree*> ICPTree::getParentTree() {
+  template<class Settings>
+  std::experimental::optional<ICPTree<Settings>*> ICPTree<Settings>::getParentTree() {
     return mParentTree;
   }
 
-  ICPTree* ICPTree::getLeftChild() {
+  template<class Settings>
+  ICPTree<Settings>* ICPTree<Settings>::getLeftChild() {
     return mLeftChild.get();
   }
 
-  ICPTree* ICPTree::getRightChild() {
+  template<class Settings>
+  ICPTree<Settings>* ICPTree<Settings>::getRightChild() {
     return mRightChild.get();
   }
 
-  bool ICPTree::isLeaf() {
+  template<class Settings>
+  bool ICPTree<Settings>::isLeaf() {
     return (!mLeftChild && !mRightChild);
   }
 
-  vector<ICPTree*> ICPTree::getLeafNodes() {
-    vector<ICPTree*> leafNodes;
+  template<class Settings>
+  vector<ICPTree<Settings>*> ICPTree<Settings>::getLeafNodes() {
+    vector<ICPTree<Settings>*> leafNodes;
     if (isLeaf()) {
       leafNodes.push_back(this);
     }
     else {
       if (mLeftChild) {
-        vector<ICPTree*> leftLeafNodes = mLeftChild->getLeafNodes();
+        vector<ICPTree<Settings>*> leftLeafNodes = mLeftChild->getLeafNodes();
         leafNodes.insert(leafNodes.end(), leftLeafNodes.begin(), leftLeafNodes.end());
       }
       if (mRightChild) {
-        vector<ICPTree*> rightLeafNodes = mRightChild->getLeafNodes();
+        vector<ICPTree<Settings>*> rightLeafNodes = mRightChild->getLeafNodes();
         leafNodes.insert(leafNodes.end(), rightLeafNodes.begin(), rightLeafNodes.end());
       }
     }
@@ -173,27 +184,32 @@ namespace smtrat
     return leafNodes;
   }
 
-  std::experimental::optional<carl::Variable> ICPTree::getSplitDimension() {
+  template<class Settings>
+  std::experimental::optional<carl::Variable> ICPTree<Settings>::getSplitDimension() {
     return mSplitDimension;
   }
 
-  std::set<ConstraintT>& ICPTree::getConflictingConstraints() {
+  template<class Settings>
+  std::set<ConstraintT>& ICPTree<Settings>::getConflictingConstraints() {
     return mConflictingConstraints;
   }
 
-  bool ICPTree::isUnsat() {
+  template<class Settings>
+  bool ICPTree<Settings>::isUnsat() {
     return mIsUnsat;
   }
 
-  void ICPTree::split(carl::Variable var) {
+  template<class Settings>
+  void ICPTree<Settings>::split(carl::Variable var) {
     mSplitDimension = var;
 
     // we create two new search trees with copies of the original bounds
-    mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds(), mOriginalVariables);
-    mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds(), mOriginalVariables);
+    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables);
+    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables);
   }
 
-  std::set<ConstraintT> ICPTree::getConflictReasons(carl::Variable conflictVar) {
+  template<class Settings>
+  std::set<ConstraintT> ICPTree<Settings>::getConflictReasons(carl::Variable conflictVar) {
     std::set<ConstraintT> conflictReasons;
 
     // retrieve all constraints that have been used to contract this variable (in the current ICP state)
@@ -211,7 +227,8 @@ namespace smtrat
     return conflictReasons;
   }
 
-  void ICPTree::accumulateConflictReasons() {
+  template<class Settings>
+  void ICPTree<Settings>::accumulateConflictReasons() {
     if (mLeftChild && mLeftChild->isUnsat() && mRightChild && mRightChild->isUnsat()) {
       mIsUnsat = true;
       mConflictingConstraints.insert(mLeftChild->getConflictingConstraints().begin(),
@@ -221,18 +238,21 @@ namespace smtrat
     }
   }
 
-  int ICPTree::getNumberOfSplits(){
+  template<class Settings>
+  int ICPTree<Settings>::getNumberOfSplits(){
     return getRoot()->getNumberOfSplitsRecursive();
   }
 
-  ICPTree* ICPTree::getRoot(){
+  template<class Settings>
+  ICPTree<Settings>* ICPTree<Settings>::getRoot(){
     if(mParentTree) {
       return (*mParentTree)->getRoot();
     }
     return this;
   }
 
-  int ICPTree::getNumberOfSplitsRecursive(){
+  template<class Settings>
+  int ICPTree<Settings>::getNumberOfSplitsRecursive(){
     int ret = 0;
     if(mLeftChild&&mRightChild) {
       ret +=1;
@@ -246,7 +266,8 @@ namespace smtrat
     return ret;
   }
   
-  bool ICPTree::addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
+  template<class Settings>
+  bool ICPTree<Settings>::addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
     mCurrentState.getBounds().addBound(_constraint, _origin);
     
     // we need to add the constraint to all children as well
@@ -273,7 +294,8 @@ namespace smtrat
     }
   }
 
-  void ICPTree::removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
+  template<class Settings>
+  void ICPTree<Settings>::removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
     mCurrentState.getBounds().removeBound(_constraint, _origin);
 
     // TODO:
