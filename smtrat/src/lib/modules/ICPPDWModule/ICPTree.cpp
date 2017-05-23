@@ -4,6 +4,8 @@
 namespace smtrat
 {
 
+  template class ICPTree<ICPPDWSettings1>;
+
   template<class Settings>
   ICPTree<Settings>::ICPTree() :
     mCurrentState(this),
@@ -42,6 +44,8 @@ namespace smtrat
   {
     mOriginalVariables = originalVariables;
   }
+
+  template ICPTree<ICPPDWSettings1>::ICPTree(ICPTree<ICPPDWSettings1>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables);
 
   template<class Settings>
   void ICPTree<Settings>::printVariableBounds() {
@@ -198,6 +202,7 @@ namespace smtrat
   bool ICPTree<Settings>::isUnsat() {
     return mIsUnsat;
   }
+
 
   template<class Settings>
   void ICPTree<Settings>::split(carl::Variable var) {

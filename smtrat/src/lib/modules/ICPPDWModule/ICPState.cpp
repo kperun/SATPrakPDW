@@ -6,6 +6,9 @@
 
 namespace smtrat
 {
+  template class ICPState<ICPPDWSettings1>;
+
+
   template<class Settings>
   ICPState<Settings>::ICPState(ICPTree<Settings>* correspondingTree) :
     mOriginalVariables(),
@@ -153,20 +156,20 @@ namespace smtrat
 
   template<class Settings>
   bool ICPState<Settings>::isTerminationConditionReached() {
-    if(mAppliedContractionCandidates.size() > ICPPDWSettings1::maxContractions) {
+    if(mAppliedContractionCandidates.size() > Settings::maxContractions) {
       SMTRAT_LOG_INFO("smtrat.module","Termination reached by max iterations!\n");
       return true;
     }
     //otherwise check if we have reached our desired interval
     //first check if all intervals are inside the desired one
     for (auto key : (*mOriginalVariables) ) {
-      if(mBounds.getDoubleInterval(key).diameter()>ICPPDWSettings1::targetDiameter) {
+      if(mBounds.getDoubleInterval(key).diameter()>Settings::targetDiameter) {
         return false;
       }
 
     }
     // no check if maximum number of splits has been reached and terminate
-    if(computeNumberOfSplits()>ICPPDWSettings1::maxSplitNumber) {
+    if(computeNumberOfSplits()>Settings::maxSplitNumber) {
       SMTRAT_LOG_INFO("smtrat.module","Termination reached by maximal number of splits!\n");
       return true;
     }
@@ -200,65 +203,65 @@ namespace smtrat
     double oldIntervalUpper = 0;
     //first the mandatory first interval
     if(intervals.first.lowerBoundType()== carl::BoundType::INFTY) {
-      newFirstLower = -ICPPDWSettings1::bigM;
+      newFirstLower = -Settings::bigM;
     }else{
       if(intervals.first.lowerBoundType()== carl::BoundType::WEAK) {
         newFirstLower = intervals.first.lower();
       }else{ //in case it is scrict, we add a small epsilon to make it better
-        newFirstLower = intervals.first.lower() + ICPPDWSettings1::epsilon;
+        newFirstLower = intervals.first.lower() + Settings::epsilon;
       }
     }
 
     if(intervals.first.upperBoundType()== carl::BoundType::INFTY) {
-      newFirstUpper = ICPPDWSettings1::bigM;
+      newFirstUpper = Settings::bigM;
     }else{
       if(intervals.first.upperBoundType()== carl::BoundType::WEAK) {
         newFirstUpper = intervals.first.upper();
       }else{
-        newFirstUpper = intervals.first.upper() - ICPPDWSettings1::epsilon;
+        newFirstUpper = intervals.first.upper() - Settings::epsilon;
       }
     }
 
     //now the second optional interval
     if(intervals.second) {
       if((*(intervals.second)).lowerBoundType()== carl::BoundType::INFTY) {
-        newSecondLower = -ICPPDWSettings1::bigM;
+        newSecondLower = -Settings::bigM;
       }else{
         if((*(intervals.second)).lowerBoundType()== carl::BoundType::WEAK) {
           newSecondLower = (*(intervals.second)).lower();
         }else{
-          newSecondLower = (*(intervals.second)).lower() + ICPPDWSettings1::epsilon;
+          newSecondLower = (*(intervals.second)).lower() + Settings::epsilon;
         }
 
       }
       if((*(intervals.second)).upperBoundType()== carl::BoundType::INFTY) {
-        newSecondUpper = ICPPDWSettings1::bigM;
+        newSecondUpper = Settings::bigM;
       }else{
         if((*(intervals.second)).upperBoundType()== carl::BoundType::WEAK) {
           newSecondUpper = (*(intervals.second)).upper();
         }else{
-          newSecondUpper = (*(intervals.second)).upper() - ICPPDWSettings1::epsilon;
+          newSecondUpper = (*(intervals.second)).upper() - Settings::epsilon;
         }
       }
     }
     //finally the old interval
     if(old_interval.lowerBoundType()== carl::BoundType::INFTY) {
-      oldIntervalLower = -ICPPDWSettings1::bigM;
+      oldIntervalLower = -Settings::bigM;
     }else{
       if(old_interval.lowerBoundType()== carl::BoundType::WEAK) {
         oldIntervalLower = old_interval.lower();
       }else{
-        oldIntervalLower = old_interval.lower()+ICPPDWSettings1::epsilon;
+        oldIntervalLower = old_interval.lower()+Settings::epsilon;
       }
     }
 
     if(old_interval.upperBoundType()== carl::BoundType::INFTY) {
-      oldIntervalUpper = ICPPDWSettings1::bigM;
+      oldIntervalUpper = Settings::bigM;
     }else{
       if(old_interval.upperBoundType()== carl::BoundType::WEAK) {
         oldIntervalUpper = old_interval.upper();
       }else{
-        oldIntervalUpper = old_interval.upper() - ICPPDWSettings1::epsilon;
+        oldIntervalUpper = old_interval.upper() - Settings::epsilon;
       }
     }
 
@@ -290,7 +293,7 @@ namespace smtrat
     std::experimental::optional<int> ret;
 
 
-    if(currentBestGain>ICPPDWSettings1::gainThreshold) {
+    if(currentBestGain>Settings::gainThreshold) {
       //if the gain is beyond the threshold, return it
       ret = currentBest;
       return ret;
@@ -309,7 +312,7 @@ namespace smtrat
     const EvalDoubleIntervalMap& bounds = mBounds.getIntervalMap();
     for(auto& bound : bounds) {
       double mid = 0; //Default if something goes wrong
-      double epsilon = ICPPDWSettings1::epsilon;
+      double epsilon = Settings::epsilon;
       if(bound.second.isEmpty()) { //No values in interval, should not happen
         mid = 0;
       } else if (bound.second.isInfinite()) { //Both are INFTY
