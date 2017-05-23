@@ -158,10 +158,10 @@ namespace smtrat
       map<carl::Variable,double> guessSolution();
 
       /**
-       * For all stored variables and intervals, find a variable whose contraction
-       * results in a split, and return the variable where this split results in the biggest
+       * For all stored variables and intervals, find the best original variable
+       * for manual splitting.
        */
-      carl::Variable getBestSplitVariable(vector<ICPContractionCandidate*>& candidates);
+      carl::Variable getBestSplitVariable();
 
       /**
        * Return the number of splits performed.

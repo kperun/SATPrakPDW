@@ -9,6 +9,7 @@
 #include "ICPPDWModule.h"
 #include "ICPContractionCandidate.h"
 #include "ICPState.h"
+#include "ICPUtil.h"
 
 namespace smtrat
 {
@@ -29,6 +30,7 @@ namespace smtrat
       mActiveOriginalConstraints(),
       mSlackSubstitutionConstraints(),
       mActiveContractionCandidates(),
+      mActiveSimpleBounds(),
       mIsFirstCheckCore(true)
       {
       }
@@ -217,12 +219,22 @@ namespace smtrat
         // since we linearized the constraints, we actually need to activate
         // the linearized constraints instead of the original one
         for (const auto& lC : mLinearizations[constraint]) {
-          for (auto& cc : mContractionCandidates) {
-            if (cc.getConstraint() == lC) {
-              mActiveContractionCandidates.push_back(&cc);
+          // if the constraint that should be activated is a simple bound
+          // (i.e. linear with only one variable) we will directly activate it
+          if (lC.variables().size() == 1) {
+            mActiveSimpleBounds.push_back(lC);
+          }
+          // otherwise we will indirectly activate all contraction candidates
+          // which correspond to that constraint
+          else {
+            for (auto& cc : mContractionCandidates) {
+              if (cc.getConstraint() == lC) {
+                mActiveContractionCandidates.push_back(&cc);
+              }
             }
           }
 
+          // most important thing: we actually add the constraint to our search tree
           if(!mSearchTree.addConstraint(lC, constraint)) {
             causesConflict = true;
           }
@@ -252,14 +264,28 @@ namespace smtrat
         // since we linearized the constraints, we actually need to remove
         // the linearized constraints instead of the original one
         for (const auto& lC : mLinearizations[constraint]) {
-          for (auto& cc : mContractionCandidates) {
-            if (cc.getConstraint() == lC) {
-              auto ccIt = std::find(mActiveContractionCandidates.begin(), mActiveContractionCandidates.end(), &cc);
-              if (ccIt != mActiveContractionCandidates.end()) {
-                mActiveContractionCandidates.erase(ccIt);
+          // if the constraint that should be removed is a simple bound
+          // (i.e. linear with only one variable) we will directly de-activate it
+          if (lC.variables().size() == 1) {
+            auto lcIt = std::find(mActiveSimpleBounds.begin(), mActiveSimpleBounds.end(), lC);
+            if (lcIt != mActiveSimpleBounds.end()) {
+              mActiveSimpleBounds.erase(lcIt);
+            }
+          }
+          // otherwise we will indirectly de-activate all contraction candidates
+          // which correspond to that constraint
+          else {
+            for (auto& cc : mContractionCandidates) {
+              if (cc.getConstraint() == lC) {
+                auto ccIt = std::find(mActiveContractionCandidates.begin(), mActiveContractionCandidates.end(), &cc);
+                if (ccIt != mActiveContractionCandidates.end()) {
+                  mActiveContractionCandidates.erase(ccIt);
+                }
               }
             }
           }
+
+          // most important thing: we actually remove the constraint from within our search tree
           mSearchTree.removeConstraint(lC, constraint);
         }
       }
@@ -299,10 +325,10 @@ namespace smtrat
       // and might be removed later and constraints which correspond to initial bounds for variables
       // during checkCore we can be sure that all necessary constraints have been added already
       // but we will call this method only in the very first checkCore call
-      if(mIsFirstCheckCore) {
+      /*if(mIsFirstCheckCore) {
         initBounds();
         mIsFirstCheckCore = false;
-      }
+      }*/
 
       // we need to search through all leaf nodes of the search tree
       std::stack<ICPTree*> searchStack;
@@ -386,14 +412,28 @@ namespace smtrat
 
   template<class Settings>
     void ICPPDWModule<Settings>::createInfeasableSubset() {
+      // the base set of conflicting constraints
+      std::set<ConstraintT> conflictingConstraints = mSearchTree.getConflictingConstraints();
+
+      // and we need to add all used simple bounds
+      // we need to do this manually here, because the search tree never "contracts" with simple bounds
+      // and thus, they will not appear in its conflicting constraint set
+      for (const ConstraintT& c : mActiveSimpleBounds) {
+        // we actually only need to add those simple bounds where the variable was used
+        // during one of the contraction steps
+        if (ICPUtil::occursVariableInConstraints(*(c.variables().begin()), conflictingConstraints)) {
+          conflictingConstraints.insert(c);
+        }
+      }
+
       SMTRAT_LOG_INFO("smtrat.module","Reasons: " << std::endl);
-      for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
+      for (const ConstraintT& c : conflictingConstraints) {
         SMTRAT_LOG_INFO("smtrat.module",mDeLinearizations[c] << ", ");
       }
       //now we have a set of conflicting constraints representing the infeasable set (TODO:minimal subset??)
       //store it in the variable "mInfeasibleSubsets"
       FormulaSetT infeasibleSubset; //a set of formulas which result in an UNSAT situtation
-      for (const ConstraintT& c : mSearchTree.getConflictingConstraints()) {
+      for (const ConstraintT& c : conflictingConstraints) {
         //get de-linearized constraints and their corresponding formulas, add them to the set
         //of infeasiable constraints
         infeasibleSubset.insert(mConstraintFormula[mDeLinearizations[c]]);

@@ -1,4 +1,5 @@
 #include "ICPTree.h"
+#include "ICPUtil.h"
 
 namespace smtrat
 {
@@ -10,7 +11,8 @@ namespace smtrat
     mRightChild(),
     mSplitDimension(),
     mConflictingConstraints(),
-    mOriginalVariables()
+    mOriginalVariables(),
+    mIsUnsat(false)
   {
   }
 
@@ -21,7 +23,8 @@ namespace smtrat
     mRightChild(),
     mSplitDimension(),
     mConflictingConstraints(),
-    mOriginalVariables(originalVariables)
+    mOriginalVariables(originalVariables),
+    mIsUnsat(false)
   {
   }
 
@@ -31,7 +34,8 @@ namespace smtrat
     mLeftChild(),
     mRightChild(),
     mSplitDimension(),
-    mConflictingConstraints()
+    mConflictingConstraints(),
+    mIsUnsat(false)
   {
     mOriginalVariables = originalVariables;
   }
@@ -52,8 +56,9 @@ namespace smtrat
       // i.e. no variable has an empty interval
       if (mCurrentState.getBounds().isConflicting()) {
         // if the bounds do contain a conflict, this ICP node is unsatisfiable
-        // so we retrieve the set of conflicting constraints and add them to our state
+        mIsUnsat = true;
 
+        // so we retrieve the set of conflicting constraints and add them to our state
         carl::Variable conflictVar = mCurrentState.getConflictingVariable();
         mConflictingConstraints = getConflictReasons(conflictVar);
 
@@ -112,16 +117,17 @@ namespace smtrat
         }else{ //otherwise terminate and return false
           SMTRAT_LOG_INFO("smtrat.module","Gain too small -> split!\n");
           //First extract the best variable for splitting
-          carl::Variable splittingVar = mCurrentState.getBestSplitVariable(contractionCandidates);
+          carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
           IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
-          IntervalT firstNewInterval(oldInterval.lower(), oldInterval.lowerBoundType(), oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::WEAK);
-          IntervalT secondNewInterval(oldInterval.lower() + oldInterval.diameter() / 2.0, carl::BoundType::STRICT, oldInterval.upper(), oldInterval.upperBoundType());
+          
+          std::pair<IntervalT, IntervalT> newIntervals = ICPUtil::splitInterval(oldInterval);
+
           SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: "
-              << firstNewInterval << " and " << secondNewInterval << endl);
+              << newIntervals.first << " and " << newIntervals.second << endl);
+
           split(splittingVar);
-          //TODO: Think about origins
-          mLeftChild->getCurrentState().setInterval(splittingVar, firstNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);
-          mRightChild->getCurrentState().setInterval(splittingVar, secondNewInterval,mCurrentState.getBounds().getOriginsOfBounds(splittingVar)[0]);
+          mLeftChild->getCurrentState().setInterval(splittingVar, newIntervals.first, ConstraintT()); // empty origin
+          mRightChild->getCurrentState().setInterval(splittingVar, newIntervals.second, ConstraintT());
           return true;
         }
       }
@@ -176,15 +182,15 @@ namespace smtrat
   }
 
   bool ICPTree::isUnsat() {
-    return !mConflictingConstraints.empty();
+    return mIsUnsat;
   }
 
   void ICPTree::split(carl::Variable var) {
     mSplitDimension = var;
 
     // we create two new search trees with copies of the original bounds
-    mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds(),mOriginalVariables);
-    mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds(),mOriginalVariables);
+    mLeftChild  = make_unique<ICPTree>(this, mCurrentState.getBounds(), mOriginalVariables);
+    mRightChild = make_unique<ICPTree>(this, mCurrentState.getBounds(), mOriginalVariables);
   }
 
   std::set<ConstraintT> ICPTree::getConflictReasons(carl::Variable conflictVar) {
@@ -207,10 +213,11 @@ namespace smtrat
 
   void ICPTree::accumulateConflictReasons() {
     if (mLeftChild && mLeftChild->isUnsat() && mRightChild && mRightChild->isUnsat()) {
+      mIsUnsat = true;
       mConflictingConstraints.insert(mLeftChild->getConflictingConstraints().begin(),
-          mLeftChild->getConflictingConstraints().end());
+                                     mLeftChild->getConflictingConstraints().end());
       mConflictingConstraints.insert(mRightChild->getConflictingConstraints().begin(),
-          mRightChild->getConflictingConstraints().end());
+                                     mRightChild->getConflictingConstraints().end());
     }
   }
 
@@ -254,23 +261,52 @@ namespace smtrat
       isRightConflicting = !mRightChild->addConstraint(_constraint, _origin);
     }
 
-    if (isLeftConflicting || isRightConflicting || mCurrentState.getBounds().isConflicting()) {
-      // the added constraint is already conflicting with other bounds, so we return false
+    if ((isLeftConflicting && isRightConflicting) || mCurrentState.getBounds().isConflicting()) {
+      // the added constraint yields in an unsat search tree
+      mIsUnsat = true;
+      // TODO: what do with mConflictingConstraints?
       return false;
     }
     else {
+      // TODO: what do with mConflictingConstraints?
       return true;
     }
   }
 
   void ICPTree::removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
-    // TODO
     mCurrentState.getBounds().removeBound(_constraint, _origin);
+
+    // TODO:
+    /*
+     * Go through the contraction candidate list from first to last applied cc.
+     * If a cc with the removed constraint was applied, we need to revert all following applied CCs.
+     * This can be done in the following steps:
+     * 1. delete the children (if there are any)
+     * 2. go through the appliedIntervalBounds from last to the current cc
+     *    and remove those bounds form the variable bounds object
+     */
+
+    // we need to recursively remove the bounds form child trees as well
+    bool isLeftConflicting = false;
     if (mLeftChild) {
       mLeftChild->removeConstraint(_constraint, _origin);
+      isLeftConflicting = mLeftChild->isUnsat();
     }
+
+    bool isRightConflicting = false;
     if (mRightChild) {
       mRightChild->removeConstraint(_constraint, _origin);
+      isRightConflicting = mRightChild->isUnsat();
+    }
+
+    // removal of this bound might have made this state sat again
+    if ((isLeftConflicting && isRightConflicting) || mCurrentState.getBounds().isConflicting()) {
+      mIsUnsat = true;
+      // TODO: what do with mConflictingConstraints?
+    }
+    else {
+      mIsUnsat = false;
+      mConflictingConstraints.clear();
     }
   }
 }

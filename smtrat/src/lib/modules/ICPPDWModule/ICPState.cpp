@@ -36,12 +36,17 @@ namespace smtrat
       carl::Variable var = mapEntry.first;
       IntervalT interval = mapEntry.second;
 
-      // since the origins are stored in the parent bounds
-      // we will restore them later (during getConflictReasons)
-      // but since we need an origin, we simply take the first one
-      ConstraintT origin = parentBounds.getOriginsOfBounds(var)[0];
-
-      setInterval(var, interval, origin);
+      // if the interval is infinite, there is no point in setting it
+      // (setInterval actually expects a bounded interval)
+      if (!interval.isInfinite()) {
+        setInterval(var, interval, ConstraintT());
+      }
+      else {
+        // we also need to make sure the copied variable bounds object knows about unbounded variables
+        // to this end, we will simply call "getDoubleInterval" on every unbounded variable once
+        // this method call will emplace an unbounded interval for this variable in the variable bounds object
+        mBounds.getDoubleInterval(var);
+      }
     }
   }
 
@@ -318,27 +323,25 @@ namespace smtrat
 
   }
 
-  carl::Variable ICPState::getBestSplitVariable(vector<ICPContractionCandidate*>& candidates){
+  carl::Variable ICPState::getBestSplitVariable(){
     OneOrTwo<IntervalT> intervals;
     double currentInterval = 0;
     double bestSplitInterval = 0;
-    double bestSplitCandidate = 0;
+    carl::Variable bestSplitVariable;
     cout << "Splitting" << endl;
 
-    for (int it = 0; it < (int) candidates.size(); it++) {
-      if((*mOriginalVariables).find(candidates[it]->getVariable()) != (*mOriginalVariables).end()) {
-        //first compute the diameter of a variable
-        currentInterval = mBounds.getDoubleInterval(candidates[it]->getVariable()).diameter();
-        //now check if the new interval is "bigger"
-        if(bestSplitInterval<currentInterval) {
-          bestSplitCandidate = it;
-          bestSplitInterval = currentInterval;
-        }
+    for (carl::Variable var : *mOriginalVariables) {
+      //first compute the diameter of a variable
+      currentInterval = mBounds.getDoubleInterval(var).diameter();
+      //now check if the new interval is "bigger"
+      if(bestSplitInterval<currentInterval) {
+        bestSplitVariable = var;
+        bestSplitInterval = currentInterval;
       }
     }
 
     //finally return the variable of the biggest interval
-    return candidates[bestSplitCandidate]->getVariable();
+    return bestSplitVariable;
   }
 
 

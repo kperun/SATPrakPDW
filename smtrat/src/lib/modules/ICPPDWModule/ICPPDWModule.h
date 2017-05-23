@@ -48,6 +48,10 @@ namespace smtrat
       // only the contraction candidates which contain active constraints
       vector<ICPContractionCandidate*> mActiveContractionCandidates;
 
+      // only the active linear constraints with one variable
+      // i.e. constraints without contraction candidates
+      vector<ConstraintT> mActiveSimpleBounds;
+
       /**
        * We need to linearize constraints for ICP.
        * So we will store a map from original constraints to the linearized ones
@@ -64,11 +68,10 @@ namespace smtrat
       // a map from slack variables to the constraint of their substitution
       std::map<carl::Variable, ConstraintT> mSlackSubstitutionConstraints;
 
-
-    private:
       // stores whether the check core has been called yet
       bool mIsFirstCheckCore;
 
+    private:
       /**
        * Linearizes a constraint.
        *

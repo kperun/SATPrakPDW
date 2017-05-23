@@ -37,6 +37,9 @@ namespace smtrat
       // In case of UNSAT, this set will contain the reason for unsatisifiabilty.
       std::set<ConstraintT> mConflictingConstraints;
 
+      // Stores whether this state has been determined to be unsat
+      bool mIsUnsat;
+
     public:
       ICPTree();
       ICPTree(std::set<carl::Variable>* originalVariables);
@@ -103,7 +106,7 @@ namespace smtrat
        *
        * @param _constraint The new constraint
        * @param _origin The formula where the constraint originates from
-       * @return true if the new constraint immediatly caused conflicting bounds
+       * @return false if the new constraint immediatly caused conflicting bounds
        */
       bool addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin );
 

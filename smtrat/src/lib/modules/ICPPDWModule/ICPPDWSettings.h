@@ -28,13 +28,17 @@ namespace smtrat
     static constexpr int maxContractions = 30;
 
     // desired interval
-    static constexpr double targetDiameter = 1;
+    static constexpr double targetDiameter = 1.0;
 
     // maximal number of splits allowed
     static constexpr int maxSplitNumber = 100;
 
     //we define a big M in order to be able to compute gain in case of inf intervals
-    static constexpr int bigM = 2000; //twice the max interval, since we have to consider an intervall [-inf,0] to be better than [-1000,0]
+    // it is defined as twice the max interval, since we have to consider an intervall [-inf,0] to be better than [-1000,0]
+    // since (in our examples), original vars can go from -1000 to 1000, in polynomials (e.g. x³) the value can get really big
+    // so this is good enough for at most cubic polynomials, i.e. 10*1000³
+    static constexpr double maxOriginalVarBound = 1000.0;
+    static constexpr double bigM = 10 * maxOriginalVarBound * maxOriginalVarBound * maxOriginalVarBound;
 
     //gain threshold. Best gain in contraction lower than this will result in a manual split.
     static constexpr double gainThreshold = 0.01;
