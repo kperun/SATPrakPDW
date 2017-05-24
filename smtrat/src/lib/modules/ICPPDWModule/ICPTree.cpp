@@ -332,7 +332,7 @@ namespace smtrat
 
   template<class Settings>
   void ICPTree<Settings>::removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
-    // since we always add every constraints, we also need to remove them 
+    // since we always add every constraint, we also need to remove every one
     mCurrentState.getBounds().removeBound(_constraint, _origin);
 
     // also remove simple bounds from the active simple bound set
@@ -340,31 +340,34 @@ namespace smtrat
       mActiveSimpleBounds.erase(_constraint);
     }
 
-    // TODO:
-    /*
-     * Go through the contraction candidate list from first to last applied cc.
-     * If a cc with the removed constraint was applied, we need to revert all following applied CCs.
-     * This can be done in the following steps:
-     * 1. delete the children (if there are any)
-     * 2. go through the appliedIntervalBounds from last to the current cc
-     *    and remove those bounds form the variable bounds object
-     */
+    // actually remove the constraint from the current icp state
+    // this method will revert all applied contraction candidates
+    bool isUsed = mCurrentState.removeConstraint(_constraint);
 
-    // we need to recursively remove the bounds form child trees as well
-    bool isLeftConflicting = false;
-    if (mLeftChild) {
-      mLeftChild->removeConstraint(_constraint, _origin);
-      isLeftConflicting = mLeftChild->isUnsat();
+    // if the constraint that should be removed has not been used at all
+    // we can simply tell the children to remove the constraint and be done with it
+    bool isLeftUnsat = false;
+    bool isRightUnsat = false;
+    if (!isUsed) {
+      if (mLeftChild) {
+        mLeftChild->removeConstraint(_constraint, _origin);
+        isLeftUnsat = mLeftChild->isUnsat();
+      }
+
+      if (mRightChild) {
+        mRightChild->removeConstraint(_constraint, _origin);
+        isRightUnsat = mRightChild->isUnsat();
+      }
     }
-
-    bool isRightConflicting = false;
-    if (mRightChild) {
-      mRightChild->removeConstraint(_constraint, _origin);
-      isRightConflicting = mRightChild->isUnsat();
+    // it has been used, so after the icp state reverted all applied contractions
+    // we need to remove the children
+    else {
+      mLeftChild.reset();
+      mRightChild.reset();
     }
 
     // removal of this bound might have made this state sat again
-    if ((isLeftConflicting && isRightConflicting) || mCurrentState.getBounds().isConflicting()) {
+    if ((isLeftUnsat && isRightUnsat) || mCurrentState.getBounds().isConflicting()) {
       mIsUnsat = true;
       // TODO: what do with mConflictingConstraints?
     }

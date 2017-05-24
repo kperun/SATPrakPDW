@@ -128,6 +128,17 @@ namespace smtrat
       void addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints);
 
       /**
+       * Removes a constraint from this ICP State.
+       *
+       * It not only removes the constraint itself from the variable bounds,
+       * but also all contraction candidates that have been after the first usage of that constraint.
+       *
+       * @param constraint the constraint that should be removed
+       * @return whether the constraint has been used in this icp state at all
+       */
+      bool removeConstraint(const ConstraintT& constraint);
+
+      /**
        * @return the variable that has an empty interval.
        */
       carl::Variable getConflictingVariable();
@@ -166,9 +177,16 @@ namespace smtrat
       carl::Variable getBestSplitVariable();
 
       /**
-       * Return the number of splits performed.
+       * @return the number of splits performed.
        */
       int computeNumberOfSplits();
+
+    private:
+      /**
+       * Removes the given interval constraints from the variable bounds.
+       * @param intervalConstraints one or two interval constraints that should be removed
+       */
+      void removeIntervalConstraints(const OneOrTwo<ConstraintT>& intervalConstraints, const ConstraintT& origin);
 
   };
 }

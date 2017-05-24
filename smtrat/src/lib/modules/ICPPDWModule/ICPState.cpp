@@ -2,6 +2,7 @@
 #include "ICPContractionCandidate.h"
 #include "ICPTree.h"
 #include "ICPPDWModule.h"
+#include "ICPUtil.h"
 #include "../../logging.h"
 
 namespace smtrat
@@ -140,6 +141,59 @@ namespace smtrat
   template<class Settings>
   void ICPState<Settings>::addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints) {
     mAppliedIntervalConstraints.push_back(constraints);
+  }
+
+  template<class Settings>
+  bool ICPState<Settings>::removeConstraint(const ConstraintT& constraint) {
+    // if we remove a constraint that has been used in this ICPState, all subsequent contractions become invalid
+    // so we need to revert every applied contraction from the first application of the removed constraint
+    int firstApplicationIndex = -1;
+    bool isUsed = false;
+
+    // a simple bound is not used as a contraction candidate, but simply applied to the bounds
+    // thus, we assume that a simple bound is always used immediatly
+    if (ICPUtil<Settings>::isSimpleBound(constraint)) {
+      // basically, we need to revert all changes, since the very first contraction candidate
+      // will already have made use of the simple bound
+      firstApplicationIndex = 0;
+      isUsed = true;
+    }
+    else {
+      // we find the first usage of the removed constraint
+      for (int i = 0; i < (int) mAppliedContractionCandidates.size(); i++) {
+        if (mAppliedContractionCandidates[i]->getConstraint() == constraint) {
+          firstApplicationIndex = i;
+          isUsed = true;
+          break;
+        }
+      }
+    }
+
+    // if it has not been used at all, we don't have to do anything
+    if (!isUsed) {
+      return false;
+    }
+    // the constraint has been used, so we traverse the applied contraction from the end
+    // until the first application index, and revert all bound constraints that were applied
+    else {
+      for (int i = mAppliedIntervalConstraints.size() - 1; i >= firstApplicationIndex; i--) {
+        removeIntervalConstraints(mAppliedIntervalConstraints[i], mAppliedContractionCandidates[i]->getConstraint());
+      }
+      // actually delete those applied entries from the vectors
+      mAppliedContractionCandidates.resize(firstApplicationIndex);
+      mAppliedIntervalConstraints.resize(firstApplicationIndex);
+    }
+  }
+
+  template<class Settings>
+  void ICPState<Settings>::removeIntervalConstraints(const OneOrTwo<ConstraintT>& intervalConstraints, const ConstraintT& origin) {
+    const ConstraintT& constraint1 = intervalConstraints.first;
+    mBounds.removeBound(constraint1, origin);
+
+    if (intervalConstraints.second) {
+      const ConstraintT& constraint2 = *(intervalConstraints.second);
+      mBounds.removeBound(constraint2, origin);
+    }
   }
 
   template<class Settings>
