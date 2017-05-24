@@ -62,5 +62,16 @@ namespace smtrat
         IntervalT secondNewInterval(midpoint, carl::BoundType::STRICT, interval.upper(), interval.upperBoundType());
         return std::make_pair(firstNewInterval, secondNewInterval);
       }
+
+      /**
+       * Checks whether the constraints represents a simple bound that can be directly used in VariableBound.
+       * A simple bound is a constraint of the form a*x - b ~ 0.
+       * @param constraint the constraint to check
+       * @return true if it is a simple bound
+       */
+      static bool isSimpleBound(ConstraintT constraint) {
+        const carl::Variable& var = *constraint.variables().begin();
+        return (constraint.variables().size() == 1 && constraint.maxDegree(var) == 1);
+      }
   };
 }

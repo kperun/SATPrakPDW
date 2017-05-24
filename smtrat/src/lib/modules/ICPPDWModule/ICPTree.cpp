@@ -15,7 +15,8 @@ namespace smtrat
     mSplitDimension(),
     mConflictingConstraints(),
     mOriginalVariables(),
-    mIsUnsat(false)
+    mIsUnsat(false),
+    mActiveSimpleBounds()
   {
   }
 
@@ -28,21 +29,27 @@ namespace smtrat
     mSplitDimension(),
     mConflictingConstraints(),
     mOriginalVariables(originalVariables),
-    mIsUnsat(false)
+    mIsUnsat(false),
+    mActiveSimpleBounds()
   {
   }
 
   template<class Settings>
-  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables) :
+  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds) :
     mCurrentState(parentBounds,originalVariables,this),
     mParentTree(parent),
     mLeftChild(),
     mRightChild(),
     mSplitDimension(),
     mConflictingConstraints(),
-    mIsUnsat(false)
+    mOriginalVariables(originalVariables),
+    mIsUnsat(false),
+    mActiveSimpleBounds(simpleBounds)
   {
-    mOriginalVariables = originalVariables;
+    // we need to actually add all the simple bounds to our new icp state
+    for (const ConstraintT& simpleBound : mActiveSimpleBounds) {
+      mCurrentState.getBounds().addBound(simpleBound, simpleBound);
+    }
   }
 
 
@@ -82,7 +89,7 @@ namespace smtrat
         // every child of the parent is unsat, and thus, the parent is unsat
         // if that is the case, we need to propagate and accumulate the conflicting reasons
         if (mParentTree) {
-          (*mParentTree)->accumulateConflictReasons();
+          (*mParentTree)->accumulateConflictReasons(conflictVar);
         }
 
         // we will terminate, but we did not split the search space
@@ -208,37 +215,53 @@ namespace smtrat
     mSplitDimension = var;
 
     // we create two new search trees with copies of the original bounds
-    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables);
-    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables);
+    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds);
+    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds);
   }
 
   template<class Settings>
   std::set<ConstraintT> ICPTree<Settings>::getConflictReasons(carl::Variable conflictVar) {
     std::set<ConstraintT> conflictReasons;
 
-    // retrieve all constraints that have been used to contract this variable (in the current ICP state)
+    // retrieve all constraints that have been used
+    // TODO: only use constraints that have been used to contract the conflict variable (in the current ICP state)
     vector<ICPContractionCandidate*> appliedCCs = mCurrentState.getAppliedContractionCandidates();
     for (ICPContractionCandidate* cc : appliedCCs) {
       conflictReasons.insert(cc->getConstraint());
     }
 
-    // retrieve all constraints that have been used to contract this variable (in all parent states)
-    if(mParentTree) {
-      std::set<ConstraintT> parentReasons = (*mParentTree)->getConflictReasons(conflictVar);
-      conflictReasons.insert(parentReasons.begin(), parentReasons.end());
+    // and we need to add all used simple bounds
+    // we need to do this manually here, because the search tree never "contracts" with simple bounds
+    // and thus, they will not appear in its conflicting constraint set
+    for (const ConstraintT& c : mActiveSimpleBounds) {
+      // we actually only need to add those simple bounds where the variable was used
+      // during one of the contraction steps
+      if (ICPUtil<Settings>::occursVariableInConstraints(*(c.variables().begin()), conflictReasons)) {
+        conflictReasons.insert(c);
+      }
     }
 
     return conflictReasons;
   }
 
   template<class Settings>
-  void ICPTree<Settings>::accumulateConflictReasons() {
+  void ICPTree<Settings>::accumulateConflictReasons(carl::Variable conflictVar) {
     if (mLeftChild && mLeftChild->isUnsat() && mRightChild && mRightChild->isUnsat()) {
       mIsUnsat = true;
-      mConflictingConstraints.insert(mLeftChild->getConflictingConstraints().begin(),
-                                     mLeftChild->getConflictingConstraints().end());
-      mConflictingConstraints.insert(mRightChild->getConflictingConstraints().begin(),
-                                     mRightChild->getConflictingConstraints().end());
+      std::set<ConstraintT> leftReasons = mLeftChild->getConflictingConstraints();
+      std::set<ConstraintT> rightReasons = mRightChild->getConflictingConstraints();
+      mConflictingConstraints.insert(leftReasons.begin(), leftReasons.end());
+      mConflictingConstraints.insert(rightReasons.begin(), rightReasons.end());
+
+      // we accumulated the conflict reasons of the left and right child
+      // and now we need to add the conflict reasons of this parent tree
+      std::set<ConstraintT> parentReasons = getConflictReasons(conflictVar);
+      mConflictingConstraints.insert(parentReasons.begin(), parentReasons.end());
+
+      // we need to accumulate further
+      if (mParentTree) {
+        (*mParentTree)->accumulateConflictReasons(conflictVar);
+      }
     }
   }
 
@@ -272,7 +295,16 @@ namespace smtrat
   
   template<class Settings>
   bool ICPTree<Settings>::addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
+    // we add all constraints to the variable bounds, always
+    // even though the variable bounds cannot deduce anything from non-simple bounds
+    // it will still need to know about the occurring variables
     mCurrentState.getBounds().addBound(_constraint, _origin);
+
+    // however, in order to propagate and later remove simple bounds
+    // we need to store them seperately
+    if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
+      mActiveSimpleBounds.insert(_constraint);
+    }
     
     // we need to add the constraint to all children as well
     // otherwise the leaf nodes will not know about the new constraint
@@ -300,7 +332,13 @@ namespace smtrat
 
   template<class Settings>
   void ICPTree<Settings>::removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
+    // since we always add every constraints, we also need to remove them 
     mCurrentState.getBounds().removeBound(_constraint, _origin);
+
+    // also remove simple bounds from the active simple bound set
+    if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
+      mActiveSimpleBounds.erase(_constraint);
+    }
 
     // TODO:
     /*

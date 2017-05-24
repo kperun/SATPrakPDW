@@ -98,11 +98,6 @@ namespace smtrat
       void createAllContractionCandidates();
 
       /**
-       * Initializes the bounds of all variables.
-       */
-      void initBounds();
-
-      /**
        * Tries to guess a solution and checks if all constraints are satisfied by that model.
        * If it finds a correct model, it will be returned. Otherwise, an empty optional will be returned.
        *

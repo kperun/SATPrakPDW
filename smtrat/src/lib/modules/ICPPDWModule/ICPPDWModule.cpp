@@ -136,26 +136,6 @@ namespace smtrat
     }
 
   template<class Settings>
-    void ICPPDWModule<Settings>::initBounds() {
-      // the bounds for original variables have been added through addCore already
-
-      // we only need to update bounds for slack variables in this method
-      for (const auto& mapEntry : mSlackSubstitutionConstraints) {
-        const carl::Variable slackVar = mapEntry.first;
-        const ConstraintT& slackConstraint = mapEntry.second;
-
-        Contractor<carl::SimpleNewton> evaluator(slackConstraint.lhs());
-        // we can ignore the second interval since contracting monome = slack for slack never results in splits
-        IntervalT initialInterval, ignore;
-        // we add the constraint by itself to the bound so that the VariableBounds object knows about our variables
-        mSearchTree.getCurrentState().getBounds().addBound(slackConstraint, slackConstraint);
-        evaluator(mSearchTree.getCurrentState().getBounds().getIntervalMap(), slackVar, initialInterval, ignore, true, true);
-        mSearchTree.getCurrentState().setInterval(slackVar, initialInterval, slackConstraint);
-      }
-    }
-
-
-  template<class Settings>
     bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
     {
       // we only consider actual constraints
@@ -221,7 +201,7 @@ namespace smtrat
         for (const auto& lC : mLinearizations[constraint]) {
           // if the constraint that should be activated is a simple bound
           // (i.e. linear with only one variable) we will directly activate it
-          if (lC.variables().size() == 1) {
+          if (ICPUtil<Settings>::isSimpleBound(lC)) {
             mActiveSimpleBounds.push_back(lC);
           }
           // otherwise we will indirectly activate all contraction candidates
@@ -266,7 +246,7 @@ namespace smtrat
         for (const auto& lC : mLinearizations[constraint]) {
           // if the constraint that should be removed is a simple bound
           // (i.e. linear with only one variable) we will directly de-activate it
-          if (lC.variables().size() == 1) {
+          if (ICPUtil<Settings>::isSimpleBound(lC)) {
             auto lcIt = std::find(mActiveSimpleBounds.begin(), mActiveSimpleBounds.end(), lC);
             if (lcIt != mActiveSimpleBounds.end()) {
               mActiveSimpleBounds.erase(lcIt);
@@ -318,17 +298,6 @@ namespace smtrat
         SMTRAT_LOG_INFO("smtrat.module", *cc);
       }
       SMTRAT_LOG_INFO("smtrat.module", "");
-
-      // initialize the bounds of all variables
-      // we are initializing them during checkCore and not duringInit,
-      // because we cannot distinguish between constraints that were added by the boolean solver
-      // and might be removed later and constraints which correspond to initial bounds for variables
-      // during checkCore we can be sure that all necessary constraints have been added already
-      // but we will call this method only in the very first checkCore call
-      /*if(mIsFirstCheckCore) {
-        initBounds();
-        mIsFirstCheckCore = false;
-      }*/
 
       // we need to search through all leaf nodes of the search tree
       std::stack<ICPTree<Settings>*> searchStack;
@@ -414,17 +383,6 @@ namespace smtrat
     void ICPPDWModule<Settings>::createInfeasableSubset() {
       // the base set of conflicting constraints
       std::set<ConstraintT> conflictingConstraints = mSearchTree.getConflictingConstraints();
-
-      // and we need to add all used simple bounds
-      // we need to do this manually here, because the search tree never "contracts" with simple bounds
-      // and thus, they will not appear in its conflicting constraint set
-      for (const ConstraintT& c : mActiveSimpleBounds) {
-        // we actually only need to add those simple bounds where the variable was used
-        // during one of the contraction steps
-        if (ICPUtil<Settings>::occursVariableInConstraints(*(c.variables().begin()), conflictingConstraints)) {
-          conflictingConstraints.insert(c);
-        }
-      }
 
       SMTRAT_LOG_INFO("smtrat.module","Reasons: " << std::endl);
       for (const ConstraintT& c : conflictingConstraints) {

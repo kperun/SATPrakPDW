@@ -41,10 +41,13 @@ namespace smtrat
       // Stores whether this state has been determined to be unsat
       bool mIsUnsat;
 
+      // stores all simple bounds that have been used to initialize the variable bounds
+      std::set<ConstraintT> mActiveSimpleBounds;
+
     public:
       ICPTree();
       ICPTree(std::set<carl::Variable>* originalVariables);
-      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables);
+      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds, std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds);
 
       /**
        * Contracts the current ICP state until either:
@@ -141,8 +144,9 @@ namespace smtrat
        * Accumulates all conflict reasons of the children as its own conflict reasons.
        * But only if all child trees are indeed unsat.
        * If at least one of the children is not unsat, this method does nothing.
+       * @param conflictVar the variable that has been contracted to an empty interval
        */
-      void accumulateConflictReasons();
+      void accumulateConflictReasons(carl::Variable conflictVar);
       /**
        * Returns the root of the overall tree. Required for counting number of splits.
        */
