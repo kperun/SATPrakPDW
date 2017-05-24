@@ -336,15 +336,31 @@ namespace smtrat
     if(candidates.size()==1) {
       return 0; //return the first element
     }
+    //store the new diameter in case two candidates with equal gain are regarded
+    double currentBestAbsoluteReduction = 0;
+
     //store the current best candidate index
     int currentBest = 0;
     std::experimental::optional<double> currentBestGain = computeGain(*(candidates[currentBest]),mBounds);
     for (int it = 1; it < (int) candidates.size(); it++) {
       double currentGain = computeGain(*(candidates[it]), mBounds);
-      if(currentGain>currentBestGain) {
+      if(currentGain-(*currentBestGain)>Settings::upperDelta) {//the delta states that between the old and the new gain
+        //the difference has to be at least upperDelta, by using this behavior we are able to enforce that only candidates which 
+        //achieve a certain gain are regarded as new optimal
         //now set the new best candidate as current
         currentBestGain = currentGain;
         currentBest = it;
+        //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
+        currentBestAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
+      }else if(currentGain-(*currentBestGain)>Settings::lowerDelta){
+        //if the gain is not high enough but still almost the same, it would be interesting to consider the absolute interval reduction
+        double currentNewAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
+        //now check if the 
+        if(currentBestAbsoluteReduction<currentNewAbsoluteReduction){
+            currentBestAbsoluteReduction = currentNewAbsoluteReduction;
+            currentBestGain = currentGain;
+            currentBest = it;
+        }
       }
     }
 
