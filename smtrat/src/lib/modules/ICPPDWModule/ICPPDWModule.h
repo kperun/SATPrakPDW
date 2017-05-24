@@ -48,10 +48,6 @@ namespace smtrat
       // only the contraction candidates which contain active constraints
       vector<ICPContractionCandidate*> mActiveContractionCandidates;
 
-      // only the active linear constraints with one variable
-      // i.e. constraints without contraction candidates
-      vector<ConstraintT> mActiveSimpleBounds;
-
       /**
        * We need to linearize constraints for ICP.
        * So we will store a map from original constraints to the linearized ones

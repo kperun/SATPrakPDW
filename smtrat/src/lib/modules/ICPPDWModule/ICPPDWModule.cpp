@@ -30,7 +30,6 @@ namespace smtrat
       mActiveOriginalConstraints(),
       mSlackSubstitutionConstraints(),
       mActiveContractionCandidates(),
-      mActiveSimpleBounds(),
       mIsFirstCheckCore(true)
       {
       }
@@ -199,22 +198,13 @@ namespace smtrat
         // since we linearized the constraints, we actually need to activate
         // the linearized constraints instead of the original one
         for (const auto& lC : mLinearizations[constraint]) {
-          // if the constraint that should be activated is a simple bound
-          // (i.e. linear with only one variable) we will directly activate it
-          if (ICPUtil<Settings>::isSimpleBound(lC)) {
-            mActiveSimpleBounds.push_back(lC);
-          }
-          // otherwise we will indirectly activate all contraction candidates
-          // which correspond to that constraint
-          else {
-            for (auto& cc : mContractionCandidates) {
-              if (cc.getConstraint() == lC) {
-                mActiveContractionCandidates.push_back(&cc);
-              }
+          for (auto& cc : mContractionCandidates) {
+            if (cc.getConstraint() == lC) {
+              mActiveContractionCandidates.push_back(&cc);
             }
           }
 
-          // most important thing: we actually add the constraint to our search tree
+          // we actually add the constraint to our search tree
           if(!mSearchTree.addConstraint(lC, constraint)) {
             causesConflict = true;
           }
@@ -244,28 +234,16 @@ namespace smtrat
         // since we linearized the constraints, we actually need to remove
         // the linearized constraints instead of the original one
         for (const auto& lC : mLinearizations[constraint]) {
-          // if the constraint that should be removed is a simple bound
-          // (i.e. linear with only one variable) we will directly de-activate it
-          if (ICPUtil<Settings>::isSimpleBound(lC)) {
-            auto lcIt = std::find(mActiveSimpleBounds.begin(), mActiveSimpleBounds.end(), lC);
-            if (lcIt != mActiveSimpleBounds.end()) {
-              mActiveSimpleBounds.erase(lcIt);
-            }
-          }
-          // otherwise we will indirectly de-activate all contraction candidates
-          // which correspond to that constraint
-          else {
-            for (auto& cc : mContractionCandidates) {
-              if (cc.getConstraint() == lC) {
-                auto ccIt = std::find(mActiveContractionCandidates.begin(), mActiveContractionCandidates.end(), &cc);
-                if (ccIt != mActiveContractionCandidates.end()) {
-                  mActiveContractionCandidates.erase(ccIt);
-                }
+          for (auto& cc : mContractionCandidates) {
+            if (cc.getConstraint() == lC) {
+              auto ccIt = std::find(mActiveContractionCandidates.begin(), mActiveContractionCandidates.end(), &cc);
+              if (ccIt != mActiveContractionCandidates.end()) {
+                mActiveContractionCandidates.erase(ccIt);
               }
             }
           }
 
-          // most important thing: we actually remove the constraint from within our search tree
+          // we actually remove the constraint from within our search tree
           mSearchTree.removeConstraint(lC, constraint);
         }
       }
