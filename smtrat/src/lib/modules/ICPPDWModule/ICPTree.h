@@ -37,7 +37,7 @@ namespace smtrat
       // dimension in which the split occurred, if a split occured
       std::experimental::optional<carl::Variable> mSplitDimension;
 
-      // In case of UNSAT, this set will contain the reason for unsatisifiabilty.
+      // In case of UNSAT, this set will contain the reason for unsatisfiability.
       std::set<ConstraintT> mConflictingConstraints;
 
       // Stores whether this state has been determined to be unsat
@@ -124,6 +124,13 @@ namespace smtrat
        * @param _origin The formula where the constraint originates from
        */
       void removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin );
+
+      /**
+       * We have to overload the < operator to make the priority queue usable as intended.
+       *
+       * @param _right the ICPTree object to which the current is compared to.
+       */
+      bool operator<(const ICPTree& _right) const;
 
     private:
       /**

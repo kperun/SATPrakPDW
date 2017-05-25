@@ -169,6 +169,14 @@ namespace smtrat
        */
       std::experimental::optional<Model> getSolution(ICPTree<Settings>* currentNode);
 
+      /**
+       * Required in order to provide the priority queue with an ordering.
+       * @param node1 the first compared node
+       * @param node2 the second compared node
+       * @return true if node1 fulfills less constraints than node2
+       */
+      bool compareNumberOfSolvedConstraints(ICPTree<Settings>* node1,ICPTree<Settings>* node2);
+
       void setModel(Model model);
   };
 }

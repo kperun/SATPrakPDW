@@ -258,6 +258,13 @@ namespace smtrat
       }
     }
 
+
+   /*
+   struct OrderByNumberOfSolvedConstraints{
+          bool operator() (int const &a, Human const &b) { return a.age < b.age; }
+   };
+  */
+
   template<class Settings>
     Answer ICPPDWModule<Settings>::checkCore(){
       SMTRAT_LOG_INFO("smtrat.module","------------------------------------");
@@ -277,21 +284,22 @@ namespace smtrat
       }
       SMTRAT_LOG_INFO("smtrat.module", "");
 
-      // we need to search through all leaf nodes of the search tree
-      std::stack<ICPTree<Settings>*> searchStack;
+      // we need to search through all leaf nodes of the search tree, store them in a priority queue
+      std::priority_queue<ICPTree<Settings>*> searchPriorityQueue;
+
       vector<ICPTree<Settings>*> leafNodes = mSearchTree.getLeafNodes();
       for (ICPTree<Settings>* i : leafNodes) {
-        searchStack.push(i);
+        searchPriorityQueue.push(i);
       }
 
       // main loop of the algorithm
       // we can search for a solution as long as there still exist leaf nodes
       // which have not been fully contracted yet
-      while (!searchStack.empty()) {
+      while (!searchPriorityQueue.empty()) {
         // simply take the first one and contract it
-        SMTRAT_LOG_INFO("smtrat.module","ICPStates left to check: " << searchStack.size());
-        ICPTree<Settings>* currentNode = searchStack.top();
-        searchStack.pop();
+        SMTRAT_LOG_INFO("smtrat.module","ICPStates left to check: " << searchPriorityQueue.size());
+        ICPTree<Settings>* currentNode = searchPriorityQueue.top();
+        searchPriorityQueue.pop();
 
         // contract() will contract the node until a split occurs,
         // or the bounds turn out to be UNSAT,
@@ -300,9 +308,8 @@ namespace smtrat
 
         if (splitOccurred) {
           // a split occurred, so add the new child nodes to the leaf nodes stack
-          searchStack.push(currentNode->getLeftChild());
-          searchStack.push(currentNode->getRightChild());
-
+          searchPriorityQueue.push(currentNode->getLeftChild());
+          searchPriorityQueue.push(currentNode->getLeftChild());
           // and then we continue with some other leaf node in the next iteration
           // this corresponds to depth-first search
           // later maybe: use multithreading to contract several leaf nodes at once
@@ -419,6 +426,42 @@ namespace smtrat
       else {
         return std::experimental::optional<Model>();
       }
+    }
+
+    template<class Settings>
+    bool ICPPDWModule<Settings>::compareNumberOfSolvedConstraints(ICPTree<Settings>* node1,ICPTree<Settings>* node2){
+      std::cout << "------------------------------------------"<<endl;
+      map<carl::Variable,double> sol(node1->getCurrentState().guessSolution());
+      int numThis = 0;
+      Model model;
+      for(auto& clause : sol) {
+        Rational val = carl::rationalize<Rational>(clause.second);
+        model.emplace(clause.first, val);
+      }
+      for( const auto& rf : rReceivedFormula() ) {
+        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+        assert(isSatisfied != 2);
+        if(isSatisfied == 1) {
+          numThis++;
+        }
+      }
+
+      std::cout << "------------------------------------------"<<endl;
+      map<carl::Variable,double> sol2(node2->getCurrentState().guessSolution());
+      int numThat = 0;
+      Model model2;
+      for(auto& clause : sol2) {
+        Rational val = carl::rationalize<Rational>(clause.second);
+        model2.emplace(clause.first, val);
+      }
+      for( const auto& rf : rReceivedFormula() ) {
+        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model2);
+        assert(isSatisfied != 2);
+        if(isSatisfied == 1) {
+          numThat++;
+        }
+      }
+      return numThis<numThat;
     }
 }
 

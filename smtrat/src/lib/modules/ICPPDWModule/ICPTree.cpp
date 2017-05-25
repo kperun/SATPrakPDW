@@ -7,7 +7,7 @@ namespace smtrat
 
   template class ICPTree<ICPPDWSettings1>;
 
-  template<class Settings>
+   template<class Settings>
   ICPTree<Settings>::ICPTree() :
     mCurrentState(this),
     mParentTree(),
@@ -35,7 +35,7 @@ namespace smtrat
   {
   }
 
-  template<class Settings>
+    template<class Settings>
   ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds) :
     mCurrentState(parentBounds,originalVariables,this),
     mParentTree(parent),
