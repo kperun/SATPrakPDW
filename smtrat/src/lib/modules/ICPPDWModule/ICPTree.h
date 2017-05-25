@@ -10,6 +10,8 @@
 
 namespace smtrat
 {
+  template<typename Settings>
+  class ICPPDWModule;    
   /**
    * Represents the ICP search tree.
    */
@@ -68,7 +70,7 @@ namespace smtrat
        * @param contractionCandidates A set of pointers to contraction candidates that can be applied
        * @return whether a split occurred
        */
-      bool contract(vector<ICPContractionCandidate*>& contractionCandidates);
+      bool contract(vector<ICPContractionCandidate*>& contractionCandidates,ICPPDWModule<Settings>* module);
 
       ICPState<Settings>& getCurrentState();
 

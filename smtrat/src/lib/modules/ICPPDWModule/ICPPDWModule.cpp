@@ -296,7 +296,7 @@ namespace smtrat
         // contract() will contract the node until a split occurs,
         // or the bounds turn out to be UNSAT,
         // or some other termination criterium was met (e.g. target diameter of intervals)
-        bool splitOccurred = currentNode->contract(mActiveContractionCandidates);
+        bool splitOccurred = currentNode->contract(mActiveContractionCandidates,this);
 
         if (splitOccurred) {
           // a split occurred, so add the new child nodes to the leaf nodes stack
@@ -315,7 +315,12 @@ namespace smtrat
           else {
             // a termination criterium was met
             // so we try to guess a solution
-            std::experimental::optional<Model> model = getSolution(currentNode);
+            std::experimental::optional<Model> model;
+            if(!mFoundModel){
+              model = getSolution(currentNode);
+            }else {//now if we have guessed a solution in the ICPTree contract method in order to avoid splits, we use it here
+              model = mFoundModel;
+            }
             if(model) {
               SMTRAT_LOG_INFO("smtrat.module","------------------------------" << std::endl
                   << "Final Answer: SAT." << std::endl);
@@ -379,6 +384,11 @@ namespace smtrat
       if(!infeasibleSubset.empty()) {
         mInfeasibleSubsets.push_back(infeasibleSubset);
       }
+    }
+
+  template<class Settings>
+    void ICPPDWModule<Settings>::setModel(Model model){
+        mFoundModel = model;
     }
 
   template<class Settings>

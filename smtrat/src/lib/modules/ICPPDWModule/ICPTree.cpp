@@ -1,5 +1,6 @@
 #include "ICPTree.h"
 #include "ICPUtil.h"
+#include "ICPPDWModule.h"
 
 namespace smtrat
 {
@@ -63,7 +64,7 @@ namespace smtrat
   }
 
   template<class Settings>
-  bool ICPTree<Settings>::contract(vector<ICPContractionCandidate*>& contractionCandidates) {
+  bool ICPTree<Settings>::contract(vector<ICPContractionCandidate*>& contractionCandidates,ICPPDWModule<Settings>* module) {
     while(true) {
       printVariableBounds();
 
@@ -129,21 +130,33 @@ namespace smtrat
             SMTRAT_LOG_INFO("smtrat.module","Contract with " << *(contractionCandidates.at((*bestCC))) << ", results in bounds: " << bounds.first << std::endl);
             mCurrentState.applyContraction(contractionCandidates.at((*bestCC)), bounds.first);
           }
-        }else{ //otherwise terminate and return false
-          SMTRAT_LOG_INFO("smtrat.module","Gain too small -> split!\n");
-          //First extract the best variable for splitting
-          carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
-          IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
-          
-          std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
+        }else{ //otherwise perform a split
+          SMTRAT_LOG_INFO("smtrat.module","Start guessing model before split!\n");
+          std::experimental::optional<Model> model= (*module).getSolution(this);
+          //if we found a model, just terminate with false indicating that no split occurred
+            if(model){
+              SMTRAT_LOG_INFO("smtrat.module","Model guessed without split!\n");
+              (*module).setModel((*model));
+              mIsUnsat = false;
+              return false;
+            }
+            else {
+              //now it is not sat, thus we have to split further
+              SMTRAT_LOG_INFO("smtrat.module","No model found, gain too small -> split!\n");
+              //First extract the best variable for splitting
+              carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
+              IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
+              
+              std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
 
-          SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: "
-              << newIntervals.first << " and " << newIntervals.second << endl);
+              SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: "
+                  << newIntervals.first << " and " << newIntervals.second << endl);
 
-          split(splittingVar);
-          mLeftChild->getCurrentState().setInterval(splittingVar, newIntervals.first, ConstraintT()); // empty origin
-          mRightChild->getCurrentState().setInterval(splittingVar, newIntervals.second, ConstraintT());
-          return true;
+              split(splittingVar);
+              mLeftChild->getCurrentState().setInterval(splittingVar, newIntervals.first, ConstraintT()); // empty origin
+              mRightChild->getCurrentState().setInterval(splittingVar, newIntervals.second, ConstraintT());
+              return true;
+            }
         }
       }
     }
