@@ -336,30 +336,69 @@ namespace smtrat
     if(candidates.size()==1) {
       return 0; //return the first element
     }
-    //store the new diameter in case two candidates with equal gain are regarded
-    double currentBestAbsoluteReduction = 0;
+   
 
     //store the current best candidate index
     int currentBest = 0;
     std::experimental::optional<double> currentBestGain = computeGain(*(candidates[currentBest]),mBounds);
+
+     //store the new diameter in case two candidates with equal gain are regarded
+    double currentBestAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
+
+
+    //first compute the new weighted gain according to W_new = W_old + alpha*(gain - W_old)
+    double currentBestGainWeighted = (*(candidates[currentBest])).getWeight()+
+              Settings::alpha*((*currentBestGain)-(*(candidates[currentBest])).getWeight());
+    //update the weight
+    SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[currentBest]))<< " is " << (*(candidates[currentBest])).getWeight());            
+    (*(candidates[currentBest])).setWeight(currentBestGainWeighted);
+    SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[currentBest]))<< " adjusted to " << currentBestGainWeighted);
+
     for (int it = 1; it < (int) candidates.size(); it++) {
       double currentGain = computeGain(*(candidates[it]), mBounds);
-      if(currentGain-(*currentBestGain)>Settings::upperDelta) {//the delta states that between the old and the new gain
-        //the difference has to be at least upperDelta, by using this behavior we are able to enforce that only candidates which 
-        //achieve a certain gain are regarded as new optimal
-        //now set the new best candidate as current
+      //compute the weighted gain
+      double currentGainWeighted = (*(candidates[it])).getWeight()+
+              Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
+      //update the weighted gain
+      SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[it]))<< " is " << (*(candidates[it])).getWeight());        
+      (*(candidates[it])).setWeight(currentGainWeighted);
+      SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[it]))<< " adjusted to " << currentGainWeighted);
+
+      //do not consider candidates with weight < weight_eps
+      if(currentBestGainWeighted<Settings::weightEps&&currentGainWeighted>Settings::weightEps){
+        //if the previous candidate have not at lease epsilon weight, we disregard it 
+        currentBestGainWeighted = currentGainWeighted;
         currentBestGain = currentGain;
         currentBest = it;
         //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
-        currentBestAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
-      }else if(currentGain-(*currentBestGain)>Settings::lowerDelta){
+        currentBestAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
+        continue;
+      }
+      //if the current candidate is below weightEps, we disregard it
+      if(currentGainWeighted<Settings::weightEps){
+        continue;
+      }
+      //now actual comparison can take place
+      if(currentGainWeighted-currentBestGainWeighted>Settings::upperDelta) {//the delta states that between the old and the new gain
+        //the difference has to be at least upperDelta, by using this behavior we are able to enforce that only candidates which 
+        //achieve a certain margin of gain are regarded as the new optimal
+        //now set the new best candidate as current
+        currentBestGainWeighted = currentGainWeighted;
+        currentBestGain = currentGain;
+        currentBest = it;
+        //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
+        currentBestAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
+
+      }else if(currentGainWeighted-currentBestGainWeighted>Settings::lowerDelta){
         //if the gain is not high enough but still almost the same, it would be interesting to consider the absolute interval reduction
-        double currentNewAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
+        double currentNewAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
         //now check if the 
         if(currentBestAbsoluteReduction<currentNewAbsoluteReduction){
-            currentBestAbsoluteReduction = currentNewAbsoluteReduction;
-            currentBestGain = currentGain;
-            currentBest = it;
+           currentBestGainWeighted = currentGainWeighted;
+           currentBestGain = currentGain;
+           currentBest = it;
+           //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
+           currentBestAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
         }
       }
     }

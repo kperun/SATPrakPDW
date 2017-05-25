@@ -30,6 +30,13 @@ namespace smtrat
     return mConstraint;
   }
 
+  double ICPContractionCandidate::getWeight(){
+    return mWeight;
+  }
+
+  void ICPContractionCandidate::setWeight(double weight){
+    mWeight = weight;
+  }
 
   OneOrTwo<IntervalT> ICPContractionCandidate::getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds) {
     // first retrieve all variables with their respective bounds

@@ -21,6 +21,9 @@ namespace smtrat
     private:
       carl::Variable mVariable;
       ConstraintT mConstraint;
+      //the current weight as used in the reinforced learning
+      double mWeight = 0;
+
 
       // this contractor helps us with applying the contraction of this candidate
       Contractor<carl::SimpleNewton> mContractor;
@@ -44,6 +47,9 @@ namespace smtrat
 
       carl::Variable getVariable();
       ConstraintT& getConstraint();
+      double getWeight();
+      void setWeight(double weight);
+
 
       friend inline std::ostream& operator <<(std::ostream& os, const ICPContractionCandidate& cc) {
         os << "(" << cc.mVariable << ", " << cc.mConstraint << ")";
