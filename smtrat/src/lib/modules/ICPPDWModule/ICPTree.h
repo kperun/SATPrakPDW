@@ -11,7 +11,7 @@
 namespace smtrat
 {
   template<typename Settings>
-  class ICPPDWModule;    
+  class ICPPDWModule;
   /**
    * Represents the ICP search tree.
    */
@@ -46,10 +46,14 @@ namespace smtrat
       // stores all simple bounds that have been used to initialize the variable bounds
       std::set<ConstraintT> mActiveSimpleBounds;
 
+      //
+      ICPPDWModule<Settings>* mModule;
+
     public:
-      ICPTree();
-      ICPTree(std::set<carl::Variable>* originalVariables);
-      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds, std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds);
+      ICPTree(ICPPDWModule<Settings>* module);
+      ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module);
+      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,
+        std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module);
 
       /**
        * Contracts the current ICP state until either:
@@ -132,6 +136,9 @@ namespace smtrat
        */
       bool operator<(const ICPTree& _right) const;
 
+      ICPPDWModule<Settings>* getCorrespondingModule();
+
+
     private:
       /**
        * Splits the search tree.
@@ -164,6 +171,7 @@ namespace smtrat
        * Traverses the tree and retrieves the number of performed splits.
        */
       int getNumberOfSplitsRecursive();
+
 
   };
 }

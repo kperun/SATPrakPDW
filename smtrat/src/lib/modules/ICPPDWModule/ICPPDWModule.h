@@ -93,8 +93,8 @@ namespace smtrat
        */
       void createAllContractionCandidates();
       /**
-       * Creates an infeasable subset if the problem is unsat.
-       * The infeasable subset will added to the mInfeasableSubsets member.
+       * Creates an infeasible subset if the problem is unsat.
+       * The infeasible subset will added to the mInfeasableSubsets member.
        */
       void createInfeasableSubset();
 
@@ -178,5 +178,7 @@ namespace smtrat
       bool compareNumberOfSolvedConstraints(ICPTree<Settings>* node1,ICPTree<Settings>* node2);
 
       void setModel(Model model);
+
+      static bool compareTrees(ICPTree<Settings>* node1,ICPTree<Settings>* node2);
   };
 }

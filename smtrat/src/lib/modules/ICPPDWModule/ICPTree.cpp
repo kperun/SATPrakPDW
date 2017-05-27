@@ -8,7 +8,7 @@ namespace smtrat
   template class ICPTree<ICPPDWSettings1>;
 
    template<class Settings>
-  ICPTree<Settings>::ICPTree() :
+  ICPTree<Settings>::ICPTree(ICPPDWModule<Settings>* module) :
     mCurrentState(this),
     mParentTree(),
     mLeftChild(),
@@ -17,12 +17,13 @@ namespace smtrat
     mConflictingConstraints(),
     mOriginalVariables(),
     mIsUnsat(false),
-    mActiveSimpleBounds()
+    mActiveSimpleBounds(),
+    mModule(module)
   {
   }
 
   template<class Settings>
-  ICPTree<Settings>::ICPTree(std::set<carl::Variable>* originalVariables) :
+  ICPTree<Settings>::ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module) :
     mCurrentState(originalVariables,this),
     mParentTree(),
     mLeftChild(),
@@ -31,12 +32,14 @@ namespace smtrat
     mConflictingConstraints(),
     mOriginalVariables(originalVariables),
     mIsUnsat(false),
-    mActiveSimpleBounds()
+    mActiveSimpleBounds(),
+    mModule(module)
   {
   }
 
     template<class Settings>
-  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds) :
+  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,
+    std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module) :
     mCurrentState(parentBounds,originalVariables,this),
     mParentTree(parent),
     mLeftChild(),
@@ -45,7 +48,8 @@ namespace smtrat
     mConflictingConstraints(),
     mOriginalVariables(originalVariables),
     mIsUnsat(false),
-    mActiveSimpleBounds(simpleBounds)
+    mActiveSimpleBounds(simpleBounds),
+    mModule(module)
   {
     // we need to actually add all the simple bounds to our new icp state
     for (const ConstraintT& simpleBound : mActiveSimpleBounds) {
@@ -146,7 +150,7 @@ namespace smtrat
               //First extract the best variable for splitting
               carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
               IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
-              
+
               std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
 
               SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: "
@@ -228,8 +232,8 @@ namespace smtrat
     mSplitDimension = var;
 
     // we create two new search trees with copies of the original bounds
-    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds);
-    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds);
+    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds,mModule);
+    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds,mModule);
   }
 
   template<class Settings>
@@ -305,7 +309,7 @@ namespace smtrat
     }
     return ret;
   }
-  
+
   template<class Settings>
   bool ICPTree<Settings>::addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
     // we add all constraints to the variable bounds, always
@@ -318,7 +322,7 @@ namespace smtrat
     if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
       mActiveSimpleBounds.insert(_constraint);
     }
-    
+
     // we need to add the constraint to all children as well
     // otherwise the leaf nodes will not know about the new constraint
     bool isLeftConflicting = false;
@@ -388,5 +392,11 @@ namespace smtrat
       mIsUnsat = false;
       mConflictingConstraints.clear();
     }
+  }
+
+
+  template<class Settings>
+  ICPPDWModule<Settings>* ICPTree<Settings>::getCorrespondingModule(){
+    return mModule;
   }
 }
