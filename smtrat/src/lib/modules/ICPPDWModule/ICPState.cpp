@@ -336,7 +336,7 @@ namespace smtrat
     if(candidates.size()==1) {
       return 0; //return the first element
     }
-   
+
 
     //store the current best candidate index
     int currentBest = 0;
@@ -350,7 +350,7 @@ namespace smtrat
     double currentBestGainWeighted = (*(candidates[currentBest])).getWeight()+
               Settings::alpha*((*currentBestGain)-(*(candidates[currentBest])).getWeight());
     //update the weight
-    SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[currentBest]))<< " is " << (*(candidates[currentBest])).getWeight());            
+    SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[currentBest]))<< " is " << (*(candidates[currentBest])).getWeight());
     (*(candidates[currentBest])).setWeight(currentBestGainWeighted);
     SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[currentBest]))<< " adjusted to " << currentBestGainWeighted);
 
@@ -360,13 +360,13 @@ namespace smtrat
       double currentGainWeighted = (*(candidates[it])).getWeight()+
               Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
       //update the weighted gain
-      SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[it]))<< " is " << (*(candidates[it])).getWeight());        
+      SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[it]))<< " is " << (*(candidates[it])).getWeight());
       (*(candidates[it])).setWeight(currentGainWeighted);
       SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[it]))<< " adjusted to " << currentGainWeighted);
 
       //do not consider candidates with weight < weight_eps
       if(currentBestGainWeighted<Settings::weightEps&&currentGainWeighted>Settings::weightEps){
-        //if the previous candidate have not at lease epsilon weight, we disregard it 
+        //if the previous candidate have not at lease epsilon weight, we disregard it
         currentBestGainWeighted = currentGainWeighted;
         currentBestGain = currentGain;
         currentBest = it;
@@ -380,7 +380,7 @@ namespace smtrat
       }
       //now actual comparison can take place
       if(currentGainWeighted-currentBestGainWeighted>Settings::upperDelta) {//the delta states that between the old and the new gain
-        //the difference has to be at least upperDelta, by using this behavior we are able to enforce that only candidates which 
+        //the difference has to be at least upperDelta, by using this behavior we are able to enforce that only candidates which
         //achieve a certain margin of gain are regarded as the new optimal
         //now set the new best candidate as current
         currentBestGainWeighted = currentGainWeighted;
@@ -392,7 +392,7 @@ namespace smtrat
       }else if(currentGainWeighted-currentBestGainWeighted>Settings::lowerDelta){
         //if the gain is not high enough but still almost the same, it would be interesting to consider the absolute interval reduction
         double currentNewAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
-        //now check if the 
+        //now check if the
         if(currentBestAbsoluteReduction<currentNewAbsoluteReduction){
            currentBestGainWeighted = currentGainWeighted;
            currentBestGain = currentGain;

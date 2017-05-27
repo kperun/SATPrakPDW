@@ -21,22 +21,52 @@ namespace smtrat
       /**
        * Example for a statistic.
        */
-      size_t mExampleStatistic;
+      int mNumberOfSplits = 0;
+      int mNumberOfNodes = 0;
+      int mNumberOfWrongGuesses = 0;
+      int mNumberOfContractions = 0;
+      double mSumOfContractions = 0.0;
+      int mNumberOfIterations = 0;
+
+
     public:
       // Override Statistics::collect.
-      void collect()
-      {
-        Statistics::addKeyValuePair( "example_statistic", mExampleStatistic );
+      void collect(){
+        Statistics::addKeyValuePair( "Number of performed splits", mNumberOfSplits );
+        Statistics::addKeyValuePair( "Number of checked nodes", mNumberOfNodes );
+        Statistics::addKeyValuePair( "Number of wrong solution guesses", mNumberOfWrongGuesses);
+        Statistics::addKeyValuePair( "Number of performed contractions", mNumberOfContractions);
+        Statistics::addKeyValuePair( "Overall contraction diameter", mSumOfContractions);
+        Statistics::addKeyValuePair( "Average contraction gain", mSumOfContractions/mNumberOfContractions);
       }
-      void foo()
-      {
-        ++mExampleStatistic;
-      }
+
       ICPPDWStatistics( const std::string& _statisticName ):
-        Statistics( _statisticName, this ),
-        mExampleStatistic( 0 )
-    {}
-      ~ICPPDWStatistics() {}
+        Statistics( _statisticName, this ){}
+      ~ICPPDWStatistics(){}
+
+      void increaseNumberOfIterations(){
+        mNumberOfIterations++;
+      }
+
+      void increaseNumberOfSplits(){
+        mNumberOfSplits++;
+      }
+
+      void increaseNumberOfNodes(){
+        mNumberOfNodes++;
+      }
+
+      void increaseNumberOfWrongGuesses(){
+        mNumberOfWrongGuesses++;
+      }
+
+      void increaseNumberOfContractions(){
+        mNumberOfContractions++;
+      }
+
+      void addContractionGain(double gain){
+        mSumOfContractions+= gain;
+      }
   };
 }
 

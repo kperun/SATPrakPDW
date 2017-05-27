@@ -26,7 +26,6 @@ namespace smtrat
       ICPPDWStatistics mStatistics;
 #endif
       // Members.
-
       //if a model existis, it should be stored here
       std::experimental::optional<Model> mFoundModel;
 
@@ -180,5 +179,9 @@ namespace smtrat
       void setModel(Model model);
 
       static bool compareTrees(ICPTree<Settings>* node1,ICPTree<Settings>* node2);
+
+#ifdef SMTRAT_DEVOPTION_Statistics
+      ICPPDWStatistics* getStatistics(){return &mStatistics;}
+#endif
   };
 }

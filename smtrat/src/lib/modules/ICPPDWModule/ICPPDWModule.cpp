@@ -295,9 +295,13 @@ namespace smtrat
 
   template<class Settings>
     Answer ICPPDWModule<Settings>::checkCore(){
+
+#ifdef SMTRAT_DEVOPTION_Statistics
+    mStatistics.increaseNumberOfIterations();
+#endif
+
+
       SMTRAT_LOG_INFO("smtrat.module","------------------------------------");
-
-
       SMTRAT_LOG_INFO("smtrat.module", "Check core with the following active original constraints:");
       for (const auto& c : mActiveOriginalConstraints) {
         for (const auto& lC : mLinearizations[c]) {
@@ -336,9 +340,16 @@ namespace smtrat
         bool splitOccurred = currentNode->contract(mActiveContractionCandidates,this);
 
         if (splitOccurred) {
+#ifdef SMTRAT_DEVOPTION_Statistics
+          mStatistics.increaseNumberOfSplits();
+#endif
           // a split occurred, so add the new child nodes to the leaf nodes stack
           searchPriorityQueue.push(currentNode->getLeftChild());
-          searchPriorityQueue.push(currentNode->getLeftChild());
+          searchPriorityQueue.push(currentNode->getRightChild());
+#ifdef SMTRAT_DEVOPTION_Statistics
+          mStatistics.increaseNumberOfNodes();
+          mStatistics.increaseNumberOfNodes();
+#endif
           // and then we continue with some other leaf node in the next iteration
           // this corresponds to depth-first search
           // later maybe: use multithreading to contract several leaf nodes at once
@@ -453,6 +464,9 @@ namespace smtrat
         return model;
       }
       else {
+#ifdef SMTRAT_DEVOPTION_Statistics
+          mStatistics.increaseNumberOfWrongGuesses();
+#endif
         return std::experimental::optional<Model>();
       }
     }
