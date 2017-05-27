@@ -21,9 +21,13 @@ namespace smtrat
     private:
       carl::Variable mVariable;
       ConstraintT mConstraint;
+      bool mIsEqRelation;
+      carl::Relation mNewRelation;
 
       // this contractor helps us with applying the contraction of this candidate
       Contractor<carl::SimpleNewton> mContractor;
+      //Helper function that handles non EQ constraints
+      void constructorHelper();
 
     public:
       ICPContractionCandidate(const ICPContractionCandidate& rhs);

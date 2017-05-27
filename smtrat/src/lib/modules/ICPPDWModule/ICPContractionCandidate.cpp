@@ -8,15 +8,51 @@ namespace smtrat
   ICPContractionCandidate::ICPContractionCandidate(const ICPContractionCandidate& rhs):
     mVariable(rhs.mVariable),
     mConstraint(rhs.mConstraint),
-    mContractor(Contractor<carl::SimpleNewton>(rhs.mConstraint.lhs(), rhs.mConstraint.lhs()))
+    mContractor(Contractor<carl::SimpleNewton>(rhs.mConstraint.lhs(), rhs.mConstraint.lhs())),
+    mIsEqRelation(true)
   {
+    constructorHelper();
   }
 
   ICPContractionCandidate::ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint):
     mVariable(var),
     mConstraint(constraint),
-    mContractor(constraint.lhs(), constraint.lhs())
+    mContractor(constraint.lhs(), constraint.lhs()),
+    mIsEqRelation(true)
   {
+    constructorHelper();
+  }
+
+  void ICPContractionCandidate::constructorHelper(){
+    //Special case if the relation is not EQ, since we can not use the predefined contraction
+    if(mConstraint.relation() != carl::Relation::EQ){
+      mIsEqRelation = false;
+      //We only need to look at linear constraints, others are not used
+      if(mConstraint.lhs().isLinear()){
+        Poly p = mConstraint.lhs();
+        Rational constantPart = 0;
+				for (const auto& t: p) {
+					if (t.has(mVariable)) {//The term that includes the var we are solving for
+            //If the coefficient is negative we need to revert the relation
+            //Unfortunately we can not use the inverse() function, since NEQ should not become EQ
+            if(t.coeff() < 0){
+              if(mConstraint.relation() == carl::Relation::LEQ){
+                mNewRelation = carl::Relation::GEQ;
+              } else if(mConstraint.relation() == carl::Relation::LESS) {
+                mNewRelation = carl::Relation::GREATER;
+              } else if(mConstraint.relation() == carl::Relation::GEQ) {
+                mNewRelation = carl::Relation::LEQ;
+              } else if(mConstraint.relation() == carl::Relation::GREATER) {
+                mNewRelation = carl::Relation::LESS;
+              }
+            } else {
+              mNewRelation = mConstraint.relation();
+            }
+					}
+				}
+      }else{ //These (original) constraints are generated but not used for contraction
+      }
+    }
   }
 
   ICPContractionCandidate::~ICPContractionCandidate() {
@@ -40,74 +76,71 @@ namespace smtrat
     IntervalT resultA, resultB;
     std::experimental::optional<IntervalT> retB;
 
-    // apply contraction
-    // arguments are true because we want to use propagation
-    bool split = mContractor(map, mVariable, resultA, resultB, true, true);
-
-    /*
-     * The contractor only solves for equality, i.e. it solves polynomial = 0 for the variable.
-     * In case our constraint was an inequality, we need to relax the result.
-     *
-     * After our linearization, the only types of constraints we have are:
-     * 1) monomial - slack = 0
-     * 2) linear_polynomial ~ 0, where ~ is <=, =, >=, <, > (we assume it is <= or <)
-     *
-     * So the only time the constraint can be something different than an equality, it is a linear constraint.
-     * This makes adjustment of the result for linear_polynomial = 0 to linear_polynomial ~ 0 easier.
-     * If the relation was <= (taking the coefficient of the variable we solved for into account),
-     * then the result will be relaxed to: (-inf, upper bound].
-     * Similarly, if the relation was >=, then the result will be relaxed to [lower bound, inf)
-     */
-    if (mConstraint.relation() == carl::Relation::LEQ || mConstraint.relation() == carl::Relation::LESS) {
-      // we want the coefficient of our variable, which always has degree 1 since it is a linear polynomial
-      auto coefficient = mConstraint.coefficient(mVariable, 1).constantPart();
-      carl::BoundType boundType = (mConstraint.relation() == carl::Relation::LEQ) ? carl::BoundType::WEAK : carl::BoundType::STRICT;
-
-      if (coefficient > 0) {
-        // the constraint is truly a <= or < relation
-        // so we take (-inf, upper bound]
-
-        // TODO: write own contractor (?)
-        // if result is empty interval, the contractor might have done some weird stuff
-        // because it already intersected with the original interval.
-        // we use a workaround by simply using the original upper bound then
-        if (resultA.isEmpty()) {
-          resultA = IntervalT(0.0, carl::BoundType::INFTY, originalInterval.upper(), boundType);
-        }
-        else {
-          resultA = IntervalT(0.0, carl::BoundType::INFTY, resultA.upper(), boundType);
-        }
-
-        // we can ignore resultB, since linear polynomials will never lead to two intervals
+    //Two Cases: If the relation of the polynom is "=" we can simply use the Contractor.
+    bool split = false;
+    if (mConstraint.relation() == carl::Relation::EQ){
+      // apply contraction
+      // arguments are true because we want to use propagation
+      bool split = mContractor(map, mVariable, resultA, resultB, true, true);
+      // finally, we intersect the contracted interval with the original interval
+      // This might not be necessary if it is already done in Contraction.
+      resultA = resultA.intersect(originalInterval);
+      resultB = resultB.intersect(originalInterval);
+      if(split){ //Interval was split in two
+        retB = resultB;
+      } else { //only resultA
       }
-      else {
-        // the constraint is actually a >= or > relation
-        // so we take [lower bound, inf)
-        if (resultA.isEmpty()) {
-          resultA = IntervalT(originalInterval.lower(), boundType, 0.0, carl::BoundType::INFTY);
-        }
-        else {
-          resultA = IntervalT(resultA.lower(), boundType, 0.0, carl::BoundType::INFTY);
-        }
-        // we can ignore resultB, since linear polynomials will never lead to two intervals
+
+      OneOrTwo<IntervalT> ret(resultA,retB);
+      return ret;
+    }
+    else {//2nd case: Inequalities. This has to be handled as a special case.
+      //First use the carl VarSolutionFormula to calculate the interval resulting from propagation
+      carl::VarSolutionFormula<Poly> mySol(mConstraint.lhs(),mVariable);
+      resultA = mySol.evaluate(map)[0]; //Should only contain one solution Interval
+      //Next use the cases seen in slide 18 on ICP
+      //TODO: Looking at all these cases is extremely tedious! This version ignores bounds that contain INFTY
+      if(originalInterval.lowerBoundType() == carl::BoundType::INFTY
+          || resultA.lowerBoundType() == carl::BoundType::INFTY
+          || originalInterval.upperBoundType() == carl::BoundType::INFTY
+          || resultA.upperBoundType() == carl::BoundType::INFTY){
+        resultA = IntervalT::unboundedInterval();
+        OneOrTwo<IntervalT> ret(resultA,retB);
+        return ret;
       }
+
+      switch(mNewRelation){
+        case carl::Relation::LEQ:
+          if(originalInterval.lower() >= resultA.upper()){
+            resultA = IntervalT::emptyInterval();
+          } else {
+            resultA = IntervalT(originalInterval.lower(),carl::BoundType::WEAK,(originalInterval.upper() <= resultA.upper()?originalInterval.upper():resultA.upper()),carl::BoundType::WEAK);
+          }
+          break;
+        case carl::Relation::LESS:
+          resultA = IntervalT(originalInterval.lower(),carl::BoundType::WEAK,(originalInterval.upper() <= resultA.upper()?originalInterval.upper():resultA.upper()),carl::BoundType::WEAK);
+          break;
+        case carl::Relation::GEQ:
+          resultA = IntervalT((originalInterval.lower() >= resultA.lower()?originalInterval.lower():resultA.lower()),carl::BoundType::WEAK, originalInterval.upper(),carl::BoundType::WEAK);
+          break;
+        case carl::Relation::GREATER:
+          if(originalInterval.upper() <= resultA.lower()){
+            resultA = IntervalT::emptyInterval();
+          } else {
+            resultA = IntervalT((originalInterval.lower() >= resultA.lower()?originalInterval.lower():resultA.lower()),carl::BoundType::WEAK, originalInterval.upper(),carl::BoundType::WEAK);
+          }
+          break;
+        default:
+          cout << "This should not happen" << endl;
+          cout << mVariable << "," << mConstraint << endl;
+          break;
+      }
+      cout << "Contracting from to: "<< endl;
+      cout << originalInterval << endl;
+      cout << resultA << endl;
+
+      OneOrTwo<IntervalT> ret(resultA,retB);
+      return ret;
     }
-    else {
-      // we assume all constraints are in the form: <= or =
-      // so there is nothing to do here.
-    }
-
-    // finally, we intersect the contracted interval with the original interval
-    resultA = resultA.intersect(originalInterval);
-    resultB = resultB.intersect(originalInterval);
-
-    if(split){ //Interval was split in two
-      retB = resultB;
-    } else { //only resultA
-
-    }
-
-    OneOrTwo<IntervalT> ret(resultA,retB);
-    return ret;
   }
 }
