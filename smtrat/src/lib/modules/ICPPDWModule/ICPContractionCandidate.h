@@ -21,8 +21,13 @@ namespace smtrat
     private:
       carl::Variable mVariable;
       ConstraintT mConstraint;
+      //Saves if the relation of this constraint is EQ
       bool mIsEqRelation;
+      //If not, this relation is used for propagation (after solving vor mVariable)
       carl::Relation mNewRelation;
+      //the current weight as used in the reinforced learning
+      double mWeight = 0;
+
 
       // this contractor helps us with applying the contraction of this candidate
       Contractor<carl::SimpleNewton> mContractor;
@@ -48,6 +53,9 @@ namespace smtrat
 
       carl::Variable getVariable();
       ConstraintT& getConstraint();
+      double getWeight();
+      void setWeight(double weight);
+
 
       friend inline std::ostream& operator <<(std::ostream& os, const ICPContractionCandidate& cc) {
         os << "(" << cc.mVariable << ", " << cc.mConstraint << ")";

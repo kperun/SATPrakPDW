@@ -10,6 +10,8 @@
 
 namespace smtrat
 {
+  template<typename Settings>
+  class ICPPDWModule;
   /**
    * Represents the ICP search tree.
    */
@@ -35,7 +37,7 @@ namespace smtrat
       // dimension in which the split occurred, if a split occured
       std::experimental::optional<carl::Variable> mSplitDimension;
 
-      // In case of UNSAT, this set will contain the reason for unsatisifiabilty.
+      // In case of UNSAT, this set will contain the reason for unsatisfiability.
       std::set<ConstraintT> mConflictingConstraints;
 
       // Stores whether this state has been determined to be unsat
@@ -44,10 +46,14 @@ namespace smtrat
       // stores all simple bounds that have been used to initialize the variable bounds
       std::set<ConstraintT> mActiveSimpleBounds;
 
+      //
+      ICPPDWModule<Settings>* mModule;
+
     public:
-      ICPTree();
-      ICPTree(std::set<carl::Variable>* originalVariables);
-      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds, std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds);
+      ICPTree(ICPPDWModule<Settings>* module);
+      ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module);
+      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,
+        std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module);
 
       /**
        * Contracts the current ICP state until either:
@@ -68,7 +74,7 @@ namespace smtrat
        * @param contractionCandidates A set of pointers to contraction candidates that can be applied
        * @return whether a split occurred
        */
-      bool contract(vector<ICPContractionCandidate*>& contractionCandidates);
+      bool contract(vector<ICPContractionCandidate*>& contractionCandidates,ICPPDWModule<Settings>* module);
 
       ICPState<Settings>& getCurrentState();
 
@@ -123,6 +129,16 @@ namespace smtrat
        */
       void removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin );
 
+      /**
+       * We have to overload the < operator to make the priority queue usable as intended.
+       *
+       * @param _right the ICPTree object to which the current is compared to.
+       */
+      bool operator<(const ICPTree& _right) const;
+
+      ICPPDWModule<Settings>* getCorrespondingModule();
+
+
     private:
       /**
        * Splits the search tree.
@@ -155,6 +171,7 @@ namespace smtrat
        * Traverses the tree and retrieves the number of performed splits.
        */
       int getNumberOfSplitsRecursive();
+
 
   };
 }

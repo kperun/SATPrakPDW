@@ -13,6 +13,7 @@
 
 namespace smtrat
 {
+
   template<class Settings>
     ICPPDWModule<Settings>::ICPPDWModule(const ModuleInput* _formula, RuntimeSettings*, Conditionals& _conditionals, Manager* _manager) :
       Module( _formula, _conditionals, _manager ),
@@ -22,7 +23,7 @@ namespace smtrat
       mFoundModel(),
       mConstraintFormula(),
       mOriginalVariables(),
-      mSearchTree(&mOriginalVariables),
+      mSearchTree(&mOriginalVariables,this),
       mContractionCandidates(),
       mLinearizations(),
       mDeLinearizations(),
@@ -109,7 +110,7 @@ namespace smtrat
       for (const auto& lC : linearizedConstraints) {
         mDeLinearizations[lC] = constraint;
       }
-      // also, to make the code more robust and easier to use, we define 
+      // also, to make the code more robust and easier to use, we define
       // the de-linearization of an original constraint to be the constraint itself
       mDeLinearizations[constraint] = constraint;
 
@@ -183,7 +184,7 @@ namespace smtrat
     bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
     {
       const FormulaT& formula = _subformula->formula();
-      
+
       // we only consider actual constraints
       bool causesConflict = false;
       if (formula.getType() == carl::FormulaType::CONSTRAINT) {
@@ -258,6 +259,40 @@ namespace smtrat
       }
     }
 
+
+    template<class Settings>
+    bool ICPPDWModule<Settings>::compareTrees(ICPTree<Settings>* node1,ICPTree<Settings>* node2){
+      map<carl::Variable,double> sol(node1->getCurrentState().guessSolution());
+      int numThis = 0;
+      Model model;
+      for(auto& clause : sol) {
+        Rational val = carl::rationalize<Rational>(clause.second);
+        model.emplace(clause.first, val);
+      }
+      for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
+        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+        assert(isSatisfied != 2);
+        if(isSatisfied == 1) {
+          numThis++;
+        }
+      }
+      map<carl::Variable,double> sol2(node2->getCurrentState().guessSolution());
+      int numThat = 0;
+      Model model2;
+      for(auto& clause : sol2) {
+        Rational val = carl::rationalize<Rational>(clause.second);
+        model2.emplace(clause.first, val);
+      }
+      for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
+        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model2);
+        assert(isSatisfied != 2);
+        if(isSatisfied == 1) {
+          numThat++;
+        }
+      }
+      return numThis<numThat;
+    }
+
   template<class Settings>
     Answer ICPPDWModule<Settings>::checkCore(){
       SMTRAT_LOG_INFO("smtrat.module","------------------------------------");
@@ -277,32 +312,33 @@ namespace smtrat
       }
       SMTRAT_LOG_INFO("smtrat.module", "");
 
-      // we need to search through all leaf nodes of the search tree
-      std::stack<ICPTree<Settings>*> searchStack;
+      // we need to search through all leaf nodes of the search tree, store them in a priority queue
+      std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,std::function<bool(ICPTree<Settings>*, ICPTree<Settings>*)>> searchPriorityQueue(compareTrees);
+      //std::priority_queue<ICPTree<Settings>*> searchPriorityQueue;
+
       vector<ICPTree<Settings>*> leafNodes = mSearchTree.getLeafNodes();
       for (ICPTree<Settings>* i : leafNodes) {
-        searchStack.push(i);
+        searchPriorityQueue.push(i);
       }
 
       // main loop of the algorithm
       // we can search for a solution as long as there still exist leaf nodes
       // which have not been fully contracted yet
-      while (!searchStack.empty()) {
+      while (!searchPriorityQueue.empty()) {
         // simply take the first one and contract it
-        SMTRAT_LOG_INFO("smtrat.module","ICPStates left to check: " << searchStack.size());
-        ICPTree<Settings>* currentNode = searchStack.top();
-        searchStack.pop();
+        SMTRAT_LOG_INFO("smtrat.module","ICPStates left to check: " << searchPriorityQueue.size());
+        ICPTree<Settings>* currentNode = searchPriorityQueue.top();
+        searchPriorityQueue.pop();
 
         // contract() will contract the node until a split occurs,
         // or the bounds turn out to be UNSAT,
         // or some other termination criterium was met (e.g. target diameter of intervals)
-        bool splitOccurred = currentNode->contract(mActiveContractionCandidates);
+        bool splitOccurred = currentNode->contract(mActiveContractionCandidates,this);
 
         if (splitOccurred) {
           // a split occurred, so add the new child nodes to the leaf nodes stack
-          searchStack.push(currentNode->getLeftChild());
-          searchStack.push(currentNode->getRightChild());
-
+          searchPriorityQueue.push(currentNode->getLeftChild());
+          searchPriorityQueue.push(currentNode->getLeftChild());
           // and then we continue with some other leaf node in the next iteration
           // this corresponds to depth-first search
           // later maybe: use multithreading to contract several leaf nodes at once
@@ -315,7 +351,12 @@ namespace smtrat
           else {
             // a termination criterium was met
             // so we try to guess a solution
-            std::experimental::optional<Model> model = getSolution(currentNode);
+            std::experimental::optional<Model> model;
+            if(!mFoundModel){
+              model = getSolution(currentNode);
+            }else {//now if we have guessed a solution in the ICPTree contract method in order to avoid splits, we use it here
+              model = mFoundModel;
+            }
             if(model) {
               SMTRAT_LOG_INFO("smtrat.module","------------------------------" << std::endl
                   << "Final Answer: SAT." << std::endl);
@@ -382,6 +423,11 @@ namespace smtrat
     }
 
   template<class Settings>
+    void ICPPDWModule<Settings>::setModel(Model model){
+        mFoundModel = model;
+    }
+
+  template<class Settings>
     std::experimental::optional<Model> ICPPDWModule<Settings>::getSolution(ICPTree<Settings>* currentNode) {
       map<carl::Variable,double> sol(currentNode->getCurrentState().guessSolution());
       Model model;
@@ -410,6 +456,9 @@ namespace smtrat
         return std::experimental::optional<Model>();
       }
     }
+
+
+
 }
 
 #include "Instantiation.h"

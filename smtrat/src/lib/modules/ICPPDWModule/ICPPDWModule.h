@@ -92,19 +92,9 @@ namespace smtrat
        * in that constraint, a new constraction candidate will be created and stored in mContractionCandidates.
        */
       void createAllContractionCandidates();
-
       /**
-       * Tries to guess a solution and checks if all constraints are satisfied by that model.
-       * If it finds a correct model, it will be returned. Otherwise, an empty optional will be returned.
-       *
-       * @param currentNode the ICP state of which a solution should be guessed
-       * @return A correct model or optional empty
-       */
-      std::experimental::optional<Model> getSolution(ICPTree<Settings>* currentNode);
-
-      /**
-       * Creates an infeasable subset if the problem is unsat.
-       * The infeasable subset will added to the mInfeasableSubsets member.
+       * Creates an infeasible subset if the problem is unsat.
+       * The infeasible subset will added to the mInfeasableSubsets member.
        */
       void createInfeasableSubset();
 
@@ -167,5 +157,28 @@ namespace smtrat
        *		 Unknown, otherwise.
        */
       Answer checkCore();
+
+
+
+      /**
+       * Tries to guess a solution and checks if all constraints are satisfied by that model.
+       * If it finds a correct model, it will be returned. Otherwise, an empty optional will be returned.
+       *
+       * @param currentNode the ICP state of which a solution should be guessed
+       * @return A correct model or optional empty
+       */
+      std::experimental::optional<Model> getSolution(ICPTree<Settings>* currentNode);
+
+      /**
+       * Required in order to provide the priority queue with an ordering.
+       * @param node1 the first compared node
+       * @param node2 the second compared node
+       * @return true if node1 fulfills less constraints than node2
+       */
+      bool compareNumberOfSolvedConstraints(ICPTree<Settings>* node1,ICPTree<Settings>* node2);
+
+      void setModel(Model model);
+
+      static bool compareTrees(ICPTree<Settings>* node1,ICPTree<Settings>* node2);
   };
 }

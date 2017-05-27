@@ -34,7 +34,7 @@ namespace smtrat
     static constexpr int maxSplitNumber = 100;
 
     //we define a big M in order to be able to compute gain in case of inf intervals
-    // it is defined as twice the max interval, since we have to consider an intervall [-inf,0] to be better than [-1000,0]
+    // it is defined as twice the max interval, since we have to consider an interval [-inf,0] to be better than [-1000,0]
     // since (in our examples), original vars can go from -1000 to 1000, in polynomials (e.g. x³) the value can get really big
     // so this is good enough for at most cubic polynomials, i.e. 10*1000³
     static constexpr double maxOriginalVarBound = 1000.0;
@@ -50,6 +50,10 @@ namespace smtrat
     static constexpr double lowerDelta = 0.01;//set the lower bound to a smaller value to make absolute reduction more relevant
     static constexpr double upperDelta = 0.03;//set the upper higher in order to make the difference in gain more relevant
 
+    //alpha as used in reinforced learning, see chapter 8 slide 17
+    static constexpr double alpha = 0.9;
 
+    //a epsilon is required to distinguish between candidates with weights which are regarded and which not
+    static constexpr double weightEps = 0.1;
   };
 }
