@@ -350,9 +350,9 @@ namespace smtrat
     double currentBestGainWeighted = (*(candidates[currentBest])).getWeight()+
               Settings::alpha*((*currentBestGain)-(*(candidates[currentBest])).getWeight());
     //update the weight
-    SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[currentBest]))<< " is " << (*(candidates[currentBest])).getWeight());
+    //SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[currentBest]))<< " is " << (*(candidates[currentBest])).getWeight());
     (*(candidates[currentBest])).setWeight(currentBestGainWeighted);
-    SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[currentBest]))<< " adjusted to " << currentBestGainWeighted);
+    //SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[currentBest]))<< " adjusted to " << currentBestGainWeighted);
 
     for (int it = 1; it < (int) candidates.size(); it++) {
       double currentGain = computeGain(*(candidates[it]), mBounds);
@@ -360,9 +360,9 @@ namespace smtrat
       double currentGainWeighted = (*(candidates[it])).getWeight()+
               Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
       //update the weighted gain
-      SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[it]))<< " is " << (*(candidates[it])).getWeight());
+      //SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[it]))<< " is " << (*(candidates[it])).getWeight());
       (*(candidates[it])).setWeight(currentGainWeighted);
-      SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[it]))<< " adjusted to " << currentGainWeighted);
+      //SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[it]))<< " adjusted to " << currentGainWeighted);
 
       //do not consider candidates with weight < weight_eps
       if(currentBestGainWeighted<Settings::weightEps&&currentGainWeighted>Settings::weightEps){

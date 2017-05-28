@@ -21,23 +21,20 @@ namespace smtrat
     private:
       carl::Variable mVariable;
       ConstraintT mConstraint;
-      //Saves if the relation of this constraint is EQ
-      bool mIsEqRelation;
-      //If not, this relation is used for propagation (after solving vor mVariable)
-      carl::Relation mNewRelation;
+
+      // the solution formula of this contraction candidate
+      carl::VarSolutionFormula<Poly> mSolutionFormula;
+
+      // the actual relation used for propagation,
+      // i.e. flipped constraint if the coefficient of var is negative
+      carl::Relation mRelation;
+
       //the current weight as used in the reinforced learning
       double mWeight = 0;
-
-
-      // this contractor helps us with applying the contraction of this candidate
-      Contractor<carl::SimpleNewton> mContractor;
-      //Helper function that handles non EQ constraints
-      void constructorHelper();
 
     public:
       ICPContractionCandidate(const ICPContractionCandidate& rhs);
       ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint);
-      ~ICPContractionCandidate();
 
       /**
        * Calculates the contracted interval of this contraction candidate.

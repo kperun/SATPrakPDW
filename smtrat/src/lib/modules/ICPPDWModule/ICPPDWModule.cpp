@@ -30,8 +30,7 @@ namespace smtrat
       mSlackVariables(),
       mActiveOriginalConstraints(),
       mSlackSubstitutionConstraints(),
-      mActiveContractionCandidates(),
-      mIsFirstCheckCore(true)
+      mActiveContractionCandidates()
       {
       }
 
@@ -110,9 +109,6 @@ namespace smtrat
       for (const auto& lC : linearizedConstraints) {
         mDeLinearizations[lC] = constraint;
       }
-      // also, to make the code more robust and easier to use, we define
-      // the de-linearization of an original constraint to be the constraint itself
-      mDeLinearizations[constraint] = constraint;
 
       return mLinearizations[constraint];
     }
@@ -259,40 +255,6 @@ namespace smtrat
       }
     }
 
-
-    template<class Settings>
-    bool ICPPDWModule<Settings>::compareTrees(ICPTree<Settings>* node1,ICPTree<Settings>* node2){
-      map<carl::Variable,double> sol(node1->getCurrentState().guessSolution());
-      int numThis = 0;
-      Model model;
-      for(auto& clause : sol) {
-        Rational val = carl::rationalize<Rational>(clause.second);
-        model.emplace(clause.first, val);
-      }
-      for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
-        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
-        assert(isSatisfied != 2);
-        if(isSatisfied == 1) {
-          numThis++;
-        }
-      }
-      map<carl::Variable,double> sol2(node2->getCurrentState().guessSolution());
-      int numThat = 0;
-      Model model2;
-      for(auto& clause : sol2) {
-        Rational val = carl::rationalize<Rational>(clause.second);
-        model2.emplace(clause.first, val);
-      }
-      for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
-        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model2);
-        assert(isSatisfied != 2);
-        if(isSatisfied == 1) {
-          numThat++;
-        }
-      }
-      return numThis<numThat;
-    }
-
   template<class Settings>
     Answer ICPPDWModule<Settings>::checkCore(){
 #ifdef SMTRAT_DEVOPTION_Statistics
@@ -314,8 +276,7 @@ namespace smtrat
       SMTRAT_LOG_INFO("smtrat.module", "");
 
       // we need to search through all leaf nodes of the search tree, store them in a priority queue
-      std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,std::function<bool(ICPTree<Settings>*, ICPTree<Settings>*)>> searchPriorityQueue(compareTrees);
-      //std::priority_queue<ICPTree<Settings>*> searchPriorityQueue;
+      std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,std::function<bool(ICPTree<Settings>*, ICPTree<Settings>*)>> searchPriorityQueue(ICPUtil<Settings>::compareTrees);
 
       vector<ICPTree<Settings>*> leafNodes = mSearchTree.getLeafNodes();
       for (ICPTree<Settings>* i : leafNodes) {
@@ -407,13 +368,24 @@ namespace smtrat
     }
 
   template<class Settings>
+    ConstraintT ICPPDWModule<Settings>::deLinearize(const ConstraintT& c) {
+      auto it = mDeLinearizations.find(c);
+      if (it == mDeLinearizations.end()) {
+        return c;
+      }
+      else {
+        return it->second;
+      }
+    }
+
+  template<class Settings>
     void ICPPDWModule<Settings>::createInfeasableSubset() {
       // the base set of conflicting constraints
       std::set<ConstraintT> conflictingConstraints = mSearchTree.getConflictingConstraints();
 
       SMTRAT_LOG_INFO("smtrat.module","Reasons: " << std::endl);
       for (const ConstraintT& c : conflictingConstraints) {
-        SMTRAT_LOG_INFO("smtrat.module",mDeLinearizations[c] << ", ");
+        SMTRAT_LOG_INFO("smtrat.module",deLinearize(c) << ", ");
       }
       //now we have a set of conflicting constraints representing the infeasible set (TODO:minimal subset??)
       //store it in the variable "mInfeasibleSubsets"
@@ -421,7 +393,7 @@ namespace smtrat
       for (const ConstraintT& c : conflictingConstraints) {
         //get de-linearized constraints and their corresponding formulas, add them to the set
         //of infeasible constraints
-        infeasibleSubset.insert(mConstraintFormula[mDeLinearizations[c]]);
+        infeasibleSubset.insert(mConstraintFormula[deLinearize(c)]);
       }
       //if at least one constraint has been found, store it in the mInfeasibleSubset variables as inspected by
       //the governing algorithm

@@ -63,9 +63,6 @@ namespace smtrat
       // a map from slack variables to the constraint of their substitution
       std::map<carl::Variable, ConstraintT> mSlackSubstitutionConstraints;
 
-      // stores whether the check core has been called yet
-      bool mIsFirstCheckCore;
-
     private:
       /**
        * Linearizes a constraint.
@@ -96,6 +93,13 @@ namespace smtrat
        * The infeasible subset will added to the mInfeasableSubsets member.
        */
       void createInfeasableSubset();
+
+      /**
+       * Helper function which returns the delinearized constraint.
+       * @param c a constraint
+       * @return the de-linearized constraint if c was a linearized constraints, otherwise c itself
+       */
+      ConstraintT deLinearize(const ConstraintT& c);
 
     public:
       typedef Settings SettingsType;
@@ -158,7 +162,6 @@ namespace smtrat
       Answer checkCore();
 
 
-
       /**
        * Tries to guess a solution and checks if all constraints are satisfied by that model.
        * If it finds a correct model, it will be returned. Otherwise, an empty optional will be returned.
@@ -168,17 +171,7 @@ namespace smtrat
        */
       std::experimental::optional<Model> getSolution(ICPTree<Settings>* currentNode);
 
-      /**
-       * Required in order to provide the priority queue with an ordering.
-       * @param node1 the first compared node
-       * @param node2 the second compared node
-       * @return true if node1 fulfills less constraints than node2
-       */
-      bool compareNumberOfSolvedConstraints(ICPTree<Settings>* node1,ICPTree<Settings>* node2);
-
       void setModel(Model model);
-
-      static bool compareTrees(ICPTree<Settings>* node1,ICPTree<Settings>* node2);
 
 #ifdef SMTRAT_DEVOPTION_Statistics
       ICPPDWStatistics* getStatistics(){return &mStatistics;}
