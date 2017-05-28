@@ -106,9 +106,10 @@ namespace smtrat
           || resultA.lowerBoundType() == carl::BoundType::INFTY
           || originalInterval.upperBoundType() == carl::BoundType::INFTY
           || resultA.upperBoundType() == carl::BoundType::INFTY){
-        resultA = IntervalT::unboundedInterval();
+        //resultA = IntervalT::unboundedInterval();
+        resultA = originalInterval;
         resultB = IntervalT::emptyInterval();
-      } 
+      }
       else {
         // TODO: check if correct
         switch(mRelation){
