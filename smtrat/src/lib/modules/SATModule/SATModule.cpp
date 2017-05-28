@@ -31,7 +31,7 @@
 #ifdef LOGGING
 #define DEBUG_METHODS_SATMODULE
 #ifdef DEBUG_METHODS_SATMODULE
-#define DEBUG_SATMODULE
+//#define DEBUG_SATMODULE
 #endif
 //#define DEBUG_SATMODULE_THEORY_PROPAGATION
 //#define DEBUG_SATMODULE_DECISION_HEURISTIC
@@ -178,21 +178,21 @@ namespace smtrat
         delete mpStatistics;
         #endif
     }
-    
+
     class ScopedBool
     {
         bool& watch;
         bool oldValue;
-        
+
         public:
-            
-        ScopedBool( bool& watch, bool newValue ): 
-            watch(watch), 
+
+        ScopedBool( bool& watch, bool newValue ):
+            watch(watch),
             oldValue(watch)
         {
             watch = newValue;
         }
-            
+
         ~ScopedBool()
         {
             watch = oldValue;
@@ -306,7 +306,7 @@ namespace smtrat
             }
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::removeLiteralOrigin( Lit _litToRemove, const FormulaT& _origin )
     {
@@ -362,7 +362,7 @@ namespace smtrat
 
         return pow( y, seq );
     }
-    
+
     template<class Settings>
     Answer SATModule<Settings>::checkCore()
     {
@@ -453,7 +453,7 @@ namespace smtrat
             }
             else
                 result = search();
-            
+
             if (isLemmaLevel(LemmaLevel::ADVANCED))
             {
                 assert(result == l_True);
@@ -509,7 +509,7 @@ namespace smtrat
                             const Abstraction& abstr = assigns[k] == l_False ? *mBooleanConstraintMap[k].second : *mBooleanConstraintMap[k].first;
                             if( !abstr.reabstraction.isTrue() && abstr.consistencyRelevant && (abstr.reabstraction.getType() == carl::FormulaType::UEQ || abstr.reabstraction.getType() == carl::FormulaType::BITVECTOR || abstr.reabstraction.constraint().isConsistent() != 1))
                             {
-                                excludeClause.push( mkLit( k, assigns[k] != l_False ) ); 
+                                excludeClause.push( mkLit( k, assigns[k] != l_False ) );
                             }
                         }
                     }
@@ -527,7 +527,7 @@ namespace smtrat
                     handleConflict( confl );
             }
         }
-        
+
         #ifdef SMTRAT_DEVOPTION_Statistics
         collectStats();
         #endif
@@ -544,7 +544,7 @@ namespace smtrat
         }
         return UNKNOWN;
     }
-    
+
     template<class Settings>
     Minisat::lbool SATModule<Settings>::checkFormula()
     {
@@ -803,7 +803,7 @@ namespace smtrat
         mComputeAllSAT = false;
         cancelUntil(0, true);
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::updateInfeasibleSubset()
     {
@@ -826,7 +826,7 @@ namespace smtrat
 //        }
         mInfeasibleSubsets.push_back( std::move(infeasibleSubset) );
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::cleanUpAfterOptimizing( const std::vector<CRef>& _excludedAssignments )
     {
@@ -840,7 +840,7 @@ namespace smtrat
             removeClause( cl );
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::removeUpperBoundOnMinimal()
     {
@@ -850,7 +850,7 @@ namespace smtrat
             eraseSubformulaFromPassedFormula( mUpperBoundOnMinimal, true );
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::addBooleanAssignments( EvalRationalMap& _rationalAssignment ) const
     {
@@ -868,7 +868,7 @@ namespace smtrat
             }
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::updateCNFInfoCounter( typename FormulaCNFInfosMap::iterator _iter, const FormulaT& _origin, bool _increment )
     {
@@ -945,7 +945,7 @@ namespace smtrat
             }
         }
     }
-    
+
     template<class Settings>
     Lit SATModule<Settings>::addClauses( const FormulaT& _formula, unsigned _type, unsigned _depth, const FormulaT& _original )
     {
@@ -967,7 +967,7 @@ namespace smtrat
             case carl::FormulaType::NOT:
             {
 				SMTRAT_LOG_DEBUG("smtrat.sat", "Adding a negation: " << _formula);
-                Lit l = lit_Undef; 
+                Lit l = lit_Undef;
                 if( _formula.isLiteral() )
                 {
                     l = createLiteral( _formula, _original, everythingDecisionRelevant || _depth <= 1 );
@@ -1028,7 +1028,7 @@ namespace smtrat
                     }
                     if( !mReceivedFormulaPurelyPropositional && Settings::formula_guided_decision_heuristic )
                     {
-                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::vector<signed>{ (signed)var(condLit), (signed)var(thenLit), (signed)var(elseLit)} ); 
+                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::vector<signed>{ (signed)var(condLit), (signed)var(thenLit), (signed)var(elseLit)} );
                     }
                     // (or ts -cond -then)
                     lits.push( tsLit ); lits.push( negCondLit ); lits.push( negThenLit ); addClause_( lits, _type, _original, cnfInfoIter );
@@ -1038,7 +1038,7 @@ namespace smtrat
                     lits.clear(); lits.push( neg( tsLit ) ); lits.push( negCondLit ); lits.push( thenLit ); addClause_( lits, _type, _original, cnfInfoIter );
                     // (or -ts cond else)
                     lits.clear(); lits.push( neg( tsLit ) ); lits.push( condLit ); lits.push( elseLit ); addClause_( lits, _type, _original, cnfInfoIter );
-                    
+
                     return tsLit;
                 }
                 case carl::FormulaType::IMPLIES:
@@ -1059,7 +1059,7 @@ namespace smtrat
                     }
                     if( !mReceivedFormulaPurelyPropositional && Settings::formula_guided_decision_heuristic )
                     {
-                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::vector<signed>{ (signed)var(premLit), (signed)var(conLit)} ); 
+                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::vector<signed>{ (signed)var(premLit), (signed)var(conLit)} );
                     }
                     // (or -ts -prem con)
                     lits.push( neg( tsLit ) ); lits.push( negPremLit ); lits.push( conLit ); addClause_( lits, _type, _original, cnfInfoIter );
@@ -1088,7 +1088,7 @@ namespace smtrat
                         std::vector<signed> vars;
                         for( int pos = 0; pos < lits.size(); ++pos )
                             vars.push_back( (signed)var(lits[pos]) );
-                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::move(vars) ); 
+                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::move(vars) );
                     }
                     // (or -ts a1 .. an)
                     lits.push( neg( tsLit ) );
@@ -1133,7 +1133,7 @@ namespace smtrat
                         std::vector<signed> vars;
                         for( int pos = 0; pos < lits.size(); ++pos )
                             vars.push_back( (signed)var(lits[pos]) );
-                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::move(vars) ); 
+                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::move(vars) );
                     }
                     lits.push( tsLit );
                     addClause_( lits, _type, _original, cnfInfoIter );
@@ -1141,7 +1141,7 @@ namespace smtrat
                         cnfInfoIter->second.mLiteral = tsLit;
                     return tsLit;
                 }
-                case carl::FormulaType::IFF: 
+                case carl::FormulaType::IFF:
                 {
                     vec<Lit> tmp;
                     if( _depth == 0 )
@@ -1179,7 +1179,7 @@ namespace smtrat
                         std::vector<signed> vars;
                         for( int pos = 0; pos < lits.size(); ++pos )
                             vars.push_back( (signed)var(lits[pos]) );
-                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::move(vars) ); 
+                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::move(vars) );
                     }
                     // (or a1 .. an h)
                     lits.push( tsLit ); addClause_( lits, _type, _original, cnfInfoIter );
@@ -1220,7 +1220,7 @@ namespace smtrat
                         std::vector<signed> vars;
                         for( int pos = 0; pos < lits.size(); ++pos )
                             vars.push_back( (signed)var(lits[pos]) );
-                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::move(vars) ); 
+                        mTseitinVarShadows.emplace( (signed)var(tsLit), std::move(vars) );
                     }
                     lits.push( neg( tsLit ) );
                     negLits.push( tsLit );
@@ -1241,7 +1241,7 @@ namespace smtrat
         }
         return lit_Undef;
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::addXorClauses( const vec<Lit>& _literals, const vec<Lit>& _negLiterals, int _from, bool _numOfNegatedLitsEven, unsigned _type, vec<Lit>& _clause, const FormulaT& _original, typename FormulaCNFInfosMap::iterator _formulaCNFInfoIter )
     {
@@ -1261,7 +1261,7 @@ namespace smtrat
             _clause.pop();
         }
     }
-    
+
     template<class Settings>
     Lit SATModule<Settings>::createLiteral( const FormulaT& _formula, const FormulaT& _origin, bool _decisionRelevant )
     {
@@ -1412,13 +1412,13 @@ namespace smtrat
                 mConstraintLiteralMap.insert( std::make_pair( negated ? _formula : FormulaT( carl::FormulaType::NOT, constraint ), litsB ) );
                 mConstraintLiteralMap.insert( std::make_pair( invertedConstraint, std::move( litsB ) ) );
                 // we return the abstraction variable as literal, if the negated flag was negative,
-                // otherwise we return the abstraction variable's negation 
+                // otherwise we return the abstraction variable's negation
                 Lit res = negated ? litNegative : litPositive;
                 return res;
             }
         }
     }
-    
+
     template<class Settings>
     Lit SATModule<Settings>::getLiteral( const FormulaT& _formula ) const
     {
@@ -1488,7 +1488,7 @@ namespace smtrat
         }
 //        assert( passedFormulaCorrect() );
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::adaptPassedFormula( Abstraction& _abstr )
     {
@@ -1513,7 +1513,7 @@ namespace smtrat
         }
         _abstr.updateInfo = 0;
     }
-    
+
     template<class Settings>
     bool SATModule<Settings>::passedFormulaCorrect() const
     {
@@ -1594,7 +1594,7 @@ namespace smtrat
         #endif
         // Check if clause is satisfied and remove false/duplicate literals:true);
         sort( add_tmp );
-        
+
         int falseLiteralsCount = 0;
         // check the clause for tautologies and similar
         // note, that we do not change original clauses, as due to incrementality we
@@ -1680,7 +1680,7 @@ namespace smtrat
         }
         return result;
     }
-    
+
     template<class Settings>
     CRef SATModule<Settings>::storeLemmas()
     {
@@ -1912,7 +1912,7 @@ namespace smtrat
         }
         return false;
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::cancelUntil( int level, bool force )
     {
@@ -1952,7 +1952,7 @@ namespace smtrat
             insertVarOrder( x );
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::resetVariableAssignment( Var _var )
     {
@@ -2057,14 +2057,14 @@ namespace smtrat
             }
         }
     }
-    
+
     template<class Settings>
     CRef SATModule<Settings>::propagateConsistently( bool _checkWithTheory )
     {
         CRef confl = CRef_Undef;
-        
+
         ScopedBool scopedBool( mBusy, true );
-        
+
         // add lemmas that we're left behind
         if( mLemmas.size() > 0 )
         {
@@ -2097,7 +2097,7 @@ namespace smtrat
                     confl = storeLemmas();
             }
             else
-            {   
+            {
                 // even though in conflict, we still need to discharge the lemmas
                 if( mLemmas.size() > 0 )
                 {
@@ -2122,7 +2122,7 @@ namespace smtrat
 		SMTRAT_LOG_TRACE("smtrat.sat", "Returning " << confl);
         return confl;
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::propagateTheory()
     {
@@ -2154,7 +2154,7 @@ namespace smtrat
             }
         }
     }
-    
+
     template<class Settings>
     CRef SATModule<Settings>::reason( Var x )
     {
@@ -2174,7 +2174,7 @@ namespace smtrat
         explanation.push( l );
         for( const auto& subformula : tp.mPremise )
             explanation.push( neg( getLiteral( subformula ) ) );
-        
+
         // remove theory propagation
         removeTheoryPropagation( vd.mExpPos );
 
@@ -2222,7 +2222,7 @@ namespace smtrat
         attachClause(real_reason);
         return real_reason;
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::removeTheoryPropagation( int _position )
     {
@@ -2238,7 +2238,7 @@ namespace smtrat
         }
         mTheoryPropagations.pop_back();
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::theoryCall()
     {
@@ -2252,7 +2252,7 @@ namespace smtrat
         cout << "###" << endl; printDecisions( cout, "### " );
         cout << "###" << endl;
         #endif
-        if( !mReceivedFormulaPurelyPropositional && decisionLevel() >= assumptions.size() && 
+        if( !mReceivedFormulaPurelyPropositional && decisionLevel() >= assumptions.size() &&
             (!Settings::try_full_lazy_call_first || mNumberOfFullLazyCalls > 0 || trail.size() == assigns.size()) )
         {
             if( Settings::try_full_lazy_call_first && trail.size() == assigns.size() )
@@ -2302,7 +2302,7 @@ namespace smtrat
             }
         }
     }
-    
+
     template<class Settings>
     bool SATModule<Settings>::expPositionsCorrect() const
     {
@@ -2313,7 +2313,7 @@ namespace smtrat
         }
         return true;
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::constructLemmas()
     {
@@ -2395,7 +2395,7 @@ namespace smtrat
                      // Reduce the set of learned clauses:
                      reduceDB();
                 }
-                
+
                 Lit next = lit_Undef;
                 while( decisionLevel() < assumptions.size() )
                 {
@@ -2471,7 +2471,7 @@ namespace smtrat
                 // CONFLICT
                 conflicts++;
                 conflictC++;
-                
+
                 if( decisionLevel() <= assumptions.size() )
                 {
                     if( !mReceivedFormulaPurelyPropositional && !Settings::stop_search_after_first_unknown && mExcludedAssignments )
@@ -2483,7 +2483,7 @@ namespace smtrat
             }
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::handleConflict( CRef _confl )
     {
@@ -2525,7 +2525,7 @@ namespace smtrat
         varDecayActivity();
         claDecayActivity();
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::decrementLearntSizeAdjustCnt()
     {
@@ -2547,7 +2547,7 @@ namespace smtrat
                         progressEstimate() * 100 );
         }
     }
-    
+
     template<class Settings>
     bool SATModule<Settings>::fullAssignment()
     {
@@ -2558,7 +2558,7 @@ namespace smtrat
             order_heap.removeMin();
         return order_heap.empty();
     }
-        
+
     template<class Settings>
     Var SATModule<Settings>::pickSplittingVar()
     {
@@ -2623,7 +2623,7 @@ namespace smtrat
         return next == var_Undef ? lit_Undef : mkLit( next, polarity[next] );
         //return next == var_Undef ? lit_Undef : mkLit( next, rnd_pol ? drand( random_seed ) < 0.5 : polarity[next] );
     }
-    
+
     template<class Settings>
     Lit SATModule<Settings>::bestBranchLit()
     {
@@ -2742,7 +2742,7 @@ namespace smtrat
         }
         return next == var_Undef ? lit_Undef : mkLit( next, polarity[next] );
     }
-    
+
     template<class Settings>
     bool SATModule<Settings>::analyze( CRef confl, vec<Lit>& out_learnt, int& out_btlevel )
     {
@@ -2766,7 +2766,7 @@ namespace smtrat
             for( int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++ )
             {
                 Lit q = c[j];
-                
+
                 if( !seen[var( q )] && level( var( q ) ) > 0 )
                 {
                     varBumpActivity( var( q ) );
@@ -2961,7 +2961,7 @@ namespace smtrat
         {
             assert( mBooleanConstraintMap[var( p )].second != nullptr );
             Abstraction& abstr = sign( p ) ? *mBooleanConstraintMap[var( p )].second : *mBooleanConstraintMap[var( p )].first;
-            if( !abstr.reabstraction.isTrue() && abstr.consistencyRelevant && (abstr.reabstraction.getType() == carl::FormulaType::UEQ || abstr.reabstraction.getType() == carl::FormulaType::BITVECTOR || abstr.reabstraction.constraint().isConsistent() != 1)) 
+            if( !abstr.reabstraction.isTrue() && abstr.consistencyRelevant && (abstr.reabstraction.getType() == carl::FormulaType::UEQ || abstr.reabstraction.getType() == carl::FormulaType::BITVECTOR || abstr.reabstraction.constraint().isConsistent() != 1))
             {
                 if( ++abstr.updateInfo > 0 )
                 {
@@ -3162,7 +3162,7 @@ NextClause:
         learnts.shrink( i - j );
         checkGarbage();
     }
-	
+
     template<class Settings>
     void SATModule<Settings>::clearLearnts( int n )
     {
@@ -3270,7 +3270,7 @@ NextClause:
         }
         return lemmasLearned;
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::learnTheoryConflicts()
     {
@@ -3314,7 +3314,7 @@ NextClause:
             ++backend;
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::adaptConflictEvaluation( size_t& _clauseEvaluation, Lit _lit, bool _firstLiteral )
     {
@@ -3394,7 +3394,7 @@ NextClause:
             }
             iter.second.mClauses = std::move( tmp );
         }
-        
+
         carl::FastMap<Minisat::CRef,ClauseInformation> tmp;
         for( auto& ciPair : mClauseInformation )
         {
@@ -3403,7 +3403,7 @@ NextClause:
             tmp.emplace( c, ciPair.second );
         }
         mClauseInformation = std::move( tmp );
-        
+
         if( Settings::check_if_all_clauses_are_satisfied )
         {
             for( auto& lcsPair : mLiteralClausesMap )
@@ -3418,7 +3418,7 @@ NextClause:
                 cls = std::move(tmp);
             }
         }
-        
+
         if( !mReceivedFormulaPurelyPropositional && Settings::check_active_literal_occurrences )
         {
             for( auto& cls : mLiteralsClausesMap )
@@ -3426,7 +3426,7 @@ NextClause:
                 cls.reloc( ca, to );
             }
         }
-        
+
         // All watchers:
         //
         // for (int i = 0; i < watches.size(); i++)
@@ -3487,7 +3487,7 @@ NextClause:
         }
         return map[x];
     }
-    
+
     #ifdef DEBUG_METHODS_SATMODULE
     template<class Settings>
     void SATModule<Settings>::print( ostream& _out, const string _init ) const
@@ -3525,7 +3525,7 @@ NextClause:
             _out << " ]" << endl;
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::printFormulaCNFInfosMap( ostream& _out, const string _init ) const
     {
@@ -3543,7 +3543,7 @@ NextClause:
             _out << " }" << std::endl;
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::printClauseInformation( ostream& _out, const string _init ) const
     {
@@ -3673,7 +3673,7 @@ NextClause:
                     _out << (satisfied(ca[_clauses[i]]) ? " (ok)" : "     ");
                 _out << ": ";
                 printClause( _clauses[i], _withAssignment, _out, ""  );
-                
+
             }
         }
 
@@ -3786,7 +3786,7 @@ NextClause:
             _out << " }" << endl;
         }
     }
-    
+
     template<class Settings>
     void SATModule<Settings>::printLiteralsActiveOccurrences( ostream& _out, string _init ) const
     {

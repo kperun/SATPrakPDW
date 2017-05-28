@@ -402,9 +402,15 @@ namespace smtrat
         }
       }
     }
-
+#ifdef SMTRAT_DEVOPTION_Statistics
+    if(currentBestGain){
+      mCorrespondingTree->getCorrespondingModule()->
+        getStatistics()->addContractionGain((*currentBestGain));
+       mCorrespondingTree->getCorrespondingModule()->
+        getStatistics()->increaseNumberOfContractions();
+    }
+#endif
     std::experimental::optional<int> ret;
-
 
     if(currentBestGain>Settings::gainThreshold) {
       //if the gain is beyond the threshold, return it

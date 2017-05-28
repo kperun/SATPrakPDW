@@ -295,12 +295,9 @@ namespace smtrat
 
   template<class Settings>
     Answer ICPPDWModule<Settings>::checkCore(){
-
 #ifdef SMTRAT_DEVOPTION_Statistics
     mStatistics.increaseNumberOfIterations();
 #endif
-
-
       SMTRAT_LOG_INFO("smtrat.module","------------------------------------");
       SMTRAT_LOG_INFO("smtrat.module", "Check core with the following active original constraints:");
       for (const auto& c : mActiveOriginalConstraints) {
@@ -391,7 +388,7 @@ namespace smtrat
       // this means we have fully contracted every ICP node in our search tree
       // if every node turned out to be UNSAT, the root node will now be UNSAT as well
       if (mSearchTree.isUnsat()) {
-        // we need to create an infeasable subset for the governing algorithm
+        // we need to create an infeasible subset for the governing algorithm
         // otherwise the sat solver will not determine UNSAT
         createInfeasableSubset();
 
@@ -418,16 +415,16 @@ namespace smtrat
       for (const ConstraintT& c : conflictingConstraints) {
         SMTRAT_LOG_INFO("smtrat.module",mDeLinearizations[c] << ", ");
       }
-      //now we have a set of conflicting constraints representing the infeasable set (TODO:minimal subset??)
+      //now we have a set of conflicting constraints representing the infeasible set (TODO:minimal subset??)
       //store it in the variable "mInfeasibleSubsets"
-      FormulaSetT infeasibleSubset; //a set of formulas which result in an UNSAT situtation
+      FormulaSetT infeasibleSubset; //a set of formulas which result in an UNSAT situation
       for (const ConstraintT& c : conflictingConstraints) {
         //get de-linearized constraints and their corresponding formulas, add them to the set
-        //of infeasiable constraints
+        //of infeasible constraints
         infeasibleSubset.insert(mConstraintFormula[mDeLinearizations[c]]);
       }
       //if at least one constraint has been found, store it in the mInfeasibleSubset variables as inspected by
-      //the governing algomithm
+      //the governing algorithm
       if(!infeasibleSubset.empty()) {
         mInfeasibleSubsets.push_back(infeasibleSubset);
       }

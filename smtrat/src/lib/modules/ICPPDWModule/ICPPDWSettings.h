@@ -53,7 +53,7 @@ namespace smtrat
     //alpha as used in reinforced learning, see chapter 8 slide 17
     static constexpr double alpha = 0.9;
 
-    //a epsilon is required to distinguish between candidates with weights which are regarded and which not
+    //an epsilon is required to distinguish between candidates with weights which are regarded and which are not
     static constexpr double weightEps = 0.1;
   };
 }

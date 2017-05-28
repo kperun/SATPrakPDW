@@ -119,13 +119,12 @@ namespace smtrat
 
         if(bestCC) { //if a contraction candidate has been found proceed
           OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getBounds());
-
           if(bounds.second) {
             // We contracted to two intervals, so we need to split
             SMTRAT_LOG_INFO("smtrat.module","Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl);
             split(contractionCandidates.at((*bestCC))->getVariable());
 
-            // we splitted the tree, now we need to apply the intervals for the children
+            // we split the tree, now we need to apply the intervals for the children
             mLeftChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)),  bounds.first );
             mRightChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)), *bounds.second);
             return true;
@@ -145,6 +144,9 @@ namespace smtrat
               return false;
             }
             else {
+#ifdef SMTRAT_DEVOPTION_Statistics
+      mModule->getStatistics()->increaseNumberOfSplits();
+#endif
               //now it is not sat, thus we have to split further
               SMTRAT_LOG_INFO("smtrat.module","No model found, gain too small -> split!\n");
               //First extract the best variable for splitting

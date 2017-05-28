@@ -83,7 +83,7 @@ namespace smtrat
     IntervalT resultA, resultB;
     std::experimental::optional<IntervalT> retB;
 
-    //Two Cases: If the relation of the polynom is "=" we can simply use the Contractor.
+    //Two Cases: If the relation of the polynomial is "=" we can simply use the Contractor.
     bool split = false;
     if (mConstraint.relation() == carl::Relation::EQ){
       // apply contraction

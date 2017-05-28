@@ -38,10 +38,12 @@ namespace smtrat
         Statistics::addKeyValuePair( "Number of performed contractions", mNumberOfContractions);
         Statistics::addKeyValuePair( "Overall contraction diameter", mSumOfContractions);
         Statistics::addKeyValuePair( "Average contraction gain", mSumOfContractions/mNumberOfContractions);
+        Statistics::addKeyValuePair( "Overall number of SAT<->SMTRAT iterations", mNumberOfIterations);
       }
 
       ICPPDWStatistics( const std::string& _statisticName ):
-        Statistics( _statisticName, this ){}
+        Statistics( _statisticName, this ),
+        mSumOfContractions(0.0){}
       ~ICPPDWStatistics(){}
 
       void increaseNumberOfIterations(){
@@ -65,6 +67,7 @@ namespace smtrat
       }
 
       void addContractionGain(double gain){
+        assert(gain>=0);
         mSumOfContractions+= gain;
       }
   };
