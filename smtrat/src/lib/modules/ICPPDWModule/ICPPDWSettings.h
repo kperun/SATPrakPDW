@@ -19,12 +19,10 @@ namespace smtrat
   template <class T>
     using OneOrTwo = std::pair<T,std::experimental::optional<T>>;
 
-#define UsedSettings ICPPDWDebug
-
-  struct ICPPDWDebug
+  struct ICPPDWSettingsDebug
   {
     /// Name of the Module
-    static constexpr auto moduleName = "ICPPDWModule<ICPPDWDebug>";
+    static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettingsDebug>";
 
     // number of maximal contraction per ICP state
     static constexpr int maxContractions = 30;
@@ -59,10 +57,10 @@ namespace smtrat
     static constexpr double weightEps = 0.1;
   };
 
-  struct ICPPDWProduction
+  struct ICPPDWSettingsProduction
   {
     /// Name of the Module
-    static constexpr auto moduleName = "ICPPDWModule<ICPPDWProduction>";
+    static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettingsProduction>";
 
     // number of maximal contraction per ICP state
     static constexpr int maxContractions = 10000;

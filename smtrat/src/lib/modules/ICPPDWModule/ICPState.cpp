@@ -7,7 +7,8 @@
 
 namespace smtrat
 {
-  template class ICPState<UsedSettings>;
+  template class ICPState<ICPPDWSettingsDebug>;
+  template class ICPState<ICPPDWSettingsProduction>;
 
 
   template<class Settings>

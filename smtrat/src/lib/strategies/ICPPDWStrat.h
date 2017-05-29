@@ -24,7 +24,7 @@ namespace smtrat
             ICPPDWStrat(): Manager() {
 				setStrategy({
 					addBackend<SATModule<SATSettings1>>({
-						addBackend<ICPPDWModule<UsedSettings>>()
+						addBackend<ICPPDWModule<ICPPDWSettingsDebug>>()
 					})
 				});
 			}

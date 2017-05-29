@@ -9,5 +9,7 @@
 #include "ICPPDWModule.h"
 
 namespace smtrat {
-template class ICPPDWModule<UsedSettings>;
+template class ICPPDWModule<ICPPDWSettingsDebug>;
+template class ICPPDWModule<ICPPDWSettingsProduction>;
+
 }

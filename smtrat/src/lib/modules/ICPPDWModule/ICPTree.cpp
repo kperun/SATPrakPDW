@@ -5,7 +5,8 @@
 namespace smtrat
 {
 
-  template class ICPTree<UsedSettings>;
+  template class ICPTree<ICPPDWSettingsDebug>;
+  template class ICPTree<ICPPDWSettingsProduction>;
 
    template<class Settings>
   ICPTree<Settings>::ICPTree(ICPPDWModule<Settings>* module) :
