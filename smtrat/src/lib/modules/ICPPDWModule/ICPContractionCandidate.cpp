@@ -93,44 +93,38 @@ namespace smtrat
       split = false;
 
       //Next use the cases seen in slide 18 on ICP
-      //TODO: Looking at all these cases is extremely tedious! This version ignores bounds that contain INFTY
-      if(originalInterval.lowerBoundType() == carl::BoundType::INFTY
-          || resultA.lowerBoundType() == carl::BoundType::INFTY
-          || originalInterval.upperBoundType() == carl::BoundType::INFTY
-          || resultA.upperBoundType() == carl::BoundType::INFTY){
-        //resultA = IntervalT::unboundedInterval();
-        resultA = originalInterval;
-        resultB = IntervalT::emptyInterval();
+      //Make the INFTY case easier by replacing one bound by INFTY
+      switch(mRelation){
+        case carl::Relation::LESS:
+          if(originalInterval.lower() >= resultA.upper()){
+            resultA = IntervalT::emptyInterval();
+          } else {
+            resultA.setLowerBound(resultA.lower(),carl::BoundType::INFTY);
+            resultA = resultA.intersect(originalInterval);
+          }
+          break;
+        case carl::Relation::LEQ:
+          resultA.setLowerBound(resultA.lower(),carl::BoundType::INFTY);
+          resultA = resultA.intersect(originalInterval);
+          break;
+        case carl::Relation::GEQ:
+          resultA.setUpperBound(resultA.upper(),carl::BoundType::INFTY);
+          resultA = resultA.intersect(originalInterval);
+          break;
+        case carl::Relation::GREATER:
+          if(originalInterval.upper() <= resultA.lower()){
+            resultA = IntervalT::emptyInterval();
+          } else {
+            resultA.setUpperBound(resultA.upper(),carl::BoundType::INFTY);
+            resultA = resultA.intersect(originalInterval);
+          }
+          break;
+        default:
+          cout << "This should not happen" << endl;
+          cout << mVariable << "," << mConstraint << endl;
+          break;
       }
-      else {
-        // TODO: check if correct
-        switch(mRelation){
-          case carl::Relation::LEQ:
-            if(originalInterval.lower() >= resultA.upper()){
-              resultA = IntervalT::emptyInterval();
-            } else {
-              resultA = IntervalT(originalInterval.lower(),carl::BoundType::WEAK,(originalInterval.upper() <= resultA.upper()?originalInterval.upper():resultA.upper()),carl::BoundType::WEAK);
-            }
-            break;
-          case carl::Relation::LESS:
-            resultA = IntervalT(originalInterval.lower(),carl::BoundType::WEAK,(originalInterval.upper() <= resultA.upper()?originalInterval.upper():resultA.upper()),carl::BoundType::WEAK);
-            break;
-          case carl::Relation::GEQ:
-            resultA = IntervalT((originalInterval.lower() >= resultA.lower()?originalInterval.lower():resultA.lower()),carl::BoundType::WEAK, originalInterval.upper(),carl::BoundType::WEAK);
-            break;
-          case carl::Relation::GREATER:
-            if(originalInterval.upper() <= resultA.lower()){
-              resultA = IntervalT::emptyInterval();
-            } else {
-              resultA = IntervalT((originalInterval.lower() >= resultA.lower()?originalInterval.lower():resultA.lower()),carl::BoundType::WEAK, originalInterval.upper(),carl::BoundType::WEAK);
-            }
-            break;
-          default:
-            cout << "This should not happen" << endl;
-            cout << mVariable << "," << mConstraint << endl;
-            break;
-        }
-      }
+      resultB = IntervalT::emptyInterval();
     }
 
     std::experimental::optional<IntervalT> retB;
