@@ -33,7 +33,6 @@ namespace smtrat
       double mWeight = 0;
 
     public:
-      ICPContractionCandidate(const ICPContractionCandidate& rhs);
       ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint);
 
       /**

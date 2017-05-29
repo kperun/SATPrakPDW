@@ -27,14 +27,6 @@ namespace smtrat
     }
   }
 
-  ICPContractionCandidate::ICPContractionCandidate(const ICPContractionCandidate& rhs):
-    mVariable(rhs.mVariable),
-    mConstraint(rhs.mConstraint),
-    mSolutionFormula(rhs.mConstraint.lhs(), rhs.mVariable),
-    mRelation(rhs.mRelation)
-  {
-  }
-
   carl::Variable ICPContractionCandidate::getVariable() {
     return mVariable;
   }
