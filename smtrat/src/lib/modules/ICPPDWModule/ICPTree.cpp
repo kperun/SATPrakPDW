@@ -272,13 +272,6 @@ namespace smtrat
     accumulateInvolvedConstraintsAndVariables(mConflictingVariables, mConflictingConstraints,
       mCurrentState.getAppliedContractionCandidates(), (int) (mCurrentState.getAppliedContractionCandidates().size()) - 1, -1);
 
-    // retrieve all constraints that have been used
-    // TODO: only use constraints that have been used to contract the conflict variable (in the current ICP state)
-    /*vector<ICPContractionCandidate*> appliedCCs = mCurrentState.getAppliedContractionCandidates();
-    for (ICPContractionCandidate* cc : appliedCCs) {
-      conflictReasons.insert(cc->getConstraint());
-    }*/
-
     // and we need to add all used simple bounds
     // we need to do this manually here, because the search tree never "contracts" with simple bounds
     // and thus, they will not appear in its conflicting constraint set
@@ -288,9 +281,6 @@ namespace smtrat
       if (mConflictingVariables.count(*(c.variables().begin())) > 0) {
         mConflictingConstraints.insert(c);
       }
-      /*if (ICPUtil<Settings>::occursVariableInConstraints(*(c.variables().begin()), conflictReasons)) {
-        conflictReasons.insert(c);
-      }*/
     }
   }
 
@@ -312,8 +302,6 @@ namespace smtrat
 
       // we accumulated the conflict reasons of the left and right child
       // and now we need to add the conflict reasons of this parent tree
-      /*std::set<ConstraintT> parentReasons = getConflictReasons(conflictVar);
-      mConflictingConstraints.insert(parentReasons.begin(), parentReasons.end());*/
       generateConflictReasons();
 
       // we need to accumulate further
@@ -512,31 +500,31 @@ namespace smtrat
                                                  std::set<ConstraintT>&    involvedConstraints,
                                                  vector<ICPContractionCandidate*>& candidates,
                                                  int startIndex, int endIndex) {
-    cout << "Initial involved vars: " << involvedVars << endl;
-    cout << "Initial involved constraints: " << involvedConstraints << endl;
+    //cout << "Initial involved vars: " << involvedVars << endl;
+    //cout << "Initial involved constraints: " << involvedConstraints << endl;
 
     int step = (startIndex <= endIndex) ? 1 : -1;
 
     for (int i = startIndex; i != endIndex; i += step) {
       ICPContractionCandidate* it = candidates[i];
-      cout << "Check [" << i << "] if " << *it << " is involved...";
+      //cout << "Check [" << i << "] if " << *it << " is involved...";
       if (involvedConstraints.count(it->getConstraint()) > 0 || 
           ICPUtil<Settings>::occurVariablesInConstraint(involvedVars, it->getConstraint())) {
         // the constraint itself is an involved constraint
         // or it contains an involved variable
-        cout << " yep!" << endl;
+        //cout << " yep!" << endl;
         auto cVars = it->getConstraint().variables();
 
-        cout << "Adding " << cVars << " to involved vars." << endl;
+        //cout << "Adding " << cVars << " to involved vars." << endl;
         involvedVars.insert(cVars.begin(), cVars.end());
-        cout << "Adding " << it->getConstraint() << " to involved constraints." << endl;
+        //cout << "Adding " << it->getConstraint() << " to involved constraints." << endl;
         involvedConstraints.insert(it->getConstraint());
       }
       else {
-        cout << " nope." << endl;
+        //cout << " nope." << endl;
       }
     }
-    cout << "Final involved vars: " << involvedVars << endl;
-    cout << "Final involved constraints: " << involvedConstraints << endl;
+    //cout << "Final involved vars: " << involvedVars << endl;
+    //cout << "Final involved constraints: " << involvedConstraints << endl;
   }
 }
