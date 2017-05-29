@@ -143,10 +143,10 @@ namespace smtrat
     std::experimental::optional<IntervalT> retB;
     if (split) {
       retB = resultB;
-      SMTRAT_LOG_INFO("smtrat.module","Used " << *this << "\t to contract from " << originalInterval << "\t to " << resultA << " and " << resultB);
+      //SMTRAT_LOG_INFO("smtrat.module","Used " << *this << "\t to contract from " << originalInterval << "\t to " << resultA << " and " << resultB);
     }
     else {
-      SMTRAT_LOG_INFO("smtrat.module","Used " << *this << "\t to contract from " << originalInterval << "\t to " << resultA);
+      //SMTRAT_LOG_INFO("smtrat.module","Used " << *this << "\t to contract from " << originalInterval << "\t to " << resultA);
     }
 
     OneOrTwo<IntervalT> ret(resultA,retB);
