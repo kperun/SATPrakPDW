@@ -275,8 +275,12 @@ namespace smtrat
       }
       SMTRAT_LOG_INFO("smtrat.module", "");
 
+      // clean up first
+      // reset the found model for the next iteration
+      mFoundModel = std::experimental::nullopt;
+
       // we need to search through all leaf nodes of the search tree, store them in a priority queue
-      std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,std::function<bool(ICPTree<Settings>*, ICPTree<Settings>*)>> searchPriorityQueue(ICPUtil<Settings>::compareTrees);
+      std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,std::function<bool(ICPTree<Settings>*, ICPTree<Settings>*)>> searchPriorityQueue(ICPTree<Settings>::compareTrees);
 
       vector<ICPTree<Settings>*> leafNodes = mSearchTree.getLeafNodes();
       for (ICPTree<Settings>* i : leafNodes) {

@@ -33,6 +33,21 @@ namespace smtrat
       }
 
       /**
+       * Determines whether any variable of a given set of variable occurs in a given constraint.
+       * @param vars the set of variables
+       * @param constraints the constraint
+       * @return true if one of the variables is contained in the constraint
+       */
+      static bool occurVariablesInConstraint(std::set<carl::Variable> vars, ConstraintT constraint) {
+        for (const carl::Variable& v : vars) {
+          if (constraint.lhs().has(v)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      /**
        * Splits the given interval into two non-empty pieces.
        * @param interval the interval that should be splitted
        * @return a pair of two new non-empty intervals which 
@@ -72,45 +87,6 @@ namespace smtrat
       static bool isSimpleBound(ConstraintT constraint) {
         const carl::Variable& var = *constraint.variables().begin();
         return (constraint.variables().size() == 1 && constraint.maxDegree(var) == 1);
-      }
-
-
-      /**
-       * Required in order to provide the priority queue with an ordering.
-       * @param node1 the first compared node
-       * @param node2 the second compared node
-       * @return true if node1 fulfills less constraints than node2
-       */
-      static bool compareTrees(ICPTree<Settings>* node1, ICPTree<Settings>* node2) {
-        map<carl::Variable,double> sol(node1->getCurrentState().guessSolution());
-        int numThis = 0;
-        Model model;
-        for(auto& clause : sol) {
-          Rational val = carl::rationalize<Rational>(clause.second);
-          model.emplace(clause.first, val);
-        }
-        for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
-          unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
-          assert(isSatisfied != 2);
-          if(isSatisfied == 1) {
-            numThis++;
-          }
-        }
-        map<carl::Variable,double> sol2(node2->getCurrentState().guessSolution());
-        int numThat = 0;
-        Model model2;
-        for(auto& clause : sol2) {
-          Rational val = carl::rationalize<Rational>(clause.second);
-          model2.emplace(clause.first, val);
-        }
-        for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
-          unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model2);
-          assert(isSatisfied != 2);
-          if(isSatisfied == 1) {
-            numThat++;
-          }
-        }
-        return numThis<numThat;
       }
   };
 }

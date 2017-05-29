@@ -40,6 +40,9 @@ namespace smtrat
       // In case of UNSAT, this set will contain the reason for unsatisfiability.
       std::set<ConstraintT> mConflictingConstraints;
 
+      // In case of UNSAT, this set will contain the variables that were involved in the unsat core
+      std::set<carl::Variable> mConflictingVariables;
+
       // Stores whether this state has been determined to be unsat
       bool mIsUnsat;
 
@@ -95,6 +98,8 @@ namespace smtrat
 
       std::set<ConstraintT>& getConflictingConstraints();
 
+      std::set<carl::Variable>& getConflictingVariables();
+
       /**
        * @return whether the search on this tree has led to an empty interval
        */
@@ -129,17 +134,24 @@ namespace smtrat
        */
       void removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin );
 
-      /**
-       * We have to overload the < operator to make the priority queue usable as intended.
-       *
-       * @param _right the ICPTree object to which the current is compared to.
-       */
-      bool operator<(const ICPTree& _right) const;
-
       ICPPDWModule<Settings>* getCorrespondingModule();
+
+      static bool compareTrees(ICPTree<Settings>* node1, ICPTree<Settings>* node2);
 
 
     private:
+      /**
+       * Does all necessary steps if a state has been determined to be unsat.
+       * I.e., it will generate conflict reasons, set appropriate member variables etc.
+       */
+      void handleUnsat();
+
+      /**
+       * Resets the tree to a state where no unsat has been determined yet,
+       * i.e. conflicting variables and constraints will be cleared and mUnsat will be set to false.
+       */
+      void clearUnsat();
+
       /**
        * Splits the search tree.
        * @param var the split dimension
@@ -147,31 +159,32 @@ namespace smtrat
       void split(carl::Variable var);
 
       /**
-       * Retrieves the reasons why the current state is UNSAT.
+       * Retrieves and stores the reasons why the current state is UNSAT.
        * I.e. retrieves the constraints that were used to contract the
-       * given variable to an empty interval.
-       *
-       * @param conflictVar the variable that has been contracted to an empty interval
-       * @return a list of conflict reasons (original constraints)
+       * conflicting variables to an empty interval. And stores them in mConflictingConstraints.
        */
-      std::set<ConstraintT> getConflictReasons(carl::Variable conflictVar);
+      void generateConflictReasons();
 
       /**
        * Accumulates all conflict reasons of the children as its own conflict reasons.
        * But only if all child trees are indeed unsat.
        * If at least one of the children is not unsat, this method does nothing.
-       * @param conflictVar the variable that has been contracted to an empty interval
        */
-      void accumulateConflictReasons(carl::Variable conflictVar);
+      void accumulateConflictReasons();
+
       /**
        * Returns the root of the overall tree. Required for counting number of splits.
        */
       ICPTree<Settings>* getRoot();
+
       /**
        * Traverses the tree and retrieves the number of performed splits.
        */
       int getNumberOfSplitsRecursive();
 
-
+      void accumulateInvolvedConstraintsAndVariables(std::set<carl::Variable>& involvedVars, 
+            std::set<ConstraintT>& involvedConstraints, 
+            vector<ICPContractionCandidate*>& candidates, 
+            int startIndex, int endIndex);
   };
 }
