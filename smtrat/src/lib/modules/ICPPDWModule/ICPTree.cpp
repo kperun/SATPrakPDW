@@ -64,11 +64,13 @@ namespace smtrat
 
   template<class Settings>
   void ICPTree<Settings>::printVariableBounds() {
-    SMTRAT_LOG_INFO("smtrat.module","Variable bounds:");
+#ifdef PDW_MODULE_DEBUG_1
+    std::cout << "Variable bounds:" << endl;
     for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
-      SMTRAT_LOG_INFO("smtrat.module",mapEntry.first << " in " << mapEntry.second);
+      std::cout << mapEntry.first << " in " << mapEntry.second ;
     }
-    SMTRAT_LOG_INFO("smtrat.module",std::endl);
+    std::cout << std::endl;
+#endif
   }
 
   template<class Settings>
@@ -80,21 +82,22 @@ namespace smtrat
       // i.e. no variable has an empty interval
       if (mCurrentState.getBounds().isConflicting()) {
         handleUnsat();
-
-        SMTRAT_LOG_INFO("smtrat.module","Bounds are conflicting!" << std::endl
-            << "Reasons: ");
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << "Bounds are conflicting!" << std::endl;
+            << "Reasons: ";
         for (const ConstraintT& c : mConflictingConstraints) {
-          SMTRAT_LOG_INFO("smtrat.module",c << ", ");
+          std::cout << c << ", ";
         }
-        SMTRAT_LOG_INFO("smtrat.module",std::endl);
-
+        std::cout << std::endl;
+#endif
         // we will terminate, but we did not split the search space
         return false;
       }
       // if we met some other termination condition (e.g. target diameter reached
       else if (mCurrentState.isTerminationConditionReached()) {
-        SMTRAT_LOG_INFO("smtrat.module","Termination condition reached." << std::endl);
-
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << "Termination condition reached." << std::endl;
+#endif
         // we will terminate, but we did not split the search space
         return false;
       }
@@ -112,7 +115,9 @@ namespace smtrat
           OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getBounds());
           if(bounds.second) {
             // We contracted to two intervals, so we need to split
-            SMTRAT_LOG_INFO("smtrat.module","Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl);
+#ifdef PDW_MODULE_DEBUG_1
+            std::cout << "Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl;
+#endif
             split(contractionCandidates.at((*bestCC))->getVariable());
 
             // we split the tree, now we need to apply the intervals for the children
@@ -121,15 +126,21 @@ namespace smtrat
             return true;
           } else {
             // no split, we can simply apply the contraction to the current state
-            SMTRAT_LOG_INFO("smtrat.module","Contract with " << *(contractionCandidates.at((*bestCC))) << ", results in bounds: " << bounds.first << std::endl);
+#ifdef PDW_MODULE_DEBUG_1
+            std::cout << "Contract with " << *(contractionCandidates.at((*bestCC))) << ", results in bounds: " << bounds.first << std::endl;
+#endif
             mCurrentState.applyContraction(contractionCandidates.at((*bestCC)), bounds.first);
           }
         }else{ //otherwise perform a split
-          SMTRAT_LOG_INFO("smtrat.module","Start guessing model before split!\n");
+#ifdef PDW_MODULE_DEBUG_1
+          std::cout << "Start guessing model before split!\n";
+#endif
           std::experimental::optional<Model> model= (*module).getSolution(this);
           //if we found a model, just terminate with false indicating that no split occurred
             if(model){
-              SMTRAT_LOG_INFO("smtrat.module","Model guessed without split!\n");
+#ifdef PDW_MODULE_DEBUG_1
+              std::cout << "Model guessed without split!\n";
+#endif
               (*module).setModel((*model));
               mIsUnsat = false;
               return false;
@@ -138,17 +149,19 @@ namespace smtrat
 #ifdef SMTRAT_DEVOPTION_Statistics
       mModule->getStatistics()->increaseNumberOfSplits();
 #endif
+#ifdef PDW_MODULE_DEBUG_1
               //now it is not sat, thus we have to split further
-              SMTRAT_LOG_INFO("smtrat.module","No model found, gain too small -> split!\n");
+              std::cout << "No model found, gain too small -> split!\n";
+#endif
               //First extract the best variable for splitting
               carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
               IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
 
               std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
-
-              SMTRAT_LOG_INFO("smtrat.module", "Split on " << splittingVar << " with new intervals: "
-                  << newIntervals.first << " and " << newIntervals.second << endl);
-
+#ifdef PDW_MODULE_DEBUG_1
+              std::cout << "Split on " << splittingVar << " with new intervals: "
+                  << newIntervals.first << " and " << newIntervals.second << endl;
+#endif
               split(splittingVar);
               mLeftChild->getCurrentState().setInterval(splittingVar, newIntervals.first, ConstraintT()); // empty origin
               mRightChild->getCurrentState().setInterval(splittingVar, newIntervals.second, ConstraintT());
@@ -482,7 +495,7 @@ namespace smtrat
    *
    * I.e., this method will traverse the given iterator from begin to end, and check
    * whether any involved variables occur in the constraint of the current contraction candidate,
-   * or if the constraint itself is an involved constraint. 
+   * or if the constraint itself is an involved constraint.
    * If this is the case, all the variables from that constraint will be added to involvedVars
    * and the constraint itself to involvedConstraints.
    *
@@ -508,7 +521,7 @@ namespace smtrat
     for (int i = startIndex; i != endIndex; i += step) {
       ICPContractionCandidate* it = candidates[i];
       //cout << "Check [" << i << "] if " << *it << " is involved...";
-      if (involvedConstraints.count(it->getConstraint()) > 0 || 
+      if (involvedConstraints.count(it->getConstraint()) > 0 ||
           ICPUtil<Settings>::occurVariablesInConstraint(involvedVars, it->getConstraint())) {
         // the constraint itself is an involved constraint
         // or it contains an involved variable

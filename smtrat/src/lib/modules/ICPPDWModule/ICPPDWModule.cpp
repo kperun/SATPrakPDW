@@ -149,12 +149,14 @@ namespace smtrat
         // linearize the constraints
         vector<ConstraintT>& newConstraints = linearizeConstraint(constraint, _constraint);
 
+#ifdef PDW_MODULE_DEBUG_1
         // DEBUG
-        SMTRAT_LOG_INFO("smtrat.module","Linearized constraints for " << constraint << ": ");
+        std::cout << "Linearized constraints for " << constraint << ": ";
         for (int i = 0; i < (int) newConstraints.size(); i++) {
-          SMTRAT_LOG_INFO("smtrat.module",newConstraints[i]);
+          std::cout << newConstraints[i] << endl;
         }
-        SMTRAT_LOG_INFO("smtrat.module", "");
+        std::cout << "" << endl;
+#endif
       }
       return true; // This should be adapted according to your implementation.
     }
@@ -165,15 +167,16 @@ namespace smtrat
       // generates all contraction candidates, i.e. for every constraint c
       // it generates a pair of (var, c) for every variable that occurs in that constraint
       createAllContractionCandidates();
-
+#ifdef PDW_MODULE_DEBUG_1
       // DEBUG
-      SMTRAT_LOG_INFO("smtrat.module", "------------------------------------\nAll constraints informed.\n" << std::endl);
+      std::cout <<  "------------------------------------\nAll constraints informed.\n" << std::endl;
 
-      SMTRAT_LOG_INFO("smtrat.module", "Contraction Candidates:");
+      std::cout << "Contraction Candidates:";
       for (const auto& cc : mContractionCandidates) {
-        SMTRAT_LOG_INFO("smtrat.module", cc);
+        std::cout <<  cc;
       }
-      SMTRAT_LOG_INFO("smtrat.module", std::endl);
+      std::cout << std::endl;
+#endif
     }
 
   template<class Settings>
@@ -185,9 +188,9 @@ namespace smtrat
       bool causesConflict = false;
       if (formula.getType() == carl::FormulaType::CONSTRAINT) {
         const ConstraintT& constraint = formula.constraint();
-
-        SMTRAT_LOG_INFO("smtrat.module", "Adding core: " << constraint);
-
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << "Adding core: " << constraint << std::endl;
+#endif
         // A constraint was activated
         mActiveOriginalConstraints.insert(constraint);
 
@@ -219,8 +222,9 @@ namespace smtrat
       if (formula.getType() == carl::FormulaType::CONSTRAINT) {
         const ConstraintT& constraint = formula.constraint();
 
-        SMTRAT_LOG_INFO("smtrat.module", "Removing core: " << constraint);
-
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout <<  "Removing core: " << constraint << std::endl;
+#endif
         // A constraint was de-activated
         auto cIt = std::find(mActiveOriginalConstraints.begin(), mActiveOriginalConstraints.end(), constraint);
         if (cIt != mActiveOriginalConstraints.end()) {
@@ -260,21 +264,22 @@ namespace smtrat
 #ifdef SMTRAT_DEVOPTION_Statistics
     mStatistics.increaseNumberOfIterations();
 #endif
-      SMTRAT_LOG_INFO("smtrat.module","------------------------------------");
-      SMTRAT_LOG_INFO("smtrat.module", "Check core with the following active original constraints:");
+#ifdef PDW_MODULE_DEBUG_1
+      std::cout << "------------------------------------\n"
+        << "Check core with the following active original constraints:\n";
       for (const auto& c : mActiveOriginalConstraints) {
         for (const auto& lC : mLinearizations[c]) {
-          SMTRAT_LOG_INFO("smtrat.module", lC);
+          std::cout <<  lC;
         }
       }
-      SMTRAT_LOG_INFO("smtrat.module", "");
+      std::cout <<  "" ;
 
-      SMTRAT_LOG_INFO("smtrat.module", "Check core with the following active contraction candidates:");
+      std::cout <<  "Check core with the following active contraction candidates:\n";
       for (const auto& cc : mActiveContractionCandidates) {
-        SMTRAT_LOG_INFO("smtrat.module", *cc);
+        std::cout << *cc << std::endl;
       }
-      SMTRAT_LOG_INFO("smtrat.module", "");
-
+      std::cout << "" << std::endl;
+#endif
       // clean up first
       // reset the found model for the next iteration
       mFoundModel = std::experimental::nullopt;
@@ -292,7 +297,9 @@ namespace smtrat
       // which have not been fully contracted yet
       while (!searchPriorityQueue.empty()) {
         // simply take the first one and contract it
-        SMTRAT_LOG_INFO("smtrat.module","ICPStates left to check: " << searchPriorityQueue.size());
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << "ICPStates left to check: " << searchPriorityQueue.size() << std::endl;
+#endif
         ICPTree<Settings>* currentNode = searchPriorityQueue.top();
         searchPriorityQueue.pop();
 
@@ -319,7 +326,9 @@ namespace smtrat
           // we stopped not because of a split, but because the bounds
           // are either UNSAT or some abortion criterium was met
           if (currentNode->isUnsat()) {
-            SMTRAT_LOG_INFO("smtrat.module","Current ICP State is UNSAT." << std::endl);
+#ifdef PDW_MODULE_DEBUG_1
+            std::cout << "Current ICP State is UNSAT." << std::endl;
+#endif
           }
           else {
             // a termination criterium was met
@@ -331,8 +340,10 @@ namespace smtrat
               model = mFoundModel;
             }
             if(model) {
-              SMTRAT_LOG_INFO("smtrat.module","------------------------------" << std::endl
-                  << "Final Answer: SAT." << std::endl);
+#ifdef PDW_MODULE_DEBUG_1
+              std::cout << "------------------------------" << std::endl
+                  << "Final Answer: SAT." << std::endl;
+#endif
               //now it is sat, thus store a pointer to the model
               mFoundModel = *model;
               return Answer::SAT;
@@ -342,8 +353,10 @@ namespace smtrat
               // but for now, we simply don't know
               // if no leaf node knows an answer, we will return UNKNOWN
               // after this main loop
-              SMTRAT_LOG_INFO("smtrat.module","No Model could be guessed, returning UNKNOWN" << std::endl
-                  << "------------------------------\n");
+#ifdef PDW_MODULE_DEBUG_1
+              std::cout << "No Model could be guessed, returning UNKNOWN" << std::endl
+                  << "------------------------------\n";
+#endif
             }
           }
         }
@@ -356,17 +369,20 @@ namespace smtrat
         // we need to create an infeasible subset for the governing algorithm
         // otherwise the sat solver will not determine UNSAT
         createInfeasableSubset();
-
-        SMTRAT_LOG_INFO("smtrat.module","------------------------------" << std::endl
-            << "Final Answer: UNSAT." << std::endl);
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << "------------------------------" << std::endl
+            << "Final Answer: UNSAT." << std::endl;
+#endif
         return Answer::UNSAT;
       }
       else {
         // we would have returned SAT within the main loop,
         // so if after the main loop the problem is not UNSAT,
         // we simply don't know the answer
-        SMTRAT_LOG_INFO("smtrat.module","------------------------------" << std::endl
-            << "Final Answer: UNKNOWN." << std::endl);
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << "------------------------------" << std::endl
+            << "Final Answer: UNKNOWN." << std::endl;
+#endif
         return Answer::UNKNOWN;
       }
     }
@@ -387,10 +403,12 @@ namespace smtrat
       // the base set of conflicting constraints
       std::set<ConstraintT> conflictingConstraints = mSearchTree.getConflictingConstraints();
 
-      SMTRAT_LOG_INFO("smtrat.module","Reasons: " << std::endl);
+#ifdef PDW_MODULE_DEBUG_1
+      std::cout << "Reasons: " << std::endl;
       for (const ConstraintT& c : conflictingConstraints) {
-        SMTRAT_LOG_INFO("smtrat.module",deLinearize(c) << ", ");
+        std::cout << deLinearize(c) << ", ";
       }
+#endif
       //now we have a set of conflicting constraints representing the infeasible set (TODO:minimal subset??)
       //store it in the variable "mInfeasibleSubsets"
       FormulaSetT infeasibleSubset; //a set of formulas which result in an UNSAT situation
@@ -415,9 +433,14 @@ namespace smtrat
     std::experimental::optional<Model> ICPPDWModule<Settings>::getSolution(ICPTree<Settings>* currentNode) {
       map<carl::Variable,double> sol(currentNode->getCurrentState().guessSolution());
       Model model;
-      SMTRAT_LOG_INFO("smtrat.module","Guessed solution:" << std::endl);
+
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout<< "Guessed solution:" << std::endl;
+#endif
       for(auto& clause : sol) {
-        SMTRAT_LOG_INFO("smtrat.module",clause.first << ":" << clause.second);
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << clause.first << ":" << clause.second << std::endl;
+#endif
         Rational val = carl::rationalize<Rational>(clause.second);
         model.emplace(clause.first, val);
       }
@@ -425,7 +448,9 @@ namespace smtrat
       for( const auto& rf : rReceivedFormula() ) {
         // TODO: This check is incomplete? Refer to ICPModule
         unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
-        SMTRAT_LOG_INFO("smtrat.module",rf.formula().constraint() << "?" << isSatisfied);
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << rf.formula().constraint() << "?" << isSatisfied << std::endl;
+#endif
         assert(isSatisfied != 2);
         if(isSatisfied == 0 || isSatisfied == 2) {
           doesSat = false;

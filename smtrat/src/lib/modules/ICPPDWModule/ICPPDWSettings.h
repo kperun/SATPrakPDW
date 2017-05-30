@@ -11,6 +11,17 @@
 #include "../../Common.h"
 #include <experimental/optional>
 
+
+//#define PDW_MODULE_DEBUG_0
+//#define PDW_MODULE_DEBUG_1
+
+#ifdef PDW_MODULE_DEBUG_1
+#ifndef PDW_MODULE_DEBUG_0
+#define PDW_MODULE_DEBUG_0
+#endif
+#endif
+
+
 namespace smtrat
 {
   typedef DoubleInterval IntervalT;
