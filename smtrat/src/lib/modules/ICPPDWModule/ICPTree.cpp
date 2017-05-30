@@ -83,8 +83,7 @@ namespace smtrat
       if (mCurrentState.getBounds().isConflicting()) {
         handleUnsat();
 #ifdef PDW_MODULE_DEBUG_1
-        std::cout << "Bounds are conflicting!" << std::endl;
-            << "Reasons: ";
+        std::cout << "Bounds are conflicting!" << std::endl << "Reasons: ";
         for (const ConstraintT& c : mConflictingConstraints) {
           std::cout << c << ", ";
         }
