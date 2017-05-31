@@ -475,8 +475,32 @@ namespace smtrat
     double currentInterval = 0;
     double bestSplitInterval = 0;
     carl::Variable bestSplitVariable;
+    std::vector<carl::Variable> unsatVars;
+    Model model;
 
-    for (carl::Variable var : *mOriginalVariables) {
+    //first collect all variables which are located in a unsat clause
+    map<carl::Variable,double> sol(guessSolution());
+     for(auto& clause : sol) {
+        Rational val = carl::rationalize<Rational>(clause.second);
+        model.emplace(clause.first, val);
+      }
+     for( const auto& rf : mCorrespondingTree->getCorrespondingModule()->rReceivedFormula()) {
+       //fist check if this formula is sat
+       unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+
+       assert(isSatisfied != 2);
+       if(isSatisfied == 0) {
+          //if it is not sat, get the corresponding variables from the initial constraints
+          for(const auto& var:rf.formula().constraint().variables()){
+            if(std::find(unsatVars.begin(), unsatVars.end(), var) == unsatVars.end()) {
+             //this var is not yet in the vector, add it
+              unsatVars.push_back(var);
+            }
+          }
+        }
+      }
+    // now finally we can iterate over all variables which are part of an unsat clause
+    for (carl::Variable var : unsatVars) {
       //first compute the diameter of a variable
       currentInterval = mBounds.getDoubleInterval(var).diameter();
       //now check if the new interval is "bigger"
@@ -485,7 +509,6 @@ namespace smtrat
         bestSplitInterval = currentInterval;
       }
     }
-
     //finally return the variable of the biggest interval
     return bestSplitVariable;
   }

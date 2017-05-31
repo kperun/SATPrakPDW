@@ -65,7 +65,7 @@ namespace smtrat
     static constexpr double alpha = 0.9;
 
     //an epsilon is required to distinguish between candidates with weights which are regarded and which are not
-    static constexpr double weightEps = 0.1;
+    static constexpr double weightEps = 0.01;
   };
 
   struct ICPPDWSettingsProduction
@@ -103,6 +103,6 @@ namespace smtrat
     static constexpr double alpha = 0.9;
 
     //an epsilon is required to distinguish between candidates with weights which are regarded and which are not
-    static constexpr double weightEps = 0.1;
+    static constexpr double weightEps = 0.01;
   };
 }
