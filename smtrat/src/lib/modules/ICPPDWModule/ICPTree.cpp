@@ -67,7 +67,9 @@ namespace smtrat
 #ifdef PDW_MODULE_DEBUG_1
     std::cout << "Variable bounds:" << std::endl;
     for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
-      std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+      if (!mapEntry.second.isInfinite()) {
+        std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
+      }
     }
     std::cout << std::endl;
 #endif
