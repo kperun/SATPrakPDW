@@ -7,12 +7,12 @@
 
 (assert
 	(and
-		(or (< (* x y) 1) (> (* x y) 1))
-		(or (= (* x y) 1) (< (+ (* x x) (* y y)) 1))
+		(!= x 0)
+		(!= y 0)
 	)
 )
 
 (set-info :status sat)
-; model: x = 0.5, y = 0.5
+; model: x = 1, y = 1
 (check-sat)
 

@@ -10,6 +10,6 @@
         (or (<= y 0) (>= x 2000))
     )
 )
+(set-info :status sat)
 (check-sat)
-; unsat
 (exit)

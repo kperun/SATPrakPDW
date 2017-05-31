@@ -134,8 +134,8 @@ namespace smtrat
   template<class Settings>
     bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
     {
-      // we only consider actual constraints
-      if (_constraint.getType() == carl::FormulaType::CONSTRAINT) {
+      // we only consider actual constraints and ignore "!="-constraints (they will simply be checked in the end)
+      if (_constraint.getType() == carl::FormulaType::CONSTRAINT && _constraint.constraint().relation() != carl::Relation::NEQ) {
         const ConstraintT& constraint = _constraint.constraint();
 
         //first add it to the map between constraints and formulas
@@ -185,7 +185,7 @@ namespace smtrat
 
       // we only consider actual constraints
       bool causesConflict = false;
-      if (formula.getType() == carl::FormulaType::CONSTRAINT) {
+      if (formula.getType() == carl::FormulaType::CONSTRAINT && formula.constraint().relation() != carl::Relation::NEQ) {
         const ConstraintT& constraint = formula.constraint();
 #ifdef PDW_MODULE_DEBUG_1
         std::cout << "Adding core: " << constraint << std::endl;
@@ -218,7 +218,7 @@ namespace smtrat
     {
       const FormulaT& formula = _subformula->formula();
       // we only consider actual constraints
-      if (formula.getType() == carl::FormulaType::CONSTRAINT) {
+      if (formula.getType() == carl::FormulaType::CONSTRAINT && formula.constraint().relation() != carl::Relation::NEQ) {
         const ConstraintT& constraint = formula.constraint();
 
 #ifdef PDW_MODULE_DEBUG_1

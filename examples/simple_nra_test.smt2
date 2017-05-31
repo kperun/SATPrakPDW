@@ -7,6 +7,6 @@
         (< y 0)
     )
 )
+(set-info :status sat)
 (check-sat)
-; unsat
 (exit)

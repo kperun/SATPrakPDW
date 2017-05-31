@@ -12,6 +12,7 @@
     	(>= y -10)
     )
 )
+(set-info :status sat)
 (check-sat)
 ; sat
 (exit)
