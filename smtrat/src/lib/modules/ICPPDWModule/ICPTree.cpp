@@ -65,9 +65,9 @@ namespace smtrat
   template<class Settings>
   void ICPTree<Settings>::printVariableBounds() {
 #ifdef PDW_MODULE_DEBUG_1
-    std::cout << "Variable bounds:" << endl;
+    std::cout << "Variable bounds:" << std::endl;
     for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
-      std::cout << mapEntry.first << " in " << mapEntry.second ;
+      std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
     }
     std::cout << std::endl;
 #endif
@@ -83,9 +83,9 @@ namespace smtrat
       if (mCurrentState.getBounds().isConflicting()) {
         handleUnsat();
 #ifdef PDW_MODULE_DEBUG_1
-        std::cout << "Bounds are conflicting!" << std::endl << "Reasons: ";
+        std::cout << "Bounds are conflicting!\nReasons: " << std::endl;
         for (const ConstraintT& c : mConflictingConstraints) {
-          std::cout << c << ", ";
+          std::cout << c << std::endl;
         }
         std::cout << std::endl;
 #endif
@@ -115,7 +115,7 @@ namespace smtrat
           if(bounds.second) {
             // We contracted to two intervals, so we need to split
 #ifdef PDW_MODULE_DEBUG_1
-            std::cout << "Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << endl;
+            std::cout << "Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << std::endl;
 #endif
             split(contractionCandidates.at((*bestCC))->getVariable());
 
@@ -132,13 +132,13 @@ namespace smtrat
           }
         }else{ //otherwise perform a split
 #ifdef PDW_MODULE_DEBUG_1
-          std::cout << "Start guessing model before split!\n";
+          std::cout << "Start guessing model before split!" << std::endl;
 #endif
           std::experimental::optional<Model> model= (*module).getSolution(this);
           //if we found a model, just terminate with false indicating that no split occurred
             if(model){
 #ifdef PDW_MODULE_DEBUG_1
-              std::cout << "Model guessed without split!\n";
+              std::cout << "Model guessed without split!" << std::endl;
 #endif
               (*module).setModel((*model));
               mIsUnsat = false;
@@ -150,7 +150,7 @@ namespace smtrat
 #endif
 #ifdef PDW_MODULE_DEBUG_1
               //now it is not sat, thus we have to split further
-              std::cout << "No model found, gain too small -> split!\n";
+              std::cout << "No model found, gain too small -> split!" << std::endl;
 #endif
               //First extract the best variable for splitting
               carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
@@ -159,7 +159,7 @@ namespace smtrat
               std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
 #ifdef PDW_MODULE_DEBUG_1
               std::cout << "Split on " << splittingVar << " with new intervals: "
-                  << newIntervals.first << " and " << newIntervals.second << endl;
+                  << newIntervals.first << " and " << newIntervals.second << "\n" << std::endl;
 #endif
               split(splittingVar);
               mLeftChild->getCurrentState().setInterval(splittingVar, newIntervals.first, ConstraintT()); // empty origin

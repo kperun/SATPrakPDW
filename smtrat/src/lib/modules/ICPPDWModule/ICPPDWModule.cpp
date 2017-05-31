@@ -150,12 +150,11 @@ namespace smtrat
         vector<ConstraintT>& newConstraints = linearizeConstraint(constraint, _constraint);
 
 #ifdef PDW_MODULE_DEBUG_1
-        // DEBUG
-        std::cout << "Linearized constraints for " << constraint << ": ";
+        std::cout << "Linearized constraints for " << constraint << ":" << std::endl;
         for (int i = 0; i < (int) newConstraints.size(); i++) {
-          std::cout << newConstraints[i] << endl;
+          std::cout << newConstraints[i] << std::endl;
         }
-        std::cout << "" << endl;
+        std::cout << std::endl;
 #endif
       }
       return true; // This should be adapted according to your implementation.
@@ -167,13 +166,13 @@ namespace smtrat
       // generates all contraction candidates, i.e. for every constraint c
       // it generates a pair of (var, c) for every variable that occurs in that constraint
       createAllContractionCandidates();
+
 #ifdef PDW_MODULE_DEBUG_1
-      // DEBUG
       std::cout <<  "------------------------------------\nAll constraints informed.\n" << std::endl;
 
-      std::cout << "Contraction Candidates:";
+      std::cout << "Contraction Candidates:" << std::endl;
       for (const auto& cc : mContractionCandidates) {
-        std::cout <<  cc;
+        std::cout <<  cc << std::endl;
       }
       std::cout << std::endl;
 #endif
@@ -266,19 +265,19 @@ namespace smtrat
 #endif
 #ifdef PDW_MODULE_DEBUG_1
       std::cout << "------------------------------------\n"
-        << "Check core with the following active original constraints:\n";
+        << "Check core with the following active original constraints:" << std::endl;
       for (const auto& c : mActiveOriginalConstraints) {
         for (const auto& lC : mLinearizations[c]) {
-          std::cout <<  lC;
+          std::cout <<  lC << std::endl;
         }
       }
-      std::cout <<  "" ;
+      std::cout << "\n" << std::endl;
 
-      std::cout <<  "Check core with the following active contraction candidates:\n";
+      std::cout <<  "Check core with the following active contraction candidates:" << std::endl;
       for (const auto& cc : mActiveContractionCandidates) {
         std::cout << *cc << std::endl;
       }
-      std::cout << "" << std::endl;
+      std::cout << std::endl;
 #endif
       // clean up first
       // reset the found model for the next iteration
@@ -354,8 +353,7 @@ namespace smtrat
               // if no leaf node knows an answer, we will return UNKNOWN
               // after this main loop
 #ifdef PDW_MODULE_DEBUG_1
-              std::cout << "No Model could be guessed, returning UNKNOWN" << std::endl
-                  << "------------------------------\n";
+              std::cout << "No Model could be guessed, returning UNKNOWN" << std::endl;
 #endif
             }
           }
@@ -406,7 +404,7 @@ namespace smtrat
 #ifdef PDW_MODULE_DEBUG_1
       std::cout << "Reasons: " << std::endl;
       for (const ConstraintT& c : conflictingConstraints) {
-        std::cout << deLinearize(c) << ", ";
+        std::cout << deLinearize(c) << std::endl;
       }
 #endif
       //now we have a set of conflicting constraints representing the infeasible set (TODO:minimal subset??)
@@ -449,7 +447,7 @@ namespace smtrat
         // TODO: This check is incomplete? Refer to ICPModule
         unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
 #ifdef PDW_MODULE_DEBUG_1
-        std::cout << rf.formula().constraint() << "?" << isSatisfied << std::endl;
+        std::cout << isSatisfied << " @ " << rf.formula().constraint() << std::endl;
 #endif
         assert(isSatisfied != 2);
         if(isSatisfied == 0 || isSatisfied == 2) {
@@ -459,9 +457,15 @@ namespace smtrat
       }
 
       if (doesSat) {
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << "All constraints satisfied.\n" << std::endl;
+#endif
         return model;
       }
       else {
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout << "Unsatisfied constraints remaining.\n" << std::endl;
+#endif
 #ifdef SMTRAT_DEVOPTION_Statistics
           mStatistics.increaseNumberOfWrongGuesses();
 #endif

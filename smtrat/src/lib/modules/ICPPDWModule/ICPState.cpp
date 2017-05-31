@@ -213,7 +213,7 @@ namespace smtrat
   bool ICPState<Settings>::isTerminationConditionReached() {
     if(mAppliedContractionCandidates.size() > Settings::maxContractions) {
 #ifdef PDW_MODULE_DEBUG_1
-      std::cout << "Termination reached by max iterations!" << endl;
+      std::cout << "Termination reached by max iterations!" << std::endl;
 #endif
       return true;
     }
@@ -221,7 +221,7 @@ namespace smtrat
     // check if maximum number of splits has been reached and terminate
     if(computeNumberOfSplits()>Settings::maxSplitNumber) {
 #ifdef PDW_MODULE_DEBUG_1
-      std::cout << "Termination reached by maximal number of splits!" << endl;
+      std::cout << "Termination reached by maximal number of splits!" << std::endl;
 #endif
       return true;
     }
@@ -238,7 +238,7 @@ namespace smtrat
     if (isTargetDiameterReached) {
       //if all intervals are ok, just terminate
 #ifdef PDW_MODULE_DEBUG_1
-      std::cout << "Termination reached by desired interval diameter!" << endl;
+      std::cout << "Termination reached by desired interval diameter!" << std::endl;
 #endif
       return true;
     }
