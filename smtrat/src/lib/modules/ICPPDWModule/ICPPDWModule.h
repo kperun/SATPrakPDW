@@ -51,19 +51,36 @@ namespace smtrat
        * We need to linearize constraints for ICP.
        * So we will store a map from original constraints to the linearized ones
        * and for convenience also a map from linearized constraints to original ones.
+       * Note that we disregard monomial-slack substitution constraints 
+       * (that information can be retrieved from mMonomialSlackConstraints or mMonomialSubstitutions).
        *
-       * The key set of this map also functions as the storage for the set of all constraints.
+       * The key set of mLinearizations also functions as the storage for the set of all linearized original constraints.
        */
-      std::unordered_map<ConstraintT, vector<ConstraintT>> mLinearizations;
-      std::unordered_map<ConstraintT,        ConstraintT > mDeLinearizations;
+      std::unordered_map<ConstraintT, ConstraintT> mLinearizations;
+      std::unordered_map<ConstraintT, ConstraintT> mDeLinearizations;
 
       // the set of newly introduced variables (during the linearization)
       std::set<carl::Variable> mSlackVariables;
 
+      // all slack substitutions constraints of the form "monomial - slack = 0"
+      std::set<ConstraintT> mMonomialSlackConstraints;
+
       // a map from slack variables to the constraint of their substitution
-      std::map<carl::Variable, ConstraintT> mSlackSubstitutionConstraints;
+      std::unordered_map<Poly, carl::Variable> mMonomialSubstitutions;
 
     private:
+      /**
+       * Returns a slack variable representing the given monomial.
+       *
+       * If this method is called for the first time for a given monomial, a new slack variable
+       * will be created and associated with that monomial.
+       * In all further calls, that slack variable is returned for the monomial.
+       *
+       * @param monomial a monomial
+       * @return a slack variable representing that monomial
+       */
+      carl::Variable getSlackVariableForMonomial(Poly monomial);
+
       /**
        * Linearizes a constraint.
        *
@@ -75,11 +92,9 @@ namespace smtrat
        * In case the constraint was linear, it will be mapped to itself.
        *
        * @param constraint The constraint that should be linearized
-       * @param _origin Slac constraints are added to the set of bounds, here we need an origin of the bound,i.e. the formula.
-       * @return A vector of resulting linearized constraints.
-       *         This vector is actually stored in the mLinearizations map.
+       * @param _origin Slack constraints are added to the set of bounds, here we need an origin of the bound,i.e. the formula.
        */
-      vector<ConstraintT>& linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin);
+      void linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin);
 
       /**
        * Creates all contraction candidates.
@@ -96,8 +111,10 @@ namespace smtrat
 
       /**
        * Helper function which returns the delinearized constraint.
+       * I.e., for a constraint r_1 + ... + r_k ~ 0, the original constraint m_1 + ... + m_k ~ 0 is returned. 
+       *
        * @param c a constraint
-       * @return the de-linearized constraint if c was a linearized constraints, otherwise c itself
+       * @return the de-linearized constraint if c was a linearized constraint, otherwise c itself
        */
       ConstraintT deLinearize(const ConstraintT& c);
 

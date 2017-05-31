@@ -11,6 +11,7 @@
         (>= x -100.0)
     )
 )
+(set-info :status unsat)
 (check-sat)
 ; unsat
 (exit)

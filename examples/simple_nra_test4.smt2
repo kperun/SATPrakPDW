@@ -1,11 +1,11 @@
 (set-logic QF_LRA)
-(declare-fun x () Real) ; x = 3
-(declare-fun y () Real) ; y = -4
+(declare-fun x () Real) ; x = -1
+(declare-fun y () Real) ; y = 2
 (assert 
     (and
-    	(>= (+ (* x x) (* y y)) 25)
-    	(<= (+ (* x x) (* y y)) 26)
-    	(<= (* x y) -10)
+    	(<= (+ (* x x) x) 0)
+    	(<= (- (* -1 y y y) y) -10)
+    	(<= (+ x y) 2)
     	(<= x 10)
     	(>= x -10)
     	(<= y 10)

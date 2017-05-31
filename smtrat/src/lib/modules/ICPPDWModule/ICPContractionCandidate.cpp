@@ -96,7 +96,9 @@ namespace smtrat
       //Make the INFTY case easier by replacing one bound by INFTY
       switch(mRelation){
         case carl::Relation::LESS:
-          if(originalInterval.lower() >= resultA.upper()){
+          if(resultA.upperBoundType() != carl::BoundType::INFTY && 
+             originalInterval.lowerBoundType() != carl::BoundType::INFTY && 
+             originalInterval.lower() >= resultA.upper()){
             resultA = IntervalT::emptyInterval();
           } else {
             resultA.setLowerBound(resultA.lower(),carl::BoundType::INFTY);
@@ -112,7 +114,9 @@ namespace smtrat
           resultA = resultA.intersect(originalInterval);
           break;
         case carl::Relation::GREATER:
-          if(originalInterval.upper() <= resultA.lower()){
+          if(originalInterval.upperBoundType() != carl::BoundType::INFTY &&
+             resultA.lowerBoundType() != carl::BoundType::INFTY &&
+             originalInterval.upper() <= resultA.lower()){
             resultA = IntervalT::emptyInterval();
           } else {
             resultA.setUpperBound(resultA.upper(),carl::BoundType::INFTY);
@@ -130,10 +134,6 @@ namespace smtrat
     std::experimental::optional<IntervalT> retB;
     if (split) {
       retB = resultB;
-      //SMTRAT_LOG_INFO("smtrat.module","Used " << *this << "\t to contract from " << originalInterval << "\t to " << resultA << " and " << resultB);
-    }
-    else {
-      //SMTRAT_LOG_INFO("smtrat.module","Used " << *this << "\t to contract from " << originalInterval << "\t to " << resultA);
     }
 
     OneOrTwo<IntervalT> ret(resultA,retB);
