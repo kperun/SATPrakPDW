@@ -474,7 +474,6 @@ namespace smtrat
     OneOrTwo<IntervalT> intervals;
     double currentInterval = 0;
     double bestSplitInterval = 0;
-    carl::Variable bestSplitVariable;
     std::vector<carl::Variable> unsatVars;
     Model model;
 
@@ -499,6 +498,7 @@ namespace smtrat
           }
         }
       }
+      carl::Variable bestSplitVariable = unsatVars[0];
     // now finally we can iterate over all variables which are part of an unsat clause
     for (carl::Variable var : unsatVars) {
       //first compute the diameter of a variable
