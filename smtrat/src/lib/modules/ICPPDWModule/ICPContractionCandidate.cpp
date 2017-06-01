@@ -87,46 +87,52 @@ namespace smtrat
       }
     }
 
-    // the contraction was done on a inequality, so we need to fix the boundaries
+    // the contraction was done on an inequality, so we need to fix the boundaries
     else {
       resultA = resultPropagation[0];
       split = false;
 
-      //Next use the cases seen in slide 18 on ICP
-      //Make the INFTY case easier by replacing one bound by INFTY
-      switch(mRelation){
-        case carl::Relation::LESS:
-          if(resultA.upperBoundType() != carl::BoundType::INFTY && 
-             originalInterval.lowerBoundType() != carl::BoundType::INFTY && 
-             originalInterval.lower() >= resultA.upper()){
-            resultA = IntervalT::emptyInterval();
-          } else {
+      // First case: restulA is empty. This means the rhs is already unsat, so we return the empty interval
+      if(resultA.isEmpty()){
+        resultA = IntervalT::emptyInterval();
+      } else {
+
+        // Next use the cases seen in slide 18 on ICP
+        // Make the INFTY case easier by replacing one bound by INFTY
+        switch(mRelation){
+          case carl::Relation::LESS:
+            if(resultA.upperBoundType() != carl::BoundType::INFTY &&
+                originalInterval.lowerBoundType() != carl::BoundType::INFTY &&
+                originalInterval.lower() >= resultA.upper()){
+              resultA = IntervalT::emptyInterval();
+            } else {
+              resultA.setLowerBound(resultA.lower(),carl::BoundType::INFTY);
+              resultA = resultA.intersect(originalInterval);
+            }
+            break;
+          case carl::Relation::LEQ:
             resultA.setLowerBound(resultA.lower(),carl::BoundType::INFTY);
             resultA = resultA.intersect(originalInterval);
-          }
-          break;
-        case carl::Relation::LEQ:
-          resultA.setLowerBound(resultA.lower(),carl::BoundType::INFTY);
-          resultA = resultA.intersect(originalInterval);
-          break;
-        case carl::Relation::GEQ:
-          resultA.setUpperBound(resultA.upper(),carl::BoundType::INFTY);
-          resultA = resultA.intersect(originalInterval);
-          break;
-        case carl::Relation::GREATER:
-          if(originalInterval.upperBoundType() != carl::BoundType::INFTY &&
-             resultA.lowerBoundType() != carl::BoundType::INFTY &&
-             originalInterval.upper() <= resultA.lower()){
-            resultA = IntervalT::emptyInterval();
-          } else {
+            break;
+          case carl::Relation::GEQ:
             resultA.setUpperBound(resultA.upper(),carl::BoundType::INFTY);
             resultA = resultA.intersect(originalInterval);
-          }
-          break;
-        default:
-          cout << "This should not happen" << endl;
-          cout << mVariable << "," << mConstraint << endl;
-          break;
+            break;
+          case carl::Relation::GREATER:
+            if(originalInterval.upperBoundType() != carl::BoundType::INFTY &&
+                resultA.lowerBoundType() != carl::BoundType::INFTY &&
+                originalInterval.upper() <= resultA.lower()){
+              resultA = IntervalT::emptyInterval();
+            } else {
+              resultA.setUpperBound(resultA.upper(),carl::BoundType::INFTY);
+              resultA = resultA.intersect(originalInterval);
+            }
+            break;
+          default:
+            cout << "Error: mRelation is neither EQ nor an inequality relation!" << endl;
+            cout << mVariable << "," << mConstraint << endl;
+            break;
+        }
       }
       resultB = IntervalT::emptyInterval();
     }
