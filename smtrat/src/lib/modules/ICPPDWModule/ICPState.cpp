@@ -57,6 +57,15 @@ namespace smtrat
       }
     }
   }
+  
+  template<class Settings>
+  void ICPState<Settings>::initVariables(std::set<carl::Variable> vars) {
+    for (const auto& v : vars) {
+      // this getter will create an unbounded interval for unknown vars
+      // so essentially, it is an initializer
+      mBounds.getDoubleInterval(v);
+    }
+  }
 
   template<class Settings>
   vb::VariableBounds<ConstraintT>& ICPState<Settings>::getBounds() {
@@ -64,7 +73,7 @@ namespace smtrat
   }
 
   template<class Settings>
-  void ICPState<Settings>::applyContraction(ICPContractionCandidate* cc, IntervalT interval) {
+  void ICPState<Settings>::applyContraction(ICPContractionCandidate<Settings>* cc, IntervalT interval) {
     OneOrTwo<ConstraintT> intervalConstraints = setInterval(cc->getVariable(), interval, cc->getConstraint());
     addAppliedIntervalConstraint(intervalConstraints);
     addAppliedContractionCandidate(cc);
@@ -125,12 +134,12 @@ namespace smtrat
   }
 
   template<class Settings>
-  vector<ICPContractionCandidate*>& ICPState<Settings>::getAppliedContractionCandidates() {
+  vector<ICPContractionCandidate<Settings>*>& ICPState<Settings>::getAppliedContractionCandidates() {
     return mAppliedContractionCandidates;
   }
 
   template<class Settings>
-  void ICPState<Settings>::addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate) {
+  void ICPState<Settings>::addAppliedContractionCandidate(ICPContractionCandidate<Settings>* contractionCandidate) {
     mAppliedContractionCandidates.push_back(contractionCandidate);
   }
 
@@ -252,90 +261,7 @@ namespace smtrat
   }
 
   template<class Settings>
-  double ICPState<Settings>::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
-    //first compute the new interval
-    OneOrTwo<IntervalT> intervals = candidate.getContractedInterval(_bounds);
-    //then retrieve the old one
-    IntervalT old_interval = _bounds.getDoubleInterval(candidate.getVariable());
-
-    //in order to avoid manipulation of the existing objects, we work here with retrieved values
-    //moreover, we use a bigM in order to be able to compute with -INF and INF
-    double newFirstLower = 0;
-    double newFirstUpper = 0;
-    double newSecondLower = 0;
-    double newSecondUpper = 0;
-    double oldIntervalLower = 0;
-    double oldIntervalUpper = 0;
-    //first the mandatory first interval
-    if(intervals.first.lowerBoundType()== carl::BoundType::INFTY) {
-      newFirstLower = -Settings::bigM;
-    }else{
-      if(intervals.first.lowerBoundType()== carl::BoundType::WEAK) {
-        newFirstLower = intervals.first.lower();
-      }else{ //in case it is scrict, we add a small epsilon to make it better
-        newFirstLower = intervals.first.lower() + Settings::epsilon;
-      }
-    }
-
-    if(intervals.first.upperBoundType()== carl::BoundType::INFTY) {
-      newFirstUpper = Settings::bigM;
-    }else{
-      if(intervals.first.upperBoundType()== carl::BoundType::WEAK) {
-        newFirstUpper = intervals.first.upper();
-      }else{
-        newFirstUpper = intervals.first.upper() - Settings::epsilon;
-      }
-    }
-
-    //now the second optional interval
-    if(intervals.second) {
-      if((*(intervals.second)).lowerBoundType()== carl::BoundType::INFTY) {
-        newSecondLower = -Settings::bigM;
-      }else{
-        if((*(intervals.second)).lowerBoundType()== carl::BoundType::WEAK) {
-          newSecondLower = (*(intervals.second)).lower();
-        }else{
-          newSecondLower = (*(intervals.second)).lower() + Settings::epsilon;
-        }
-
-      }
-      if((*(intervals.second)).upperBoundType()== carl::BoundType::INFTY) {
-        newSecondUpper = Settings::bigM;
-      }else{
-        if((*(intervals.second)).upperBoundType()== carl::BoundType::WEAK) {
-          newSecondUpper = (*(intervals.second)).upper();
-        }else{
-          newSecondUpper = (*(intervals.second)).upper() - Settings::epsilon;
-        }
-      }
-    }
-    //finally the old interval
-    if(old_interval.lowerBoundType()== carl::BoundType::INFTY) {
-      oldIntervalLower = -Settings::bigM;
-    }else{
-      if(old_interval.lowerBoundType()== carl::BoundType::WEAK) {
-        oldIntervalLower = old_interval.lower();
-      }else{
-        oldIntervalLower = old_interval.lower()+Settings::epsilon;
-      }
-    }
-
-    if(old_interval.upperBoundType()== carl::BoundType::INFTY) {
-      oldIntervalUpper = Settings::bigM;
-    }else{
-      if(old_interval.upperBoundType()== carl::BoundType::WEAK) {
-        oldIntervalUpper = old_interval.upper();
-      }else{
-        oldIntervalUpper = old_interval.upper() - Settings::epsilon;
-      }
-    }
-
-    //return the value
-    return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
-  }
-
-  template<class Settings>
-  std::experimental::optional<int> ICPState<Settings>::getBestContractionCandidate(vector<ICPContractionCandidate*>& candidates){
+  std::experimental::optional<int> ICPState<Settings>::getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& candidates){
     if(candidates.size()==0) {
       throw std::invalid_argument( "Candidates vector is empty!" );
     }
@@ -347,7 +273,7 @@ namespace smtrat
 
     //store the current best candidate index
     int currentBest = 0;
-    std::experimental::optional<double> currentBestGain = computeGain(*(candidates[currentBest]),mBounds);
+    std::experimental::optional<double> currentBestGain = (candidates[currentBest])->computeGain(mBounds);
 
      //store the new diameter in case two candidates with equal gain are regarded
     double currentBestAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
@@ -362,7 +288,7 @@ namespace smtrat
     //SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[currentBest]))<< " adjusted to " << currentBestGainWeighted);
 
     for (int it = 1; it < (int) candidates.size(); it++) {
-      double currentGain = computeGain(*(candidates[it]), mBounds);
+      double currentGain = (candidates[it])->computeGain(mBounds);
       //compute the weighted gain
       double currentGainWeighted = (*(candidates[it])).getWeight()+
               Settings::alpha*(currentGain-(*(candidates[it])).getWeight());

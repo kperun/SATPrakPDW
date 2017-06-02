@@ -42,10 +42,10 @@ namespace smtrat
       std::set<ConstraintT> mActiveOriginalConstraints;
 
       // all contraction candidates
-      vector<ICPContractionCandidate> mContractionCandidates;
+      vector<ICPContractionCandidate<Settings>> mContractionCandidates;
 
       // only the contraction candidates which contain active constraints
-      vector<ICPContractionCandidate*> mActiveContractionCandidates;
+      vector<ICPContractionCandidate<Settings>*> mActiveContractionCandidates;
 
       /**
        * We need to linearize constraints for ICP.

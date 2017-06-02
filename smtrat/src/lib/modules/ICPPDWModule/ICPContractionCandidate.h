@@ -16,6 +16,7 @@ namespace smtrat
    * This class represents a contraction candidate (x, c)
    * where x is a variable and c is a constraint.
    */
+  template<class Settings>
   class ICPContractionCandidate
   {
     private:
@@ -41,11 +42,15 @@ namespace smtrat
        * The result may be either one or two intervals, depending on the order of the variable.
        *
        * @param _bounds The variable bounds
-       * @return a pair of resulting intervals
-       *         in case the result is only one interval, the second element of the pair will be an empty interval
-       *         // TODO: use optional or variant for second argument
+       * @return one or two resulting intervals
        */
       OneOrTwo<IntervalT> getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds);
+
+      /**
+       * Compute the new interval, subsequently the gain by the formula 1- D_new/D_old
+       * @param _bounds The variable bounds
+       */
+      double computeGain(const vb::VariableBounds<ConstraintT>& _bounds);
 
       carl::Variable getVariable();
       ConstraintT& getConstraint();

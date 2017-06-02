@@ -123,7 +123,7 @@ namespace smtrat
       // create contraction candidates for "monomial - slack = 0"
       for (const ConstraintT& constraint : mMonomialSlackConstraints) {
         for (const auto& variable : constraint.variables()) {
-          mContractionCandidates.push_back(ICPContractionCandidate(variable, constraint));
+          mContractionCandidates.push_back(ICPContractionCandidate<Settings>(variable, constraint));
         }
       }
 
@@ -134,7 +134,7 @@ namespace smtrat
         if (constraint.variables().size() > 1) {
           // we create a new contraction candidate for every variable in that constraint
           for (const auto& variable : constraint.variables()) {
-            mContractionCandidates.push_back(ICPContractionCandidate(variable, constraint));
+            mContractionCandidates.push_back(ICPContractionCandidate<Settings>(variable, constraint));
           }
         }
       }
@@ -168,6 +168,10 @@ namespace smtrat
   template<class Settings>
     void ICPPDWModule<Settings>::init()
     {
+      // initialize all variables to unbounded
+      mSearchTree.getCurrentState().initVariables(mOriginalVariables);
+      mSearchTree.getCurrentState().initVariables(mSlackVariables);
+
       // generates all contraction candidates, i.e. for every constraint c
       // it generates a pair of (var, c) for every variable that occurs in that constraint
       createAllContractionCandidates();
@@ -294,7 +298,7 @@ namespace smtrat
       std::cout << "\n" << std::endl;
 
       std::cout <<  "Check core with the following active contraction candidates:" << std::endl;
-      for (ICPContractionCandidate* cc : mActiveContractionCandidates) {
+      for (ICPContractionCandidate<Settings>* cc : mActiveContractionCandidates) {
         std::cout << *cc << std::endl;
       }
       std::cout << std::endl;

@@ -77,7 +77,7 @@ namespace smtrat
        * @param contractionCandidates A set of pointers to contraction candidates that can be applied
        * @return whether a split occurred
        */
-      bool contract(vector<ICPContractionCandidate*>& contractionCandidates,ICPPDWModule<Settings>* module);
+      bool contract(vector<ICPContractionCandidate<Settings>*>& contractionCandidates,ICPPDWModule<Settings>* module);
 
       ICPState<Settings>& getCurrentState();
 
@@ -184,7 +184,7 @@ namespace smtrat
 
       void accumulateInvolvedConstraintsAndVariables(std::set<carl::Variable>& involvedVars, 
             std::set<ConstraintT>& involvedConstraints, 
-            vector<ICPContractionCandidate*>& candidates, 
+            vector<ICPContractionCandidate<Settings>*>& candidates, 
             int startIndex, int endIndex);
   };
 }

@@ -53,7 +53,7 @@ namespace smtrat
        * The contraction candidates that have been applied.
        * They will be stored in the order that they have been applied.
        */
-      vector<ICPContractionCandidate*> mAppliedContractionCandidates;
+      vector<ICPContractionCandidate<Settings>*> mAppliedContractionCandidates;
 
       /**
        * After we apply a contraction candidate, we add the lower and upper
@@ -85,6 +85,14 @@ namespace smtrat
       ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree);
 
       /**
+       * Initializes the given variables with unbounded intervals.
+       * Must be called for every variables at least once.
+       *
+       * @param vars a set containing variables that should be initialized
+       */
+      void initVariables(std::set<carl::Variable> vars);
+
+      /**
        * Returns the current search box as VariableBounds.
        *
        * @return reference to the search box
@@ -100,7 +108,7 @@ namespace smtrat
        * @param cc The contraction candidate that has been applied
        * @param interval The contracted interval that should be applied
        */
-      void applyContraction(ICPContractionCandidate* cc, IntervalT interval);
+      void applyContraction(ICPContractionCandidate<Settings>* cc, IntervalT interval);
 
       /**
        * Updates the current interval bound for a specific variable.
@@ -121,8 +129,8 @@ namespace smtrat
        */
       IntervalT getInterval(carl::Variable var);
 
-      vector<ICPContractionCandidate*>& getAppliedContractionCandidates();
-      void addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate);
+      vector<ICPContractionCandidate<Settings>*>& getAppliedContractionCandidates();
+      void addAppliedContractionCandidate(ICPContractionCandidate<Settings>* contractionCandidate);
 
       vector<OneOrTwo<ConstraintT>>& getAppliedIntervalConstraints();
       void addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints);
@@ -144,17 +152,12 @@ namespace smtrat
       carl::Variable getConflictingVariable();
 
       /**
-       * For a given contraction candidate compute the new interval, subsequently the gain by the formula 1- D_new/D_old
-       */
-      double computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds);
-
-      /**
        * Chooses the best contraction candidate.
        *
        * @param contractionCandidates A list of available contraction candidates
        * @return the best contraction candidate
        */
-      std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate*>& contractionCandidates);
+      std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& contractionCandidates);
 
       /**
        * Determines whether we should stop contracting.

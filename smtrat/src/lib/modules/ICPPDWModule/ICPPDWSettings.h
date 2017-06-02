@@ -36,7 +36,7 @@ namespace smtrat
     static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettingsDebug>";
 
     // number of maximal contraction per ICP state
-    static constexpr int maxContractions = 30;
+    static constexpr int maxContractions = 50;
 
     // desired interval
     static constexpr double targetDiameter = 0.0;
@@ -74,13 +74,13 @@ namespace smtrat
     static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettingsProduction>";
 
     // number of maximal contraction per ICP state
-    static constexpr int maxContractions = 10000;
+    static constexpr int maxContractions = 1000;
 
     // desired interval
     static constexpr double targetDiameter = 1.0;
 
     // maximal number of splits allowed
-    static constexpr int maxSplitNumber = 1000;
+    static constexpr int maxSplitNumber = 100;
 
     //we define a big M in order to be able to compute gain in case of inf intervals
     // it is defined as twice the max interval, since we have to consider an interval [-inf,0] to be better than [-1000,0]
