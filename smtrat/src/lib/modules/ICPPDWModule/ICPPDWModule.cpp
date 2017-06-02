@@ -231,6 +231,13 @@ namespace smtrat
         if(!mSearchTree.addConstraint(lC, constraint)) {
           causesConflict = true;
         }
+
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout <<  "Addition resulted in bounds: " << std::endl;
+        for (ICPTree<Settings>* node : mSearchTree.getLeafNodes()) {
+          node->printVariableBounds();
+        }
+#endif
       }
 
 #ifdef PDW_MODULE_DEBUG_1
@@ -272,6 +279,13 @@ namespace smtrat
 
         // we actually remove the constraint from within our search tree
         mSearchTree.removeConstraint(lC, constraint);
+
+#ifdef PDW_MODULE_DEBUG_1
+        std::cout <<  "Removal resulted in bounds (of root): " << std::endl;
+        for (ICPTree<Settings>* node : mSearchTree.getLeafNodes()) {
+          node->printVariableBounds();
+        }
+#endif
       }
     }
 

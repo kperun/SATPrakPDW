@@ -358,10 +358,6 @@ namespace smtrat
     // clear previous conflict results
     clearUnsat();
 
-    // we add all constraints to the variable bounds, always
-    // even though the variable bounds cannot deduce anything from non-simple bounds
-    // it will still need to know about the occurring variables
-
     // we can only directly add simple constraints to our variable bounds,
     // all other constraints will be handled by ICPPDWModule through mActiveContractionCandidates
     if (ICPUtil<Settings>::isSimpleBound(_constraint)) {

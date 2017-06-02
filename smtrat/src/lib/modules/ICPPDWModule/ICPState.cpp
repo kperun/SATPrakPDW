@@ -179,13 +179,9 @@ namespace smtrat
       }
     }
 
-    // if it has not been used at all, we don't have to do anything
-    if (!isUsed) {
-      return false;
-    }
     // the constraint has been used, so we traverse the applied contraction from the end
     // until the first application index, and revert all bound constraints that were applied
-    else {
+    if (isUsed) {
       for (int i = mAppliedIntervalConstraints.size() - 1; i >= firstApplicationIndex; i--) {
         removeIntervalConstraints(mAppliedIntervalConstraints[i], mAppliedContractionCandidates[i]->getConstraint());
       }
@@ -193,6 +189,8 @@ namespace smtrat
       mAppliedContractionCandidates.resize(firstApplicationIndex);
       mAppliedIntervalConstraints.resize(firstApplicationIndex);
     }
+
+    return isUsed;
   }
 
   template<class Settings>
