@@ -10,17 +10,6 @@ namespace smtrat
   template class ICPState<ICPPDWSettingsDebug>;
   template class ICPState<ICPPDWSettingsProduction>;
 
-
-  template<class Settings>
-  ICPState<Settings>::ICPState(ICPTree<Settings>* correspondingTree) :
-    mOriginalVariables(),
-    mBounds(),
-    mAppliedContractionCandidates(),
-    mAppliedIntervalConstraints(),
-    mCorrespondingTree(correspondingTree)
-  {
-  }
-
   template<class Settings>
   ICPState<Settings>::ICPState(std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree) :
     mOriginalVariables(originalVariables),
@@ -226,7 +215,7 @@ namespace smtrat
     }
 
     // check if maximum number of splits has been reached and terminate
-    if(computeNumberOfSplits()>Settings::maxSplitNumber) {
+    if(mCorrespondingTree->getNumberOfSplits() > Settings::maxSplitNumber) {
 #ifdef PDW_MODULE_DEBUG_1
       std::cout << "Termination reached by maximal number of splits!" << std::endl;
 #endif
@@ -251,11 +240,6 @@ namespace smtrat
     }
 
     return false;
-  }
-
-  template<class Settings>
-  int ICPState<Settings>::computeNumberOfSplits(){
-    return mCorrespondingTree->getNumberOfSplits();
   }
 
   template<class Settings>

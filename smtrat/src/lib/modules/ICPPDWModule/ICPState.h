@@ -70,12 +70,7 @@ namespace smtrat
 
     public:
       /**
-       * Default constructor will create an empty state with no variable bounds.
-       */
-      ICPState(ICPTree<Settings>* correspondingTree);
-
-      /**
-       * Behaves the samme way as the default custuctor, but sets the point to the set of variables
+       * Default constructor, creates empty state with no variable bounds.
        */
       ICPState(std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree);
 
@@ -130,10 +125,8 @@ namespace smtrat
       IntervalT getInterval(carl::Variable var);
 
       vector<ICPContractionCandidate<Settings>*>& getAppliedContractionCandidates();
-      void addAppliedContractionCandidate(ICPContractionCandidate<Settings>* contractionCandidate);
 
       vector<OneOrTwo<ConstraintT>>& getAppliedIntervalConstraints();
-      void addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints);
 
       /**
        * Removes a constraint from this ICP State.
@@ -145,11 +138,6 @@ namespace smtrat
        * @return whether the constraint has been used in this icp state at all
        */
       bool removeConstraint(const ConstraintT& constraint);
-
-      /**
-       * @return the variable that has an empty interval.
-       */
-      carl::Variable getConflictingVariable();
 
       /**
        * Chooses the best contraction candidate.
@@ -178,13 +166,18 @@ namespace smtrat
        * for manual splitting.
        */
       carl::Variable getBestSplitVariable();
-
+      
       /**
-       * @return the number of splits performed.
+       * Can only be called if there is a conflict.
+       * @return the variable that has an empty interval.
        */
-      int computeNumberOfSplits();
+      carl::Variable getConflictingVariable();
 
     private:
+      void addAppliedContractionCandidate(ICPContractionCandidate<Settings>* contractionCandidate);
+
+      void addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints);
+
       /**
        * Removes the given interval constraints from the variable bounds.
        * @param intervalConstraints one or two interval constraints that should be removed

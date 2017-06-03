@@ -281,7 +281,7 @@ namespace smtrat
         mSearchTree.removeConstraint(lC, constraint);
 
 #ifdef PDW_MODULE_DEBUG_1
-        std::cout <<  "Removal resulted in bounds (of root): " << std::endl;
+        std::cout <<  "Removal resulted in bounds: " << std::endl;
         for (ICPTree<Settings>* node : mSearchTree.getLeafNodes()) {
           node->printVariableBounds();
         }

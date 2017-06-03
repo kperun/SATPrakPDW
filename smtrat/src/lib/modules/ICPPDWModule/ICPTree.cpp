@@ -8,22 +8,6 @@ namespace smtrat
   template class ICPTree<ICPPDWSettingsDebug>;
   template class ICPTree<ICPPDWSettingsProduction>;
 
-   template<class Settings>
-  ICPTree<Settings>::ICPTree(ICPPDWModule<Settings>* module) :
-    mCurrentState(this),
-    mParentTree(),
-    mLeftChild(),
-    mRightChild(),
-    mSplitDimension(),
-    mConflictingConstraints(),
-    mConflictingVariables(),
-    mOriginalVariables(),
-    mIsUnsat(false),
-    mActiveSimpleBounds(),
-    mModule(module)
-  {
-  }
-
   template<class Settings>
   ICPTree<Settings>::ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module) :
     mCurrentState(originalVariables,this),
