@@ -77,7 +77,7 @@ namespace smtrat
       /**
        * This constructor will initialize the variable bounds with a copy of parentBounds.
        */
-      ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree);
+      ICPState(const ICPState<Settings>& parentState, std::set<carl::Variable>* originalVariables, ICPTree<Settings>* correspondingTree);
 
       /**
        * Initializes the given variables with unbounded intervals.
@@ -86,13 +86,6 @@ namespace smtrat
        * @param vars a set containing variables that should be initialized
        */
       void initVariables(std::set<carl::Variable> vars);
-
-      /**
-       * Returns the current search box as VariableBounds.
-       *
-       * @return reference to the search box
-       */
-      vb::VariableBounds<ConstraintT>& getBounds();
 
       /**
        * Applies a contraction to this state.
@@ -124,9 +117,19 @@ namespace smtrat
        */
       IntervalT getInterval(carl::Variable var);
 
+      /**
+       * @return the interval map from variables to their bounds.
+       */
+      const EvalDoubleIntervalMap& getIntervalMap() const;
+
       vector<ICPContractionCandidate<Settings>*>& getAppliedContractionCandidates();
 
       vector<OneOrTwo<ConstraintT>>& getAppliedIntervalConstraints();
+
+      /**
+       * Adds a simple bound to the variable bounds.
+       */
+      void addSimpleBound(const ConstraintT& simpleBound, const ConstraintT& origin);
 
       /**
        * Removes a constraint from this ICP State.
@@ -135,9 +138,10 @@ namespace smtrat
        * but also all contraction candidates that have been after the first usage of that constraint.
        *
        * @param constraint the constraint that should be removed
+       * @param origin the origin of the constraint that should be removed
        * @return whether the constraint has been used in this icp state at all
        */
-      bool removeConstraint(const ConstraintT& constraint);
+      bool removeConstraint(const ConstraintT& constraint, const ConstraintT& origin);
 
       /**
        * Chooses the best contraction candidate.
@@ -156,6 +160,11 @@ namespace smtrat
       bool isTerminationConditionReached();
 
       /**
+       * @return True iff a variable has an empty interval.
+       */
+      bool isConflicting();
+
+      /**
        * Guesses a solution for the mBonds by choosing some values out of them.
        * @return The solution in the form of a map <carl::Variable,double>
        */
@@ -166,7 +175,7 @@ namespace smtrat
        * for manual splitting.
        */
       carl::Variable getBestSplitVariable();
-      
+
       /**
        * Can only be called if there is a conflict.
        * @return the variable that has an empty interval.

@@ -25,9 +25,9 @@ namespace smtrat
   }
 
     template<class Settings>
-  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,
+  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const ICPState<Settings>& parentState,
     std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module) :
-    mCurrentState(parentBounds,originalVariables,this),
+    mCurrentState(parentState,originalVariables,this),
     mParentTree(parent),
     mLeftChild(),
     mRightChild(),
@@ -41,7 +41,7 @@ namespace smtrat
   {
     // we need to actually add all the simple bounds to our new icp state
     for (const ConstraintT& simpleBound : mActiveSimpleBounds) {
-      mCurrentState.getBounds().addBound(simpleBound, simpleBound);
+      mCurrentState.addSimpleBound(simpleBound, simpleBound);
     }
   }
 
@@ -50,7 +50,7 @@ namespace smtrat
   void ICPTree<Settings>::printVariableBounds() {
 #ifdef PDW_MODULE_DEBUG_1
     std::cout << "Variable bounds:" << std::endl;
-    for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
+    for (const auto& mapEntry : mCurrentState.getIntervalMap()) {
       if (!mapEntry.second.isInfinite()) {
         std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
       }
@@ -66,7 +66,7 @@ namespace smtrat
 
       // first we need to make sure the bounds are still satisfiable
       // i.e. no variable has an empty interval
-      if (mCurrentState.getBounds().isConflicting()) {
+      if (mCurrentState.isConflicting()) {
         handleUnsat();
 #ifdef PDW_MODULE_DEBUG_1
         std::cout << "Bounds are conflicting!\nReasons: " << std::endl;
@@ -97,7 +97,7 @@ namespace smtrat
         std::experimental::optional<int> bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
 
         if(bestCC) { //if a contraction candidate has been found proceed
-          OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getBounds());
+          OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getIntervalMap());
           if(bounds.second) {
             // We contracted to two intervals, so we need to split
 #ifdef PDW_MODULE_DEBUG_1
@@ -140,7 +140,7 @@ namespace smtrat
 #endif
               //First extract the best variable for splitting
               carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
-              IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
+              IntervalT oldInterval = mCurrentState.getInterval(splittingVar);
 
               std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
 #ifdef PDW_MODULE_DEBUG_1
@@ -240,8 +240,8 @@ namespace smtrat
     mSplitDimension = var;
 
     // we create two new search trees with copies of the original bounds
-    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds,mModule);
-    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds,mModule);
+    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState, mOriginalVariables, mActiveSimpleBounds, mModule);
+    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState, mOriginalVariables, mActiveSimpleBounds, mModule);
   }
 
   template<class Settings>
@@ -346,7 +346,7 @@ namespace smtrat
     // all other constraints will be handled by ICPPDWModule through mActiveContractionCandidates
     if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
       mActiveSimpleBounds.insert(_constraint);
-      mCurrentState.getBounds().addBound(_constraint, _origin);
+      mCurrentState.addSimpleBound(_constraint, _origin);
 
       // we need to add the constraint to all children as well
       // otherwise the leaf nodes will not know about the new constraint
@@ -364,7 +364,7 @@ namespace smtrat
         accumulateConflictReasons();
         return false;
       }
-      else if (mCurrentState.getBounds().isConflicting()) {
+      else if (mCurrentState.isConflicting()) {
         // the added constraint yields an unsat search tree
         // directly for this current node
         handleUnsat();
@@ -387,12 +387,11 @@ namespace smtrat
     // remove simple bounds from the active simple bound set
     if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
       mActiveSimpleBounds.erase(_constraint);
-      mCurrentState.getBounds().removeBound(_constraint, _origin);
     }
 
     // actually remove the constraint from the current icp state
     // this method will revert all applied contraction candidates
-    bool isUsed = mCurrentState.removeConstraint(_constraint);
+    bool isUsed = mCurrentState.removeConstraint(_constraint, _origin);
 
     // if the constraint that should be removed has not been used at all
     // we can simply tell the children to remove the constraint and be done with it
@@ -421,7 +420,7 @@ namespace smtrat
     if (isLeftUnsat && isRightUnsat) {
       accumulateConflictReasons();
     }
-    else if (mCurrentState.getBounds().isConflicting()) {
+    else if (mCurrentState.isConflicting()) {
       // reconstruct the unsat set
       handleUnsat();
     }

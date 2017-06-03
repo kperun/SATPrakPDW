@@ -52,15 +52,21 @@ namespace smtrat
   }
 
   template<class Settings>
-  OneOrTwo<IntervalT> ICPContractionCandidate<Settings>::getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds) {
+  OneOrTwo<IntervalT> ICPContractionCandidate<Settings>::getContractedInterval(const EvalDoubleIntervalMap& intervalMap) {
+    // get the original interval
+    IntervalT originalInterval(0, carl::BoundType::INFTY, 0, carl::BoundType::INFTY);
+    auto it = intervalMap.find(mVariable);
+    if (it != intervalMap.end()) {
+      originalInterval = it->second;
+    }
+
     // possible are two intervals resulting from a split
-    IntervalT originalInterval = _bounds.getDoubleInterval(mVariable);
     IntervalT resultA = IntervalT::emptyInterval();
     IntervalT resultB = IntervalT::emptyInterval();
     bool split = false;
 
     // evaluate the solution formula
-    std::vector<IntervalT> resultPropagation = mSolutionFormula.evaluate(_bounds.getIntervalMap());
+    std::vector<IntervalT> resultPropagation = mSolutionFormula.evaluate(intervalMap);
 
     // the contraction was done on an equality
     if (mRelation == carl::Relation::EQ) {
@@ -156,11 +162,15 @@ namespace smtrat
   }
 
   template<class Settings>
-  double ICPContractionCandidate<Settings>::computeGain(const vb::VariableBounds<ConstraintT>& _bounds){
+  double ICPContractionCandidate<Settings>::computeGain(const EvalDoubleIntervalMap& intervalMap){
     //first compute the new interval
-    OneOrTwo<IntervalT> intervals = getContractedInterval(_bounds);
+    OneOrTwo<IntervalT> intervals = getContractedInterval(intervalMap);
     //then retrieve the old one
-    IntervalT old_interval = _bounds.getDoubleInterval(mVariable);
+    IntervalT old_interval(0, carl::BoundType::INFTY, 0, carl::BoundType::INFTY);
+    auto it = intervalMap.find(mVariable);
+    if (it != intervalMap.end()) {
+      old_interval = it->second;
+    }
 
     //in order to avoid manipulation of the existing objects, we work here with retrieved values
     //moreover, we use a bigM in order to be able to compute with -INF and INF

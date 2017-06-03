@@ -41,16 +41,16 @@ namespace smtrat
        * I.e., it will solve the constraint for mVariable and insert the given variable bounds.
        * The result may be either one or two intervals, depending on the order of the variable.
        *
-       * @param _bounds The variable bounds
+       * @param intervalMap The variable bounds
        * @return one or two resulting intervals
        */
-      OneOrTwo<IntervalT> getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds);
+      OneOrTwo<IntervalT> getContractedInterval(const EvalDoubleIntervalMap& intervalMap);
 
       /**
        * Compute the new interval, subsequently the gain by the formula 1- D_new/D_old
-       * @param _bounds The variable bounds
+       * @param intervalMap The variable bounds
        */
-      double computeGain(const vb::VariableBounds<ConstraintT>& _bounds);
+      double computeGain(const EvalDoubleIntervalMap& intervalMap);
 
       carl::Variable getVariable();
       ConstraintT& getConstraint();

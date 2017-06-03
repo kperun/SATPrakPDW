@@ -54,8 +54,7 @@ namespace smtrat
 
     public:
       ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module);
-      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,
-        std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module);
+      ICPTree(ICPTree<Settings>* parent, const ICPState<Settings>& parentState, std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module);
 
       /**
        * Contracts the current ICP state until either:

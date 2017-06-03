@@ -21,15 +21,15 @@ namespace smtrat
   }
 
   template<class Settings>
-  ICPState<Settings>::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree) :
+  ICPState<Settings>::ICPState(const ICPState<Settings>& parentState, std::set<carl::Variable>* originalVariables, ICPTree<Settings>* correspondingTree) :
     mBounds(),
     mAppliedContractionCandidates(),
     mAppliedIntervalConstraints(),
     mOriginalVariables(originalVariables),
     mCorrespondingTree(correspondingTree)
   {
-    // copy parentBounds to mBounds
-    for (const auto& mapEntry : parentBounds.getIntervalMap()) {
+    // copy parent's bounds to mBounds
+    for (const auto& mapEntry : parentState.getIntervalMap()) {
       carl::Variable var = mapEntry.first;
       IntervalT interval = mapEntry.second;
 
@@ -54,11 +54,6 @@ namespace smtrat
       // so essentially, it is an initializer
       mBounds.getDoubleInterval(v);
     }
-  }
-
-  template<class Settings>
-  vb::VariableBounds<ConstraintT>& ICPState<Settings>::getBounds() {
-    return mBounds;
   }
 
   template<class Settings>
@@ -119,7 +114,12 @@ namespace smtrat
 
   template<class Settings>
   IntervalT ICPState<Settings>::getInterval(carl::Variable var) {
-    mBounds.getInterval(var);
+    return mBounds.getDoubleInterval(var);
+  }
+
+  template<class Settings>
+  const EvalDoubleIntervalMap& ICPState<Settings>::getIntervalMap() const {
+    return mBounds.getIntervalMap();
   }
 
   template<class Settings>
@@ -143,7 +143,12 @@ namespace smtrat
   }
 
   template<class Settings>
-  bool ICPState<Settings>::removeConstraint(const ConstraintT& constraint) {
+  void ICPState<Settings>::addSimpleBound(const ConstraintT& simpleBound, const ConstraintT& origin) {
+    mBounds.addBound(simpleBound, origin);
+  }
+
+  template<class Settings>
+  bool ICPState<Settings>::removeConstraint(const ConstraintT& constraint, const ConstraintT& origin) {
     // if we remove a constraint that has been used in this ICPState, all subsequent contractions become invalid
     // so we need to revert every applied contraction from the first application of the removed constraint
     int firstApplicationIndex = -1;
@@ -156,6 +161,9 @@ namespace smtrat
       // will already have made use of the simple bound
       firstApplicationIndex = 0;
       isUsed = true;
+
+      // also, actually remove the simple bound
+      mBounds.removeBound(constraint, origin);
     }
     else {
       // we find the first usage of the removed constraint
@@ -243,6 +251,11 @@ namespace smtrat
   }
 
   template<class Settings>
+  bool ICPState<Settings>::isConflicting() {
+    return mBounds.isConflicting();
+  }
+
+  template<class Settings>
   std::experimental::optional<int> ICPState<Settings>::getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& candidates){
     if(candidates.size()==0) {
       throw std::invalid_argument( "Candidates vector is empty!" );
@@ -255,7 +268,7 @@ namespace smtrat
 
     //store the current best candidate index
     int currentBest = 0;
-    std::experimental::optional<double> currentBestGain = (candidates[currentBest])->computeGain(mBounds);
+    std::experimental::optional<double> currentBestGain = (candidates[currentBest])->computeGain(getIntervalMap());
 
      //store the new diameter in case two candidates with equal gain are regarded
     double currentBestAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
@@ -270,7 +283,7 @@ namespace smtrat
     //SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[currentBest]))<< " adjusted to " << currentBestGainWeighted);
 
     for (int it = 1; it < (int) candidates.size(); it++) {
-      double currentGain = (candidates[it])->computeGain(mBounds);
+      double currentGain = (candidates[it])->computeGain(getIntervalMap());
       //compute the weighted gain
       double currentGainWeighted = (*(candidates[it])).getWeight()+
               Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
