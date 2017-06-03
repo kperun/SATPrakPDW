@@ -75,21 +75,11 @@ namespace smtrat
     ConstraintT lowerBound;
     bool hasLower = false;
 
-    // if upper bound is infty, the constraint is useless
-    if (interval.upperBoundType() != carl::BoundType::INFTY) {
-      // x <= upper bound
-      // x - upper bound <= 0
-      Poly upperPoly;
-      upperPoly += var;
-      upperPoly -= interval.upper();
-      carl::Relation upperRelation = (interval.upperBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
-      upperBound = ConstraintT(upperPoly, upperRelation);
-      hasUpper = true;
-      mBounds.addBound(upperBound, _origin);
-    }
+    IntervalT oldInterval = getInterval(var);
+    pair<bool, bool> isBoundBetter = ICPUtil<Settings>::isBoundBetter(oldInterval, interval);
 
-    // if lower bound is infty, the constraint is useless
-    if (interval.lowerBoundType() != carl::BoundType::INFTY) {
+    // only consider strictly better lower bounds
+    if (isBoundBetter.first) {
       // x >= lower bound
       // lower bound - x <= 0
       Poly lowerPoly;
@@ -99,6 +89,19 @@ namespace smtrat
       lowerBound = ConstraintT(lowerPoly, lowerRelation);
       hasLower = true;
       mBounds.addBound(lowerBound, _origin);
+    }
+
+    // only consider strictly better upper bounds
+    if (isBoundBetter.second) {
+      // x <= upper bound
+      // x - upper bound <= 0
+      Poly upperPoly;
+      upperPoly += var;
+      upperPoly -= interval.upper();
+      carl::Relation upperRelation = (interval.upperBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
+      upperBound = ConstraintT(upperPoly, upperRelation);
+      hasUpper = true;
+      mBounds.addBound(upperBound, _origin);
     }
 
     if (hasUpper && hasLower) {
