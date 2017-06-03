@@ -76,8 +76,8 @@ namespace smtrat
     // number of maximal contraction per ICP state
     static constexpr int maxContractions = 1000;
 
-    // desired interval
-    static constexpr double targetDiameter = 1.0;
+    // desired interval relative to the initial interval
+    static constexpr double targetDiameter = 0.05;
 
     // maximal number of splits allowed
     static constexpr int maxSplitNumber = 100;

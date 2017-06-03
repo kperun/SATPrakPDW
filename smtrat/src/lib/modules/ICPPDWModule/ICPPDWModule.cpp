@@ -31,7 +31,8 @@ namespace smtrat
       mActiveOriginalConstraints(),
       mMonomialSlackConstraints(),
       mMonomialSubstitutions(),
-      mActiveContractionCandidates()
+      mActiveContractionCandidates(),
+      mDesiredDiameters()
       {
       }
 
@@ -153,6 +154,7 @@ namespace smtrat
         // store all variables we see for book-keeping purposes
         for (const auto& var : constraint.variables()) {
           mOriginalVariables.insert(var);
+          mDesiredDiameters[var] = mSearchTree.getCurrentState().getInterval(var).diameter()*Settings::targetDiameter;
         }
 
         // linearize the constraints
@@ -506,7 +508,10 @@ namespace smtrat
       }
     }
 
-
+    template<class Settings>
+    std::unordered_map<carl::Variable,double> ICPPDWModule<Settings>::getDesiredDiameters(){
+      return mDesiredDiameters;
+    }
 
 }
 
