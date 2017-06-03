@@ -75,11 +75,8 @@ namespace smtrat
     ConstraintT lowerBound;
     bool hasLower = false;
 
-    IntervalT oldInterval = getInterval(var);
-    pair<bool, bool> isBoundBetter = ICPUtil<Settings>::isBoundBetter(oldInterval, interval);
-
     // only consider strictly better lower bounds
-    if (isBoundBetter.first) {
+    if (interval.lowerBoundType() != carl::BoundType::INFTY) {
       // x >= lower bound
       // lower bound - x <= 0
       Poly lowerPoly;
@@ -92,7 +89,7 @@ namespace smtrat
     }
 
     // only consider strictly better upper bounds
-    if (isBoundBetter.second) {
+    if (interval.upperBoundType() != carl::BoundType::INFTY) {
       // x <= upper bound
       // x - upper bound <= 0
       Poly upperPoly;
