@@ -146,51 +146,23 @@ namespace smtrat
   }
 
   template<class Settings>
-  void ICPState<Settings>::addSimpleBound(const ConstraintT& simpleBound, const ConstraintT& origin) {
-    mBounds.addBound(simpleBound, origin);
+  void ICPState<Settings>::addSimpleBound(const ConstraintT& simpleBound) {
+    mBounds.addBound(simpleBound, ConstraintT());
   }
 
   template<class Settings>
-  bool ICPState<Settings>::removeConstraint(const ConstraintT& constraint, const ConstraintT& origin) {
-    // if we remove a constraint that has been used in this ICPState, all subsequent contractions become invalid
-    // so we need to revert every applied contraction from the first application of the removed constraint
-    int firstApplicationIndex = -1;
-    bool isUsed = false;
+  void ICPState<Settings>::removeSimpleBound(const ConstraintT& simpleBound) {
+    mBounds.removeBound(simpleBound, ConstraintT());
+  }
 
-    // a simple bound is not used as a contraction candidate, but simply applied to the bounds
-    // thus, we assume that a simple bound is always used immediatly
-    if (ICPUtil<Settings>::isSimpleBound(constraint)) {
-      // basically, we need to revert all changes, since the very first contraction candidate
-      // will already have made use of the simple bound
-      firstApplicationIndex = 0;
-      isUsed = true;
+  template<class Settings>
+  void ICPState<Settings>::removeAppliedContraction(int index) {
+    // first revert the interval constraints from the variable bounds
+    removeIntervalConstraints(mAppliedIntervalConstraints[index], mAppliedContractionCandidates[index]->getConstraint());
 
-      // also, actually remove the simple bound
-      mBounds.removeBound(constraint, origin);
-    }
-    else {
-      // we find the first usage of the removed constraint
-      for (int i = 0; i < (int) mAppliedContractionCandidates.size(); i++) {
-        if (mAppliedContractionCandidates[i]->getConstraint() == constraint) {
-          firstApplicationIndex = i;
-          isUsed = true;
-          break;
-        }
-      }
-    }
-
-    // the constraint has been used, so we traverse the applied contraction from the end
-    // until the first application index, and revert all bound constraints that were applied
-    if (isUsed) {
-      for (int i = mAppliedIntervalConstraints.size() - 1; i >= firstApplicationIndex; i--) {
-        removeIntervalConstraints(mAppliedIntervalConstraints[i], mAppliedContractionCandidates[i]->getConstraint());
-      }
-      // actually delete those applied entries from the vectors
-      mAppliedContractionCandidates.resize(firstApplicationIndex);
-      mAppliedIntervalConstraints.resize(firstApplicationIndex);
-    }
-
-    return isUsed;
+    // then remove the entries from the member vectors
+    mAppliedContractionCandidates.erase(mAppliedContractionCandidates.begin() + index);
+    mAppliedIntervalConstraints.erase(mAppliedIntervalConstraints.begin() + index);
   }
 
   template<class Settings>
@@ -436,6 +408,5 @@ namespace smtrat
     //finally return the variable of the biggest interval
     return bestSplitVariable;
   }
-
 
 };

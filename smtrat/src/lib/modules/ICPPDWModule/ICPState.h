@@ -129,19 +129,19 @@ namespace smtrat
       /**
        * Adds a simple bound to the variable bounds.
        */
-      void addSimpleBound(const ConstraintT& simpleBound, const ConstraintT& origin);
+      void addSimpleBound(const ConstraintT& simpleBound);
 
       /**
-       * Removes a constraint from this ICP State.
-       *
-       * It not only removes the constraint itself from the variable bounds,
-       * but also all contraction candidates that have been after the first usage of that constraint.
-       *
-       * @param constraint the constraint that should be removed
-       * @param origin the origin of the constraint that should be removed
-       * @return whether the constraint has been used in this icp state at all
+       * Removes a simple bound to the variable bounds.
        */
-      bool removeConstraint(const ConstraintT& constraint, const ConstraintT& origin);
+      void removeSimpleBound(const ConstraintT& simpleBound);
+
+      /**
+       * Reverts and removes an applied contraction candidate from this ICP State.
+       *
+       * @param index the index of the applied contraction candidate
+       */
+      void removeAppliedContraction(int index);
 
       /**
        * Chooses the best contraction candidate.

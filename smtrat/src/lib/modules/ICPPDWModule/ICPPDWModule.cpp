@@ -185,7 +185,7 @@ namespace smtrat
         }
 
         // and make the substitutions known to our search tree
-        mSearchTree.addConstraint(constraint, constraint);
+        mSearchTree.addConstraint(constraint);
       }
 
 #ifdef PDW_MODULE_DEBUG_1
@@ -228,7 +228,7 @@ namespace smtrat
         }
 
         // we actually add the constraint to our search tree
-        if(!mSearchTree.addConstraint(lC, constraint)) {
+        if(!mSearchTree.addConstraint(lC)) {
           causesConflict = true;
         }
 
@@ -278,7 +278,7 @@ namespace smtrat
         }
 
         // we actually remove the constraint from within our search tree
-        mSearchTree.removeConstraint(lC, constraint);
+        mSearchTree.removeConstraint(lC);
 
 #ifdef PDW_MODULE_DEBUG_1
         std::cout <<  "Removal resulted in bounds: " << std::endl;
