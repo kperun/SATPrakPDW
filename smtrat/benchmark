@@ -39,7 +39,7 @@ echo "Overall solved problems:" $solvedProblems
 echo "Overall unsolved problems:" $unsolved
 echo "Overall wrong results:" $wrongSolved
 echo "Overall time elapsed since start:" $overallElapsed "ms"
-echo "Avarage time to solve a problem: " $(echo "$overallElapsed / $solvedProblems" |bc -l) "ms"  
+echo "Avarage time to solve a problem: " $(echo "$overallElapsed / $overallTested" |bc -l) "ms"  
 
 
 
@@ -55,7 +55,7 @@ fi
 
 if (( $unsolved > 0 ));then
     echo "------------------------------------------"
-    echo "Not solved instances:"
+    echo "Wrongly solved instances:"
     for i in `seq 0 $(($wrongSolved-1))`;
         do
             echo ${wrongSolvedNames[i]}
