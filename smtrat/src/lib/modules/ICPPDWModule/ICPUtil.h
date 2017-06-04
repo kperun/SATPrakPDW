@@ -88,5 +88,52 @@ namespace smtrat
         const carl::Variable& var = *constraint.variables().begin();
         return (constraint.variables().size() == 1 && constraint.maxDegree(var) == 1);
       }
+
+      /**
+       * Checks whether the new interval bounds are strictly better than the old interval bounds.
+       * e.g. [5,... is better than [6,...
+       * e.g. ...,3) is better than ...,3]
+       *
+       * @param oldInterval the old interval
+       * @param newInterval the new interval
+       * @return a pair of booleans, representing: first is true iff the new lower bound is strictly better than the old lower bound
+       *                                           second is true iff the new upper bound is strictly better than the old upper bound
+       */
+      static pair<bool,bool> isBoundBetter(IntervalT oldInterval, IntervalT newInterval) {
+        bool isLowerBetter = false;
+        bool isUpperBetter = false;
+
+        if (newInterval.isEmpty()) {
+          isLowerBetter = true;
+          isUpperBetter = true;
+        }
+        else {
+          if (oldInterval.lowerBoundType() == carl::BoundType::INFTY && newInterval.lowerBoundType() != carl::BoundType::INFTY) {
+            isLowerBetter = true;
+          }
+          else if (oldInterval.lowerBoundType() != carl::BoundType::INFTY && newInterval.lowerBoundType() != carl::BoundType::INFTY) {
+            if (newInterval.lower() > oldInterval.lower()) {
+              isLowerBetter = true;
+            }
+            else if (oldInterval.lower() == newInterval.lower() && oldInterval.lowerBoundType() == carl::BoundType::WEAK && newInterval.lowerBoundType() == carl::BoundType::STRICT) {
+              isLowerBetter = true;
+            }
+          }
+
+          if (oldInterval.upperBoundType() == carl::BoundType::INFTY && newInterval.upperBoundType() != carl::BoundType::INFTY) {
+            isUpperBetter = true;
+          }
+          else if (oldInterval.upperBoundType() != carl::BoundType::INFTY && newInterval.upperBoundType() != carl::BoundType::INFTY) {
+            if (newInterval.upper() < oldInterval.upper()) {
+              isUpperBetter = true;
+            }
+            else if (oldInterval.upper() == newInterval.upper() && oldInterval.upperBoundType() == carl::BoundType::WEAK && newInterval.upperBoundType() == carl::BoundType::STRICT) {
+              isUpperBetter = true;
+            }
+          }
+        }
+
+        return pair<bool,bool>(isLowerBetter, isUpperBetter);
+      }
   };
 }

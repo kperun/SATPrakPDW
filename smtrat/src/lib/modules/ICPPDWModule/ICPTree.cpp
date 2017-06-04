@@ -8,22 +8,6 @@ namespace smtrat
   template class ICPTree<ICPPDWSettingsDebug>;
   template class ICPTree<ICPPDWSettingsProduction>;
 
-   template<class Settings>
-  ICPTree<Settings>::ICPTree(ICPPDWModule<Settings>* module) :
-    mCurrentState(this),
-    mParentTree(),
-    mLeftChild(),
-    mRightChild(),
-    mSplitDimension(),
-    mConflictingConstraints(),
-    mConflictingVariables(),
-    mOriginalVariables(),
-    mIsUnsat(false),
-    mActiveSimpleBounds(),
-    mModule(module)
-  {
-  }
-
   template<class Settings>
   ICPTree<Settings>::ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module) :
     mCurrentState(originalVariables,this),
@@ -41,9 +25,9 @@ namespace smtrat
   }
 
     template<class Settings>
-  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,
+  ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const ICPState<Settings>& parentState,
     std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module) :
-    mCurrentState(parentBounds,originalVariables,this),
+    mCurrentState(parentState,originalVariables,this),
     mParentTree(parent),
     mLeftChild(),
     mRightChild(),
@@ -57,7 +41,7 @@ namespace smtrat
   {
     // we need to actually add all the simple bounds to our new icp state
     for (const ConstraintT& simpleBound : mActiveSimpleBounds) {
-      mCurrentState.getBounds().addBound(simpleBound, simpleBound);
+      mCurrentState.addSimpleBound(simpleBound);
     }
   }
 
@@ -66,7 +50,7 @@ namespace smtrat
   void ICPTree<Settings>::printVariableBounds() {
 #ifdef PDW_MODULE_DEBUG_1
     std::cout << "Variable bounds:" << std::endl;
-    for (const auto& mapEntry : mCurrentState.getBounds().getIntervalMap()) {
+    for (const auto& mapEntry : mCurrentState.getIntervalMap()) {
       if (!mapEntry.second.isInfinite()) {
         std::cout << mapEntry.first << " in " << mapEntry.second << std::endl;
       }
@@ -76,13 +60,13 @@ namespace smtrat
   }
 
   template<class Settings>
-  bool ICPTree<Settings>::contract(vector<ICPContractionCandidate*>& contractionCandidates,ICPPDWModule<Settings>* module) {
+  bool ICPTree<Settings>::contract(vector<ICPContractionCandidate<Settings>*>& contractionCandidates,ICPPDWModule<Settings>* module) {
     while(true) {
       printVariableBounds();
 
       // first we need to make sure the bounds are still satisfiable
       // i.e. no variable has an empty interval
-      if (mCurrentState.getBounds().isConflicting()) {
+      if (mCurrentState.isConflicting()) {
         handleUnsat();
 #ifdef PDW_MODULE_DEBUG_1
         std::cout << "Bounds are conflicting!\nReasons: " << std::endl;
@@ -113,7 +97,7 @@ namespace smtrat
         std::experimental::optional<int> bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
 
         if(bestCC) { //if a contraction candidate has been found proceed
-          OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getBounds());
+          OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getIntervalMap());
           if(bounds.second) {
             // We contracted to two intervals, so we need to split
 #ifdef PDW_MODULE_DEBUG_1
@@ -156,7 +140,7 @@ namespace smtrat
 #endif
               //First extract the best variable for splitting
               carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
-              IntervalT oldInterval = mCurrentState.getBounds().getDoubleInterval(splittingVar);
+              IntervalT oldInterval = mCurrentState.getInterval(splittingVar);
 
               std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
 #ifdef PDW_MODULE_DEBUG_1
@@ -256,8 +240,8 @@ namespace smtrat
     mSplitDimension = var;
 
     // we create two new search trees with copies of the original bounds
-    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds,mModule);
-    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState.getBounds(), mOriginalVariables, mActiveSimpleBounds,mModule);
+    mLeftChild  = make_unique<ICPTree<Settings>>(this, mCurrentState, mOriginalVariables, mActiveSimpleBounds, mModule);
+    mRightChild = make_unique<ICPTree<Settings>>(this, mCurrentState, mOriginalVariables, mActiveSimpleBounds, mModule);
   }
 
   template<class Settings>
@@ -283,8 +267,20 @@ namespace smtrat
   void ICPTree<Settings>::generateConflictReasons() {
     // we start with only the conflicting variable
     // and determine all involved constraints and variables
-    accumulateInvolvedConstraintsAndVariables(mConflictingVariables, mConflictingConstraints,
-      mCurrentState.getAppliedContractionCandidates(), (int) (mCurrentState.getAppliedContractionCandidates().size()) - 1, -1);
+    
+    // traverse the applied contraction candidates and generate the transitive closure
+    for (int i = mCurrentState.getAppliedContractionCandidates().size()-1; i >= 0; i--) {
+      ICPContractionCandidate<Settings>* it = (mCurrentState.getAppliedContractionCandidates())[i];
+      // if the variable that was contracted was involved in the unsat reason, all the variables of the contractor are too
+      if (mConflictingVariables.count(it->getVariable()) > 0) {
+        // the constraint itself is an involved constraint
+        // or it contains an involved variable
+        auto cVars = it->getConstraint().variables();
+
+        mConflictingVariables.insert(cVars.begin(), cVars.end());
+        mConflictingConstraints.insert(it->getConstraint());
+      }
+    }
 
     // and we need to add all used simple bounds
     // we need to do this manually here, because the search tree never "contracts" with simple bounds
@@ -354,42 +350,41 @@ namespace smtrat
   }
 
   template<class Settings>
-  bool ICPTree<Settings>::addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
-    // we add all constraints to the variable bounds, always
-    // even though the variable bounds cannot deduce anything from non-simple bounds
-    // it will still need to know about the occurring variables
-    mCurrentState.getBounds().addBound(_constraint, _origin);
-
-    // however, in order to propagate and later remove simple bounds
-    // we need to store them seperately
-    if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
-      mActiveSimpleBounds.insert(_constraint);
-    }
-
-    // we need to clear the unsat results of the previous search
+  bool ICPTree<Settings>::addConstraint(const ConstraintT& _constraint) {
+    // clear previous conflict results
     clearUnsat();
 
-    // we need to add the constraint to all children as well
-    // otherwise the leaf nodes will not know about the new constraint
-    bool isLeftConflicting = false;
-    if (mLeftChild) {
-      isLeftConflicting = !mLeftChild->addConstraint(_constraint, _origin);
-    }
+    // we can only directly add simple constraints to our variable bounds,
+    // all other constraints will be handled by ICPPDWModule through mActiveContractionCandidates
+    if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
+      mActiveSimpleBounds.insert(_constraint);
+      mCurrentState.addSimpleBound(_constraint);
 
-    bool isRightConflicting = false;
-    if (mRightChild) {
-      isRightConflicting = !mRightChild->addConstraint(_constraint, _origin);
-    }
+      // we need to add the constraint to all children as well
+      // otherwise the leaf nodes will not know about the new constraint
+      bool isLeftConflicting = false;
+      if (mLeftChild) {
+        isLeftConflicting = !mLeftChild->addConstraint(_constraint);
+      }
 
-    if (isLeftConflicting && isRightConflicting) {
-      accumulateConflictReasons();
-      return false;
-    }
-    else if (mCurrentState.getBounds().isConflicting()) {
-      // the added constraint yields in an unsat search tree
-      // directly for this current node
-      handleUnsat();
-      return false;
+      bool isRightConflicting = false;
+      if (mRightChild) {
+        isRightConflicting = !mRightChild->addConstraint(_constraint);
+      }
+
+      if (isLeftConflicting && isRightConflicting) {
+        accumulateConflictReasons();
+        return false;
+      }
+      else if (mCurrentState.isConflicting()) {
+        // the added constraint yields an unsat search tree
+        // directly for this current node
+        handleUnsat();
+        return false;
+      }
+      else {
+        return true;
+      }
     }
     else {
       return true;
@@ -397,54 +392,81 @@ namespace smtrat
   }
 
   template<class Settings>
-  void ICPTree<Settings>::removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin ) {
-    // since we always add every constraint, we also need to remove every one
-    mCurrentState.getBounds().removeBound(_constraint, _origin);
-
-    // also remove simple bounds from the active simple bound set
-    if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
-      mActiveSimpleBounds.erase(_constraint);
-    }
-
+  void ICPTree<Settings>::removeConstraint(const ConstraintT& _constraint, std::set<carl::Variable> involvedVars, std::set<ConstraintT> involvedConstraints) {
+    // clear previous conflict results
     clearUnsat();
 
-    // actually remove the constraint from the current icp state
-    // this method will revert all applied contraction candidates
-    bool isUsed = mCurrentState.removeConstraint(_constraint);
+    // remove the actual bound from the variable bounds
+    if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
+      mActiveSimpleBounds.erase(_constraint);
+      mCurrentState.removeSimpleBound(_constraint);
+    }
 
-    // if the constraint that should be removed has not been used at all
-    // we can simply tell the children to remove the constraint and be done with it
+    // check applied contraction candidates for involvment with the constraint that should be removed
+    for (int i = 0; i < mCurrentState.getAppliedContractionCandidates().size(); i++) {
+      ICPContractionCandidate<Settings>* ccIt = (mCurrentState.getAppliedContractionCandidates())[i];
+      if (involvedConstraints.count(ccIt->getConstraint()) > 0 ||
+          ICPUtil<Settings>::occurVariablesInConstraint(involvedVars, ccIt->getConstraint())) {
+        // the constraint itself is an involved constraint
+        // or it contains an involved variable
+        involvedVars.insert(ccIt->getVariable());
+        involvedConstraints.insert(ccIt->getConstraint());
+
+        // now we need to revert and remove the applied contraction candidate
+        mCurrentState.removeAppliedContraction(i);
+        // since we remove one of them, our iterator is decreased by one
+        i--;
+      }
+    }
+
     bool isLeftUnsat = false;
     bool isRightUnsat = false;
-    if (!isUsed) {
+
+    // we need to delete the children if the splitting variable was an involved variable
+    if (involvedVars.count(*mSplitDimension) > 0) {
+      mLeftChild.reset();
+      mRightChild.reset();
+      mSplitDimension = std::experimental::nullopt;
+    }
+    else {
+      // split was unrelated to the constraint that was removed, so remove the constraint from the children
       if (mLeftChild) {
-        mLeftChild->removeConstraint(_constraint, _origin);
+        mLeftChild->removeConstraint(_constraint, involvedVars, involvedConstraints);
         isLeftUnsat = mLeftChild->isUnsat();
       }
 
       if (mRightChild) {
-        mRightChild->removeConstraint(_constraint, _origin);
+        mRightChild->removeConstraint(_constraint, involvedVars, involvedConstraints);
         isRightUnsat = mRightChild->isUnsat();
       }
-    }
-    // it has been used, so after the icp state reverted all applied contractions
-    // we need to remove the children
-    else {
-      mLeftChild.reset();
-      mRightChild.reset();
-      mSplitDimension = std::experimental::nullopt;
     }
 
     // removal of this bound might have made this state sat again
     if (isLeftUnsat && isRightUnsat) {
       accumulateConflictReasons();
     }
-    else if (mCurrentState.getBounds().isConflicting()) {
+    else if (mCurrentState.isConflicting()) {
       // reconstruct the unsat set
       handleUnsat();
     }
   }
 
+  template<class Settings>
+  void ICPTree<Settings>::removeConstraint(const ConstraintT& _constraint) {
+    std::set<carl::Variable> vars;
+    std::set<ConstraintT> cs;
+
+    if (ICPUtil<Settings>::isSimpleBound(_constraint)) {
+      // add the only involved variable in a simple bound
+      vars.insert(*_constraint.variables().begin());
+    }
+    else {
+      // it's not a simple bound, so we set the constraint itself as involved
+      cs.insert(_constraint);
+    }
+
+    removeConstraint(_constraint, vars, cs);
+  }
 
   template<class Settings>
   ICPPDWModule<Settings>* ICPTree<Settings>::getCorrespondingModule(){
@@ -490,55 +512,4 @@ namespace smtrat
     return numThis<numThat;
   }
 
-  /**
-   * Given an initial set of variables and constraints, this function determines
-   * all other involved variables and constraints from the given contraction candidate iterator.
-   *
-   * I.e., this method will traverse the given iterator from begin to end, and check
-   * whether any involved variables occur in the constraint of the current contraction candidate,
-   * or if the constraint itself is an involved constraint.
-   * If this is the case, all the variables from that constraint will be added to involvedVars
-   * and the constraint itself to involvedConstraints.
-   *
-   * @param involvedVars a set of initial involved vars. will be updated during this method
-   * @param involvedConstraints a set of initial involved constraints. will be updated during this method
-   * @param candidates a list of contraction candidates that should be used to determine involvement
-   * @param startIndex where to start the search for involved constraints
-   *                   if startIndex > endIndex, the list will be traversed in reverse order
-   * @param endIndex where to end the search for involved constraints (this index will not be checked)
-   *                   if startIndex > endIndex, the list will be traversed in reverse order
-   */
-
-  template<class Settings>
-  void ICPTree<Settings>::accumulateInvolvedConstraintsAndVariables(std::set<carl::Variable>& involvedVars,
-                                                 std::set<ConstraintT>&    involvedConstraints,
-                                                 vector<ICPContractionCandidate*>& candidates,
-                                                 int startIndex, int endIndex) {
-    //cout << "Initial involved vars: " << involvedVars << endl;
-    //cout << "Initial involved constraints: " << involvedConstraints << endl;
-
-    int step = (startIndex <= endIndex) ? 1 : -1;
-
-    for (int i = startIndex; i != endIndex; i += step) {
-      ICPContractionCandidate* it = candidates[i];
-      //cout << "Check [" << i << "] if " << *it << " is involved...";
-      if (involvedConstraints.count(it->getConstraint()) > 0 ||
-          ICPUtil<Settings>::occurVariablesInConstraint(involvedVars, it->getConstraint())) {
-        // the constraint itself is an involved constraint
-        // or it contains an involved variable
-        //cout << " yep!" << endl;
-        auto cVars = it->getConstraint().variables();
-
-        //cout << "Adding " << cVars << " to involved vars." << endl;
-        involvedVars.insert(cVars.begin(), cVars.end());
-        //cout << "Adding " << it->getConstraint() << " to involved constraints." << endl;
-        involvedConstraints.insert(it->getConstraint());
-      }
-      else {
-        //cout << " nope." << endl;
-      }
-    }
-    //cout << "Final involved vars: " << involvedVars << endl;
-    //cout << "Final involved constraints: " << involvedConstraints << endl;
-  }
 }

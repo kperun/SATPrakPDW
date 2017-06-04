@@ -42,16 +42,16 @@ namespace smtrat
       std::set<ConstraintT> mActiveOriginalConstraints;
 
       // all contraction candidates
-      vector<ICPContractionCandidate> mContractionCandidates;
+      vector<ICPContractionCandidate<Settings>> mContractionCandidates;
 
       // only the contraction candidates which contain active constraints
-      vector<ICPContractionCandidate*> mActiveContractionCandidates;
+      vector<ICPContractionCandidate<Settings>*> mActiveContractionCandidates;
 
       /**
        * We need to linearize constraints for ICP.
        * So we will store a map from original constraints to the linearized ones
        * and for convenience also a map from linearized constraints to original ones.
-       * Note that we disregard monomial-slack substitution constraints 
+       * Note that we disregard monomial-slack substitution constraints
        * (that information can be retrieved from mMonomialSlackConstraints or mMonomialSubstitutions).
        *
        * The key set of mLinearizations also functions as the storage for the set of all linearized original constraints.
@@ -111,7 +111,7 @@ namespace smtrat
 
       /**
        * Helper function which returns the delinearized constraint.
-       * I.e., for a constraint r_1 + ... + r_k ~ 0, the original constraint m_1 + ... + m_k ~ 0 is returned. 
+       * I.e., for a constraint r_1 + ... + r_k ~ 0, the original constraint m_1 + ... + m_k ~ 0 is returned.
        *
        * @param c a constraint
        * @return the de-linearized constraint if c was a linearized constraint, otherwise c itself

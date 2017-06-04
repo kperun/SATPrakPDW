@@ -2,7 +2,11 @@
 
 namespace smtrat
 {
-  ICPContractionCandidate::ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint):
+  template class ICPContractionCandidate<ICPPDWSettingsDebug>;
+  template class ICPContractionCandidate<ICPPDWSettingsProduction>;
+  
+  template<class Settings>
+  ICPContractionCandidate<Settings>::ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint):
     mVariable(var),
     mConstraint(constraint),
     mSolutionFormula(constraint.lhs(), var),
@@ -27,31 +31,42 @@ namespace smtrat
     }
   }
 
-  carl::Variable ICPContractionCandidate::getVariable() {
+  template<class Settings>
+  carl::Variable ICPContractionCandidate<Settings>::getVariable() {
     return mVariable;
   }
 
-  ConstraintT& ICPContractionCandidate::getConstraint() {
+  template<class Settings>
+  ConstraintT& ICPContractionCandidate<Settings>::getConstraint() {
     return mConstraint;
   }
 
-  double ICPContractionCandidate::getWeight(){
+  template<class Settings>
+  double ICPContractionCandidate<Settings>::getWeight(){
     return mWeight;
   }
 
-  void ICPContractionCandidate::setWeight(double weight){
+  template<class Settings>
+  void ICPContractionCandidate<Settings>::setWeight(double weight){
     mWeight = weight;
   }
 
-  OneOrTwo<IntervalT> ICPContractionCandidate::getContractedInterval(const vb::VariableBounds<ConstraintT>& _bounds) {
+  template<class Settings>
+  OneOrTwo<IntervalT> ICPContractionCandidate<Settings>::getContractedInterval(const EvalDoubleIntervalMap& intervalMap) {
+    // get the original interval
+    IntervalT originalInterval(0, carl::BoundType::INFTY, 0, carl::BoundType::INFTY);
+    auto it = intervalMap.find(mVariable);
+    if (it != intervalMap.end()) {
+      originalInterval = it->second;
+    }
+
     // possible are two intervals resulting from a split
-    IntervalT originalInterval = _bounds.getDoubleInterval(mVariable);
     IntervalT resultA = IntervalT::emptyInterval();
     IntervalT resultB = IntervalT::emptyInterval();
     bool split = false;
 
     // evaluate the solution formula
-    std::vector<IntervalT> resultPropagation = mSolutionFormula.evaluate(_bounds.getIntervalMap());
+    std::vector<IntervalT> resultPropagation = mSolutionFormula.evaluate(intervalMap);
 
     // the contraction was done on an equality
     if (mRelation == carl::Relation::EQ) {
@@ -144,5 +159,92 @@ namespace smtrat
 
     OneOrTwo<IntervalT> ret(resultA,retB);
     return ret;
+  }
+
+  template<class Settings>
+  double ICPContractionCandidate<Settings>::computeGain(const EvalDoubleIntervalMap& intervalMap){
+    //first compute the new interval
+    OneOrTwo<IntervalT> intervals = getContractedInterval(intervalMap);
+    //then retrieve the old one
+    IntervalT old_interval(0, carl::BoundType::INFTY, 0, carl::BoundType::INFTY);
+    auto it = intervalMap.find(mVariable);
+    if (it != intervalMap.end()) {
+      old_interval = it->second;
+    }
+
+    //in order to avoid manipulation of the existing objects, we work here with retrieved values
+    //moreover, we use a bigM in order to be able to compute with -INF and INF
+    double newFirstLower = 0;
+    double newFirstUpper = 0;
+    double newSecondLower = 0;
+    double newSecondUpper = 0;
+    double oldIntervalLower = 0;
+    double oldIntervalUpper = 0;
+    //first the mandatory first interval
+    if(intervals.first.lowerBoundType()== carl::BoundType::INFTY) {
+      newFirstLower = -Settings::bigM;
+    }else{
+      if(intervals.first.lowerBoundType()== carl::BoundType::WEAK) {
+        newFirstLower = intervals.first.lower();
+      }else{ //in case it is scrict, we add a small epsilon to make it better
+        newFirstLower = intervals.first.lower() + Settings::epsilon;
+      }
+    }
+
+    if(intervals.first.upperBoundType()== carl::BoundType::INFTY) {
+      newFirstUpper = Settings::bigM;
+    }else{
+      if(intervals.first.upperBoundType()== carl::BoundType::WEAK) {
+        newFirstUpper = intervals.first.upper();
+      }else{
+        newFirstUpper = intervals.first.upper() - Settings::epsilon;
+      }
+    }
+
+    //now the second optional interval
+    if(intervals.second) {
+      if((*(intervals.second)).lowerBoundType()== carl::BoundType::INFTY) {
+        newSecondLower = -Settings::bigM;
+      }else{
+        if((*(intervals.second)).lowerBoundType()== carl::BoundType::WEAK) {
+          newSecondLower = (*(intervals.second)).lower();
+        }else{
+          newSecondLower = (*(intervals.second)).lower() + Settings::epsilon;
+        }
+
+      }
+      if((*(intervals.second)).upperBoundType()== carl::BoundType::INFTY) {
+        newSecondUpper = Settings::bigM;
+      }else{
+        if((*(intervals.second)).upperBoundType()== carl::BoundType::WEAK) {
+          newSecondUpper = (*(intervals.second)).upper();
+        }else{
+          newSecondUpper = (*(intervals.second)).upper() - Settings::epsilon;
+        }
+      }
+    }
+    //finally the old interval
+    if(old_interval.lowerBoundType()== carl::BoundType::INFTY) {
+      oldIntervalLower = -Settings::bigM;
+    }else{
+      if(old_interval.lowerBoundType()== carl::BoundType::WEAK) {
+        oldIntervalLower = old_interval.lower();
+      }else{
+        oldIntervalLower = old_interval.lower()+Settings::epsilon;
+      }
+    }
+
+    if(old_interval.upperBoundType()== carl::BoundType::INFTY) {
+      oldIntervalUpper = Settings::bigM;
+    }else{
+      if(old_interval.upperBoundType()== carl::BoundType::WEAK) {
+        oldIntervalUpper = old_interval.upper();
+      }else{
+        oldIntervalUpper = old_interval.upper() - Settings::epsilon;
+      }
+    }
+
+    //return the value
+    return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
   }
 }

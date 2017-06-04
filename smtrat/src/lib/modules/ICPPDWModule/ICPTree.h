@@ -53,10 +53,8 @@ namespace smtrat
       ICPPDWModule<Settings>* mModule;
 
     public:
-      ICPTree(ICPPDWModule<Settings>* module);
       ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module);
-      ICPTree(ICPTree<Settings>* parent, const vb::VariableBounds<ConstraintT>& parentBounds,
-        std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module);
+      ICPTree(ICPTree<Settings>* parent, const ICPState<Settings>& parentState, std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module);
 
       /**
        * Contracts the current ICP state until either:
@@ -77,7 +75,7 @@ namespace smtrat
        * @param contractionCandidates A set of pointers to contraction candidates that can be applied
        * @return whether a split occurred
        */
-      bool contract(vector<ICPContractionCandidate*>& contractionCandidates,ICPPDWModule<Settings>* module);
+      bool contract(vector<ICPContractionCandidate<Settings>*>& contractionCandidates,ICPPDWModule<Settings>* module);
 
       ICPState<Settings>& getCurrentState();
 
@@ -123,7 +121,7 @@ namespace smtrat
        * @param _origin The formula where the constraint originates from
        * @return false if the new constraint immediatly caused conflicting bounds
        */
-      bool addConstraint(const ConstraintT& _constraint, const ConstraintT& _origin );
+      bool addConstraint(const ConstraintT& _constraint);
 
       /**
        * Removes a constraint from the current search tree.
@@ -132,7 +130,7 @@ namespace smtrat
        * @param _constraint The new constraint
        * @param _origin The formula where the constraint originates from
        */
-      void removeConstraint(const ConstraintT& _constraint, const ConstraintT& _origin );
+      void removeConstraint(const ConstraintT& _constraint);
 
       ICPPDWModule<Settings>* getCorrespondingModule();
 
@@ -140,6 +138,8 @@ namespace smtrat
 
 
     private:
+      void removeConstraint(const ConstraintT& _constraint, std::set<carl::Variable> involvedVars, std::set<ConstraintT> involvedConstraints);
+
       /**
        * Does all necessary steps if a state has been determined to be unsat.
        * I.e., it will generate conflict reasons, set appropriate member variables etc.
@@ -181,10 +181,5 @@ namespace smtrat
        * Traverses the tree and retrieves the number of performed splits.
        */
       int getNumberOfSplitsRecursive();
-
-      void accumulateInvolvedConstraintsAndVariables(std::set<carl::Variable>& involvedVars, 
-            std::set<ConstraintT>& involvedConstraints, 
-            vector<ICPContractionCandidate*>& candidates, 
-            int startIndex, int endIndex);
   };
 }

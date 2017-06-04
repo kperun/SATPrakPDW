@@ -10,17 +10,6 @@ namespace smtrat
   template class ICPState<ICPPDWSettingsDebug>;
   template class ICPState<ICPPDWSettingsProduction>;
 
-
-  template<class Settings>
-  ICPState<Settings>::ICPState(ICPTree<Settings>* correspondingTree) :
-    mOriginalVariables(),
-    mBounds(),
-    mAppliedContractionCandidates(),
-    mAppliedIntervalConstraints(),
-    mCorrespondingTree(correspondingTree)
-  {
-  }
-
   template<class Settings>
   ICPState<Settings>::ICPState(std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree) :
     mOriginalVariables(originalVariables),
@@ -32,15 +21,15 @@ namespace smtrat
   }
 
   template<class Settings>
-  ICPState<Settings>::ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree) :
+  ICPState<Settings>::ICPState(const ICPState<Settings>& parentState, std::set<carl::Variable>* originalVariables, ICPTree<Settings>* correspondingTree) :
     mBounds(),
     mAppliedContractionCandidates(),
     mAppliedIntervalConstraints(),
     mOriginalVariables(originalVariables),
     mCorrespondingTree(correspondingTree)
   {
-    // copy parentBounds to mBounds
-    for (const auto& mapEntry : parentBounds.getIntervalMap()) {
+    // copy parent's bounds to mBounds
+    for (const auto& mapEntry : parentState.getIntervalMap()) {
       carl::Variable var = mapEntry.first;
       IntervalT interval = mapEntry.second;
 
@@ -59,12 +48,16 @@ namespace smtrat
   }
 
   template<class Settings>
-  vb::VariableBounds<ConstraintT>& ICPState<Settings>::getBounds() {
-    return mBounds;
+  void ICPState<Settings>::initVariables(std::set<carl::Variable> vars) {
+    for (const auto& v : vars) {
+      // this getter will create an unbounded interval for unknown vars
+      // so essentially, it is an initializer
+      mBounds.getDoubleInterval(v);
+    }
   }
 
   template<class Settings>
-  void ICPState<Settings>::applyContraction(ICPContractionCandidate* cc, IntervalT interval) {
+  void ICPState<Settings>::applyContraction(ICPContractionCandidate<Settings>* cc, IntervalT interval) {
     OneOrTwo<ConstraintT> intervalConstraints = setInterval(cc->getVariable(), interval, cc->getConstraint());
     addAppliedIntervalConstraint(intervalConstraints);
     addAppliedContractionCandidate(cc);
@@ -82,20 +75,7 @@ namespace smtrat
     ConstraintT lowerBound;
     bool hasLower = false;
 
-    // if upper bound is infty, the constraint is useless
-    if (interval.upperBoundType() != carl::BoundType::INFTY) {
-      // x <= upper bound
-      // x - upper bound <= 0
-      Poly upperPoly;
-      upperPoly += var;
-      upperPoly -= interval.upper();
-      carl::Relation upperRelation = (interval.upperBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
-      upperBound = ConstraintT(upperPoly, upperRelation);
-      hasUpper = true;
-      mBounds.addBound(upperBound, _origin);
-    }
-
-    // if lower bound is infty, the constraint is useless
+    // only consider strictly better lower bounds
     if (interval.lowerBoundType() != carl::BoundType::INFTY) {
       // x >= lower bound
       // lower bound - x <= 0
@@ -106,6 +86,19 @@ namespace smtrat
       lowerBound = ConstraintT(lowerPoly, lowerRelation);
       hasLower = true;
       mBounds.addBound(lowerBound, _origin);
+    }
+
+    // only consider strictly better upper bounds
+    if (interval.upperBoundType() != carl::BoundType::INFTY) {
+      // x <= upper bound
+      // x - upper bound <= 0
+      Poly upperPoly;
+      upperPoly += var;
+      upperPoly -= interval.upper();
+      carl::Relation upperRelation = (interval.upperBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
+      upperBound = ConstraintT(upperPoly, upperRelation);
+      hasUpper = true;
+      mBounds.addBound(upperBound, _origin);
     }
 
     if (hasUpper && hasLower) {
@@ -121,16 +114,21 @@ namespace smtrat
 
   template<class Settings>
   IntervalT ICPState<Settings>::getInterval(carl::Variable var) {
-    mBounds.getInterval(var);
+    return mBounds.getDoubleInterval(var);
   }
 
   template<class Settings>
-  vector<ICPContractionCandidate*>& ICPState<Settings>::getAppliedContractionCandidates() {
+  const EvalDoubleIntervalMap& ICPState<Settings>::getIntervalMap() const {
+    return mBounds.getIntervalMap();
+  }
+
+  template<class Settings>
+  vector<ICPContractionCandidate<Settings>*>& ICPState<Settings>::getAppliedContractionCandidates() {
     return mAppliedContractionCandidates;
   }
 
   template<class Settings>
-  void ICPState<Settings>::addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate) {
+  void ICPState<Settings>::addAppliedContractionCandidate(ICPContractionCandidate<Settings>* contractionCandidate) {
     mAppliedContractionCandidates.push_back(contractionCandidate);
   }
 
@@ -145,45 +143,23 @@ namespace smtrat
   }
 
   template<class Settings>
-  bool ICPState<Settings>::removeConstraint(const ConstraintT& constraint) {
-    // if we remove a constraint that has been used in this ICPState, all subsequent contractions become invalid
-    // so we need to revert every applied contraction from the first application of the removed constraint
-    int firstApplicationIndex = -1;
-    bool isUsed = false;
+  void ICPState<Settings>::addSimpleBound(const ConstraintT& simpleBound) {
+    mBounds.addBound(simpleBound, ConstraintT());
+  }
 
-    // a simple bound is not used as a contraction candidate, but simply applied to the bounds
-    // thus, we assume that a simple bound is always used immediatly
-    if (ICPUtil<Settings>::isSimpleBound(constraint)) {
-      // basically, we need to revert all changes, since the very first contraction candidate
-      // will already have made use of the simple bound
-      firstApplicationIndex = 0;
-      isUsed = true;
-    }
-    else {
-      // we find the first usage of the removed constraint
-      for (int i = 0; i < (int) mAppliedContractionCandidates.size(); i++) {
-        if (mAppliedContractionCandidates[i]->getConstraint() == constraint) {
-          firstApplicationIndex = i;
-          isUsed = true;
-          break;
-        }
-      }
-    }
+  template<class Settings>
+  void ICPState<Settings>::removeSimpleBound(const ConstraintT& simpleBound) {
+    mBounds.removeBound(simpleBound, ConstraintT());
+  }
 
-    // if it has not been used at all, we don't have to do anything
-    if (!isUsed) {
-      return false;
-    }
-    // the constraint has been used, so we traverse the applied contraction from the end
-    // until the first application index, and revert all bound constraints that were applied
-    else {
-      for (int i = mAppliedIntervalConstraints.size() - 1; i >= firstApplicationIndex; i--) {
-        removeIntervalConstraints(mAppliedIntervalConstraints[i], mAppliedContractionCandidates[i]->getConstraint());
-      }
-      // actually delete those applied entries from the vectors
-      mAppliedContractionCandidates.resize(firstApplicationIndex);
-      mAppliedIntervalConstraints.resize(firstApplicationIndex);
-    }
+  template<class Settings>
+  void ICPState<Settings>::removeAppliedContraction(int index) {
+    // first revert the interval constraints from the variable bounds
+    removeIntervalConstraints(mAppliedIntervalConstraints[index], mAppliedContractionCandidates[index]->getConstraint());
+
+    // then remove the entries from the member vectors
+    mAppliedContractionCandidates.erase(mAppliedContractionCandidates.begin() + index);
+    mAppliedIntervalConstraints.erase(mAppliedIntervalConstraints.begin() + index);
   }
 
   template<class Settings>
@@ -219,7 +195,7 @@ namespace smtrat
     }
 
     // check if maximum number of splits has been reached and terminate
-    if(computeNumberOfSplits()>Settings::maxSplitNumber) {
+    if(mCorrespondingTree->getNumberOfSplits() > Settings::maxSplitNumber) {
 #ifdef PDW_MODULE_DEBUG_1
       std::cout << "Termination reached by maximal number of splits!" << std::endl;
 #endif
@@ -247,95 +223,12 @@ namespace smtrat
   }
 
   template<class Settings>
-  int ICPState<Settings>::computeNumberOfSplits(){
-    return mCorrespondingTree->getNumberOfSplits();
+  bool ICPState<Settings>::isConflicting() {
+    return mBounds.isConflicting();
   }
 
   template<class Settings>
-  double ICPState<Settings>::computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds){
-    //first compute the new interval
-    OneOrTwo<IntervalT> intervals = candidate.getContractedInterval(_bounds);
-    //then retrieve the old one
-    IntervalT old_interval = _bounds.getDoubleInterval(candidate.getVariable());
-
-    //in order to avoid manipulation of the existing objects, we work here with retrieved values
-    //moreover, we use a bigM in order to be able to compute with -INF and INF
-    double newFirstLower = 0;
-    double newFirstUpper = 0;
-    double newSecondLower = 0;
-    double newSecondUpper = 0;
-    double oldIntervalLower = 0;
-    double oldIntervalUpper = 0;
-    //first the mandatory first interval
-    if(intervals.first.lowerBoundType()== carl::BoundType::INFTY) {
-      newFirstLower = -Settings::bigM;
-    }else{
-      if(intervals.first.lowerBoundType()== carl::BoundType::WEAK) {
-        newFirstLower = intervals.first.lower();
-      }else{ //in case it is scrict, we add a small epsilon to make it better
-        newFirstLower = intervals.first.lower() + Settings::epsilon;
-      }
-    }
-
-    if(intervals.first.upperBoundType()== carl::BoundType::INFTY) {
-      newFirstUpper = Settings::bigM;
-    }else{
-      if(intervals.first.upperBoundType()== carl::BoundType::WEAK) {
-        newFirstUpper = intervals.first.upper();
-      }else{
-        newFirstUpper = intervals.first.upper() - Settings::epsilon;
-      }
-    }
-
-    //now the second optional interval
-    if(intervals.second) {
-      if((*(intervals.second)).lowerBoundType()== carl::BoundType::INFTY) {
-        newSecondLower = -Settings::bigM;
-      }else{
-        if((*(intervals.second)).lowerBoundType()== carl::BoundType::WEAK) {
-          newSecondLower = (*(intervals.second)).lower();
-        }else{
-          newSecondLower = (*(intervals.second)).lower() + Settings::epsilon;
-        }
-
-      }
-      if((*(intervals.second)).upperBoundType()== carl::BoundType::INFTY) {
-        newSecondUpper = Settings::bigM;
-      }else{
-        if((*(intervals.second)).upperBoundType()== carl::BoundType::WEAK) {
-          newSecondUpper = (*(intervals.second)).upper();
-        }else{
-          newSecondUpper = (*(intervals.second)).upper() - Settings::epsilon;
-        }
-      }
-    }
-    //finally the old interval
-    if(old_interval.lowerBoundType()== carl::BoundType::INFTY) {
-      oldIntervalLower = -Settings::bigM;
-    }else{
-      if(old_interval.lowerBoundType()== carl::BoundType::WEAK) {
-        oldIntervalLower = old_interval.lower();
-      }else{
-        oldIntervalLower = old_interval.lower()+Settings::epsilon;
-      }
-    }
-
-    if(old_interval.upperBoundType()== carl::BoundType::INFTY) {
-      oldIntervalUpper = Settings::bigM;
-    }else{
-      if(old_interval.upperBoundType()== carl::BoundType::WEAK) {
-        oldIntervalUpper = old_interval.upper();
-      }else{
-        oldIntervalUpper = old_interval.upper() - Settings::epsilon;
-      }
-    }
-
-    //return the value
-    return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
-  }
-
-  template<class Settings>
-  std::experimental::optional<int> ICPState<Settings>::getBestContractionCandidate(vector<ICPContractionCandidate*>& candidates){
+  std::experimental::optional<int> ICPState<Settings>::getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& candidates){
     if(candidates.size()==0) {
       throw std::invalid_argument( "Candidates vector is empty!" );
     }
@@ -347,7 +240,7 @@ namespace smtrat
 
     //store the current best candidate index
     int currentBest = 0;
-    std::experimental::optional<double> currentBestGain = computeGain(*(candidates[currentBest]),mBounds);
+    std::experimental::optional<double> currentBestGain = (candidates[currentBest])->computeGain(getIntervalMap());
 
      //store the new diameter in case two candidates with equal gain are regarded
     double currentBestAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
@@ -362,7 +255,7 @@ namespace smtrat
     //SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[currentBest]))<< " adjusted to " << currentBestGainWeighted);
 
     for (int it = 1; it < (int) candidates.size(); it++) {
-      double currentGain = computeGain(*(candidates[it]), mBounds);
+      double currentGain = (candidates[it])->computeGain(getIntervalMap());
       //compute the weighted gain
       double currentGainWeighted = (*(candidates[it])).getWeight()+
               Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
@@ -512,6 +405,5 @@ namespace smtrat
     //finally return the variable of the biggest interval
     return bestSplitVariable;
   }
-
 
 };

@@ -53,7 +53,7 @@ namespace smtrat
        * The contraction candidates that have been applied.
        * They will be stored in the order that they have been applied.
        */
-      vector<ICPContractionCandidate*> mAppliedContractionCandidates;
+      vector<ICPContractionCandidate<Settings>*> mAppliedContractionCandidates;
 
       /**
        * After we apply a contraction candidate, we add the lower and upper
@@ -70,26 +70,22 @@ namespace smtrat
 
     public:
       /**
-       * Default constructor will create an empty state with no variable bounds.
-       */
-      ICPState(ICPTree<Settings>* correspondingTree);
-
-      /**
-       * Behaves the samme way as the default custuctor, but sets the point to the set of variables
+       * Default constructor, creates empty state with no variable bounds.
        */
       ICPState(std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree);
 
       /**
        * This constructor will initialize the variable bounds with a copy of parentBounds.
        */
-      ICPState(const vb::VariableBounds<ConstraintT>& parentBounds,std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree);
+      ICPState(const ICPState<Settings>& parentState, std::set<carl::Variable>* originalVariables, ICPTree<Settings>* correspondingTree);
 
       /**
-       * Returns the current search box as VariableBounds.
+       * Initializes the given variables with unbounded intervals.
+       * Must be called for every variables at least once.
        *
-       * @return reference to the search box
+       * @param vars a set containing variables that should be initialized
        */
-      vb::VariableBounds<ConstraintT>& getBounds();
+      void initVariables(std::set<carl::Variable> vars);
 
       /**
        * Applies a contraction to this state.
@@ -100,7 +96,7 @@ namespace smtrat
        * @param cc The contraction candidate that has been applied
        * @param interval The contracted interval that should be applied
        */
-      void applyContraction(ICPContractionCandidate* cc, IntervalT interval);
+      void applyContraction(ICPContractionCandidate<Settings>* cc, IntervalT interval);
 
       /**
        * Updates the current interval bound for a specific variable.
@@ -121,32 +117,31 @@ namespace smtrat
        */
       IntervalT getInterval(carl::Variable var);
 
-      vector<ICPContractionCandidate*>& getAppliedContractionCandidates();
-      void addAppliedContractionCandidate(ICPContractionCandidate* contractionCandidate);
+      /**
+       * @return the interval map from variables to their bounds.
+       */
+      const EvalDoubleIntervalMap& getIntervalMap() const;
+
+      vector<ICPContractionCandidate<Settings>*>& getAppliedContractionCandidates();
 
       vector<OneOrTwo<ConstraintT>>& getAppliedIntervalConstraints();
-      void addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints);
 
       /**
-       * Removes a constraint from this ICP State.
+       * Adds a simple bound to the variable bounds.
+       */
+      void addSimpleBound(const ConstraintT& simpleBound);
+
+      /**
+       * Removes a simple bound to the variable bounds.
+       */
+      void removeSimpleBound(const ConstraintT& simpleBound);
+
+      /**
+       * Reverts and removes an applied contraction candidate from this ICP State.
        *
-       * It not only removes the constraint itself from the variable bounds,
-       * but also all contraction candidates that have been after the first usage of that constraint.
-       *
-       * @param constraint the constraint that should be removed
-       * @return whether the constraint has been used in this icp state at all
+       * @param index the index of the applied contraction candidate
        */
-      bool removeConstraint(const ConstraintT& constraint);
-
-      /**
-       * @return the variable that has an empty interval.
-       */
-      carl::Variable getConflictingVariable();
-
-      /**
-       * For a given contraction candidate compute the new interval, subsequently the gain by the formula 1- D_new/D_old
-       */
-      double computeGain(smtrat::ICPContractionCandidate& candidate,vb::VariableBounds<ConstraintT>& _bounds);
+      void removeAppliedContraction(int index);
 
       /**
        * Chooses the best contraction candidate.
@@ -154,7 +149,7 @@ namespace smtrat
        * @param contractionCandidates A list of available contraction candidates
        * @return the best contraction candidate
        */
-      std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate*>& contractionCandidates);
+      std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& contractionCandidates);
 
       /**
        * Determines whether we should stop contracting.
@@ -163,6 +158,11 @@ namespace smtrat
        * @return whether the termination condition was reached
        */
       bool isTerminationConditionReached();
+
+      /**
+       * @return True iff a variable has an empty interval.
+       */
+      bool isConflicting();
 
       /**
        * Guesses a solution for the mBonds by choosing some values out of them.
@@ -177,11 +177,16 @@ namespace smtrat
       carl::Variable getBestSplitVariable();
 
       /**
-       * @return the number of splits performed.
+       * Can only be called if there is a conflict.
+       * @return the variable that has an empty interval.
        */
-      int computeNumberOfSplits();
+      carl::Variable getConflictingVariable();
 
     private:
+      void addAppliedContractionCandidate(ICPContractionCandidate<Settings>* contractionCandidate);
+
+      void addAppliedIntervalConstraint(const OneOrTwo<ConstraintT>& constraints);
+
       /**
        * Removes the given interval constraints from the variable bounds.
        * @param intervalConstraints one or two interval constraints that should be removed

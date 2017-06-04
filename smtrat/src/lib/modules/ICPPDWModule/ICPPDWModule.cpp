@@ -123,7 +123,7 @@ namespace smtrat
       // create contraction candidates for "monomial - slack = 0"
       for (const ConstraintT& constraint : mMonomialSlackConstraints) {
         for (const auto& variable : constraint.variables()) {
-          mContractionCandidates.push_back(ICPContractionCandidate(variable, constraint));
+          mContractionCandidates.push_back(ICPContractionCandidate<Settings>(variable, constraint));
         }
       }
 
@@ -134,7 +134,7 @@ namespace smtrat
         if (constraint.variables().size() > 1) {
           // we create a new contraction candidate for every variable in that constraint
           for (const auto& variable : constraint.variables()) {
-            mContractionCandidates.push_back(ICPContractionCandidate(variable, constraint));
+            mContractionCandidates.push_back(ICPContractionCandidate<Settings>(variable, constraint));
           }
         }
       }
@@ -168,6 +168,10 @@ namespace smtrat
   template<class Settings>
     void ICPPDWModule<Settings>::init()
     {
+      // initialize all variables to unbounded
+      mSearchTree.getCurrentState().initVariables(mOriginalVariables);
+      mSearchTree.getCurrentState().initVariables(mSlackVariables);
+
       // generates all contraction candidates, i.e. for every constraint c
       // it generates a pair of (var, c) for every variable that occurs in that constraint
       createAllContractionCandidates();
@@ -181,7 +185,7 @@ namespace smtrat
         }
 
         // and make the substitutions known to our search tree
-        mSearchTree.addConstraint(constraint, constraint);
+        mSearchTree.addConstraint(constraint);
       }
 
 #ifdef PDW_MODULE_DEBUG_1
@@ -224,8 +228,9 @@ namespace smtrat
         }
 
         // we actually add the constraint to our search tree
-        if(!mSearchTree.addConstraint(lC, constraint)) {
+        if(!mSearchTree.addConstraint(lC)) {
           causesConflict = true;
+          createInfeasableSubset();
         }
       }
 
@@ -267,7 +272,7 @@ namespace smtrat
         }
 
         // we actually remove the constraint from within our search tree
-        mSearchTree.removeConstraint(lC, constraint);
+        mSearchTree.removeConstraint(lC);
       }
     }
 
@@ -294,7 +299,7 @@ namespace smtrat
       std::cout << "\n" << std::endl;
 
       std::cout <<  "Check core with the following active contraction candidates:" << std::endl;
-      for (ICPContractionCandidate* cc : mActiveContractionCandidates) {
+      for (ICPContractionCandidate<Settings>* cc : mActiveContractionCandidates) {
         std::cout << *cc << std::endl;
       }
       std::cout << std::endl;
@@ -500,8 +505,6 @@ namespace smtrat
         return std::experimental::optional<Model>();
       }
     }
-
-
 
 }
 
