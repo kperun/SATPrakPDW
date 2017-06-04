@@ -9,37 +9,37 @@ declare -a wrongSolvedNames
 
 echo "------------------------------------------"
 echo "-----------Start benchmark----------------"
-echo "------at `date`-----" 
+echo "------at `date`-----"
 #for problem in ../examples/*.smt2;
-for problem in $1/*.smt2; 
-    do
-        overallTested=$(($overallTested+1))
-        start=$(date +%s.%N)
-        temp="$(./build/smtrat $problem)"
-        finish=$(date +%s.%N)
-        if [ "$temp" = "sat" ] || [ "$temp" = "unsat" ];  # solved problems
-            then #add one to solved
-                solvedProblems=$(($solvedProblems+1))
-            else 
-                if [ "$temp" = "unknown" ]; # unknown problems
-                    then
-                        unsolvedNames[$unsolved]="$problem";
-                        unsolved=$(($unsolved+1))  
-                    else
-                        wrongSolvedNames[$wrongSolved]="$problem";
-                        wrongSolved=$(($wrongSolved+1)) 
-                fi                     
-        fi        
-        
-        overallElapsed=$(echo "$overallElapsed + $finish-$start" |bc -l)
-    done
-echo "General stats:"    
-echo "Overall tested problems:" $overallTested    
+for problem in $1/*.smt2;
+do
+  overallTested=$(($overallTested+1))
+  start=$(date +%s.%N)
+  temp="$(./build/smtrat $problem)"
+  finish=$(date +%s.%N)
+  if [ "$temp" = "sat" ] || [ "$temp" = "unsat" ];  # solved problems
+  then #add one to solved
+    solvedProblems=$(($solvedProblems+1))
+  else
+    if [ "$temp" = "unknown" ]; # unknown problems
+    then
+      unsolvedNames[$unsolved]="$problem";
+      unsolved=$(($unsolved+1))
+    else
+      wrongSolvedNames[$wrongSolved]="$problem";
+      wrongSolved=$(($wrongSolved+1))
+    fi
+  fi
+
+  overallElapsed=$(echo "$overallElapsed + $finish-$start" |bc -l)
+done
+echo "General stats:"
+echo "Overall tested problems:" $overallTested
 echo "Overall solved problems:" $solvedProblems
 echo "Overall unsolved problems:" $unsolved
 echo "Overall wrong results:" $wrongSolved
 echo "Overall time elapsed since start:" $overallElapsed "ms"
-echo "Avarage time to solve a problem: " $(echo "$overallElapsed / $overallTested" |bc -l) "ms"  
+echo "Avarage time to solve a problem: " $(echo "$overallElapsed / $overallTested" |bc -l) "ms"
 
 
 
@@ -49,17 +49,17 @@ echo "Avarage time to solve a problem: " $(echo "$overallElapsed / $overallTeste
 #    for i in `seq 0 $(($unsolved-1))`;
 #        do
 #            echo ${unsolvedNames[i]}
-#        done    
-#    echo "------------------------------------------"    
+#        done
+#    echo "------------------------------------------"
 #fi
 
 if (( $wrongSolved > 0 ));then
-    echo "------------------------------------------"
-    echo "Wrongly solved instances:"
-    for i in `seq 0 $(($wrongSolved-1))`;
-        do
-            echo ${wrongSolvedNames[i]}
-        done    
-    echo "------------------------------------------"    
+  echo "------------------------------------------"
+  echo "Wrongly solved instances:"
+  for i in `seq 0 $(($wrongSolved-1))`;
+  do
+    echo ${wrongSolvedNames[i]}
+  done
+  echo "------------------------------------------"
 fi
 echo "-----------Finish benchmark---------------"
