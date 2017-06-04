@@ -77,7 +77,7 @@ namespace smtrat
     static constexpr int maxContractions = 1000;
 
     // desired interval relative to the initial interval
-    static constexpr double targetDiameter = 0.05;
+    static constexpr double targetDiameter = 1.0;
 
     // maximal number of splits allowed
     static constexpr int maxSplitNumber = 100;

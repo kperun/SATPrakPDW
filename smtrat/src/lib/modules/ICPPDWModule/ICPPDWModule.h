@@ -68,9 +68,6 @@ namespace smtrat
       // a map from slack variables to the constraint of their substitution
       std::unordered_map<Poly, carl::Variable> mMonomialSubstitutions;
 
-      // a map of variables and their desired target diameter
-      std::unordered_map<carl::Variable,double> mDesiredDiameters;
-
     private:
       /**
        * Returns a slack variable representing the given monomial.
@@ -192,8 +189,6 @@ namespace smtrat
       std::experimental::optional<Model> getSolution(ICPTree<Settings>* currentNode);
 
       void setModel(Model model);
-
-      std::unordered_map<carl::Variable,double> getDesiredDiameters();
 
 #ifdef SMTRAT_DEVOPTION_Statistics
       ICPPDWStatistics* getStatistics(){return &mStatistics;}

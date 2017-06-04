@@ -206,7 +206,7 @@ namespace smtrat
     //first check if all intervals are inside the desired one
     bool isTargetDiameterReached = true;
     for (auto key : (*mOriginalVariables) ) {
-      if(mBounds.getDoubleInterval(key).isUnbounded() || mBounds.getDoubleInterval(key).diameter()>mCorrespondingTree->getCorrespondingModule()->getDesiredDiameters()[key]) {
+      if(mBounds.getDoubleInterval(key).isUnbounded() || mBounds.getDoubleInterval(key).diameter()>Settings::targetDiameter) {
         isTargetDiameterReached = false;
         break;
       }
