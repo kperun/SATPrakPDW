@@ -2,9 +2,6 @@
 
 namespace smtrat
 {
-  template class ICPContractionCandidate<ICPPDWSettingsDebug>;
-  template class ICPContractionCandidate<ICPPDWSettingsProduction>;
-  
   template<class Settings>
   ICPContractionCandidate<Settings>::ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint):
     mVariable(var),
@@ -247,4 +244,8 @@ namespace smtrat
     //return the value
     return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
   }
+
+  //Template instantiations
+  template class ICPContractionCandidate<ICPPDWSettingsDebug>;
+  template class ICPContractionCandidate<ICPPDWSettingsProduction>;
 }

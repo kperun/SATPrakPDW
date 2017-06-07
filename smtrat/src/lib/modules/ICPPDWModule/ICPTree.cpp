@@ -5,9 +5,6 @@
 namespace smtrat
 {
 
-  template class ICPTree<ICPPDWSettingsDebug>;
-  template class ICPTree<ICPPDWSettingsProduction>;
-
   template<class Settings>
   ICPTree<Settings>::ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module) :
     mCurrentState(originalVariables,this),
@@ -511,5 +508,9 @@ namespace smtrat
     }
     return numThis<numThat;
   }
+
+  //Template instantiations
+  template class ICPTree<ICPPDWSettingsDebug>;
+  template class ICPTree<ICPPDWSettingsProduction>;
 
 }

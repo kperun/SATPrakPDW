@@ -7,8 +7,6 @@
 
 namespace smtrat
 {
-  template class ICPState<ICPPDWSettingsDebug>;
-  template class ICPState<ICPPDWSettingsProduction>;
 
   template<class Settings>
   ICPState<Settings>::ICPState(std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree) :
@@ -406,4 +404,7 @@ namespace smtrat
     return bestSplitVariable;
   }
 
+  //Template instantiations
+  template class ICPState<ICPPDWSettingsDebug>;
+  template class ICPState<ICPPDWSettingsProduction>;
 };
