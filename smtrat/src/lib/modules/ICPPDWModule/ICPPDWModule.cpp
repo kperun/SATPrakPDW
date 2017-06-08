@@ -285,6 +285,47 @@ namespace smtrat
       }
     }
 
+template<typename Settings>
+class CompareTrees{
+  public:
+    bool operator()(ICPTree<Settings>* node1, ICPTree<Settings>* node2) {
+    map<carl::Variable,double> sol(node1->getCurrentState().guessSolution());
+    int numThis = 0;
+    Model model;
+    for(auto& clause : sol) {
+      Rational val = carl::rationalize<Rational>(clause.second);
+      model.emplace(clause.first, val);
+    }
+    for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
+      unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+      assert(isSatisfied != 2);
+      if(isSatisfied == 1) {
+        numThis++;
+      }
+    }
+    map<carl::Variable,double> sol2(node2->getCurrentState().guessSolution());
+    int numThat = 0;
+    Model model2;
+    for(auto& clause : sol2) {
+      Rational val = carl::rationalize<Rational>(clause.second);
+      model2.emplace(clause.first, val);
+    }
+    for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
+      unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model2);
+      assert(isSatisfied != 2);
+      if(isSatisfied == 1) {
+        numThat++;
+      }
+    }
+    return numThis<numThat;
+    }
+};
+
+
+
+
+
+
   template<class Settings>
     Answer ICPPDWModule<Settings>::checkCore(){
 #ifdef SMTRAT_DEVOPTION_Statistics
@@ -309,7 +350,7 @@ namespace smtrat
       mFoundModel = std::experimental::nullopt;
 
       // we need to search through all leaf nodes of the search tree, store them in a priority queue
-      std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,std::function<bool(ICPTree<Settings>*, ICPTree<Settings>*)>> searchPriorityQueue(ICPTree<Settings>::compareTrees);
+      std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,CompareTrees<Settings>> searchPriorityQueue;
 
       vector<ICPTree<Settings>*> leafNodes = mSearchTree.getLeafNodes();
       for (ICPTree<Settings>* i : leafNodes) {

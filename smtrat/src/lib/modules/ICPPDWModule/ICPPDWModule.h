@@ -15,6 +15,7 @@
 #include "ICPTree.h"
 #include "ICPContractionCandidate.h"
 #include <map>
+#include <queue>
 
 namespace smtrat
 {
