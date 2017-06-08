@@ -10,6 +10,7 @@
 
 #include "../../Common.h"
 #include <experimental/optional>
+#include "../../solver/ModuleSettings.h"
 
 
 //#define PDW_MODULE_DEBUG_0
@@ -30,7 +31,7 @@ namespace smtrat
   template <class T>
     using OneOrTwo = std::pair<T,std::experimental::optional<T>>;
 
-  struct ICPPDWSettingsDebug
+  struct ICPPDWSettingsDebug  : ModuleSettings
   {
     /// Name of the Module
     static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettingsDebug>";
@@ -68,7 +69,7 @@ namespace smtrat
     static constexpr double weightEps = 0.01;
   };
 
-  struct ICPPDWSettingsProduction
+  struct ICPPDWSettingsProduction  : ModuleSettings
   {
     /// Name of the Module
     static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettingsProduction>";

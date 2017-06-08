@@ -310,7 +310,7 @@ namespace smtrat
 #endif
     std::experimental::optional<int> ret;
 
-    if(currentBestGain>Settings::gainThreshold) {
+    if((*currentBestGain) > Settings::gainThreshold) {
       //if the gain is beyond the threshold, return it
       ret = currentBest;
       return ret;
