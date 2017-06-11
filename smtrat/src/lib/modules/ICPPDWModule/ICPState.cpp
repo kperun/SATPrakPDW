@@ -11,20 +11,20 @@ namespace smtrat
   template<class Settings>
   ICPState<Settings>::ICPState(std::set<carl::Variable>* originalVariables,ICPTree<Settings>* correspondingTree) :
     mOriginalVariables(originalVariables),
+    mCorrespondingTree(correspondingTree),
     mBounds(),
     mAppliedContractionCandidates(),
-    mAppliedIntervalConstraints(),
-    mCorrespondingTree(correspondingTree)
+    mAppliedIntervalConstraints()
   {
   }
 
   template<class Settings>
   ICPState<Settings>::ICPState(const ICPState<Settings>& parentState, std::set<carl::Variable>* originalVariables, ICPTree<Settings>* correspondingTree) :
+    mOriginalVariables(originalVariables),
+    mCorrespondingTree(correspondingTree),
     mBounds(),
     mAppliedContractionCandidates(),
-    mAppliedIntervalConstraints(),
-    mOriginalVariables(originalVariables),
-    mCorrespondingTree(correspondingTree)
+    mAppliedIntervalConstraints()
   {
     // copy parent's bounds to mBounds
     for (const auto& mapEntry : parentState.getIntervalMap()) {

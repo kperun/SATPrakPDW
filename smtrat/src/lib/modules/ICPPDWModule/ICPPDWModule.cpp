@@ -22,16 +22,16 @@ namespace smtrat
 #endif
       mFoundModel(),
       mConstraintFormula(),
-      mOriginalVariables(),
       mSearchTree(&mOriginalVariables,this),
+      mOriginalVariables(),
+      mActiveOriginalConstraints(),
       mContractionCandidates(),
+      mActiveContractionCandidates(),
       mLinearizations(),
       mDeLinearizations(),
       mSlackVariables(),
-      mActiveOriginalConstraints(),
       mMonomialSlackConstraints(),
-      mMonomialSubstitutions(),
-      mActiveContractionCandidates()
+      mMonomialSubstitutions()
       {
       }
 
@@ -64,7 +64,7 @@ namespace smtrat
     }
 
   template<class Settings>
-    void ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin) {
+    void ICPPDWModule<Settings>::linearizeConstraint(const ConstraintT& constraint) {
       const Poly& polynomial = constraint.lhs();
 
       // stores the original linearized constraint
@@ -156,7 +156,7 @@ namespace smtrat
         }
 
         // linearize the constraints
-        linearizeConstraint(constraint, _constraint);
+        linearizeConstraint(constraint);
 
 #ifdef PDW_MODULE_DEBUG_1
         std::cout << "Linearized constraint for " << constraint << ":\n" << mLinearizations[constraint] << std::endl;

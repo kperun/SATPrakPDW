@@ -93,9 +93,8 @@ namespace smtrat
        * In case the constraint was linear, it will be mapped to itself.
        *
        * @param constraint The constraint that should be linearized
-       * @param _origin Slack constraints are added to the set of bounds, here we need an origin of the bound,i.e. the formula.
        */
-      void linearizeConstraint(const ConstraintT& constraint, const FormulaT& _origin);
+      void linearizeConstraint(const ConstraintT& constraint);
 
       /**
        * Creates all contraction candidates.

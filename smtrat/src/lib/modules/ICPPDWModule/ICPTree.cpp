@@ -7,6 +7,7 @@ namespace smtrat
 
   template<class Settings>
   ICPTree<Settings>::ICPTree(std::set<carl::Variable>* originalVariables,ICPPDWModule<Settings>* module) :
+    mOriginalVariables(originalVariables),
     mCurrentState(originalVariables,this),
     mParentTree(),
     mLeftChild(),
@@ -14,7 +15,6 @@ namespace smtrat
     mSplitDimension(),
     mConflictingConstraints(),
     mConflictingVariables(),
-    mOriginalVariables(originalVariables),
     mIsUnsat(false),
     mActiveSimpleBounds(),
     mModule(module)
@@ -24,6 +24,7 @@ namespace smtrat
     template<class Settings>
   ICPTree<Settings>::ICPTree(ICPTree<Settings>* parent, const ICPState<Settings>& parentState,
     std::set<carl::Variable>* originalVariables, const std::set<ConstraintT>& simpleBounds,ICPPDWModule<Settings>* module) :
+    mOriginalVariables(originalVariables),
     mCurrentState(parentState,originalVariables,this),
     mParentTree(parent),
     mLeftChild(),
@@ -31,7 +32,6 @@ namespace smtrat
     mSplitDimension(),
     mConflictingConstraints(),
     mConflictingVariables(),
-    mOriginalVariables(originalVariables),
     mIsUnsat(false),
     mActiveSimpleBounds(simpleBounds),
     mModule(module)
@@ -266,7 +266,7 @@ namespace smtrat
     // and determine all involved constraints and variables
     
     // traverse the applied contraction candidates and generate the transitive closure
-    for (int i = mCurrentState.getAppliedContractionCandidates().size()-1; i >= 0; i--) {
+    for (int i = (int) mCurrentState.getAppliedContractionCandidates().size() - 1; i >= 0; i--) {
       ICPContractionCandidate<Settings>* it = (mCurrentState.getAppliedContractionCandidates())[i];
       // if the variable that was contracted was involved in the unsat reason, all the variables of the contractor are too
       if (mConflictingVariables.count(it->getVariable()) > 0) {
@@ -400,7 +400,7 @@ namespace smtrat
     }
 
     // check applied contraction candidates for involvment with the constraint that should be removed
-    for (int i = 0; i < mCurrentState.getAppliedContractionCandidates().size(); i++) {
+    for (int i = 0; i < (int) mCurrentState.getAppliedContractionCandidates().size(); i++) {
       ICPContractionCandidate<Settings>* ccIt = (mCurrentState.getAppliedContractionCandidates())[i];
       if (involvedConstraints.count(ccIt->getConstraint()) > 0 ||
           ICPUtil<Settings>::occurVariablesInConstraint(involvedVars, ccIt->getConstraint())) {
