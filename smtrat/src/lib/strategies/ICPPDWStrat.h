@@ -7,6 +7,7 @@
 
 #include "../modules/ICPPDWModule/ICPPDWModule.h"
 #include "../modules/SATModule/SATModule.h"
+#include "../modules/CADModule/CADModule.h"
 
 namespace smtrat
 {
@@ -24,7 +25,9 @@ namespace smtrat
             ICPPDWStrat(): Manager() {
 				setStrategy({
 					addBackend<SATModule<SATSettings1>>({
-						addBackend<ICPPDWModule<ICPPDWSettingsDebug>>()
+						addBackend<ICPPDWModule<ICPPDWSettingsDebug>>({
+                            addBackend<CADModule<CADSettingsSplitPath>>()
+                        })
 					})
 				});
 			}
