@@ -63,51 +63,12 @@ namespace smtrat
 
   template<class Settings>
   OneOrTwo<ConstraintT> ICPState<Settings>::setInterval(carl::Variable var, const IntervalT& interval, const ConstraintT& _origin) {
-    // since we cannot directly set the interval for a variable,
-    // we will need to add two constraints. one for the lower and one for the upper bound
-    // one advantage of this approach is that we can easily revert a contraction
-    // by removing those constraints from the variable bounds
-
-    ConstraintT upperBound;
-    bool hasUpper = false;
-    ConstraintT lowerBound;
-    bool hasLower = false;
-
-    // only consider strictly better lower bounds
-    if (interval.lowerBoundType() != carl::BoundType::INFTY) {
-      // x >= lower bound
-      // lower bound - x <= 0
-      Poly lowerPoly;
-      lowerPoly -= var;
-      lowerPoly += interval.lower();
-      carl::Relation lowerRelation = (interval.lowerBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
-      lowerBound = ConstraintT(lowerPoly, lowerRelation);
-      hasLower = true;
-      mBounds.addBound(lowerBound, _origin);
+    OneOrTwo<ConstraintT> constraints = ICPUtil<Settings>::intervalToConstraint(var, interval);
+    mBounds.addBound(constraints.first, _origin);
+    if (constraints.second) {
+      mBounds.addBound(*(constraints.second), _origin);
     }
-
-    // only consider strictly better upper bounds
-    if (interval.upperBoundType() != carl::BoundType::INFTY) {
-      // x <= upper bound
-      // x - upper bound <= 0
-      Poly upperPoly;
-      upperPoly += var;
-      upperPoly -= interval.upper();
-      carl::Relation upperRelation = (interval.upperBoundType() == carl::BoundType::WEAK) ? carl::Relation::LEQ : carl::Relation::LESS;
-      upperBound = ConstraintT(upperPoly, upperRelation);
-      hasUpper = true;
-      mBounds.addBound(upperBound, _origin);
-    }
-
-    if (hasUpper && hasLower) {
-      return OneOrTwo<ConstraintT>(upperBound, lowerBound);
-    }
-    else if (hasUpper) {
-      return OneOrTwo<ConstraintT>(upperBound, std::experimental::optional<ConstraintT>());
-    }
-    else /*if (hasLower)*/ {
-      return OneOrTwo<ConstraintT>(lowerBound, std::experimental::optional<ConstraintT>());
-    }
+    return constraints;
   }
 
   template<class Settings>
