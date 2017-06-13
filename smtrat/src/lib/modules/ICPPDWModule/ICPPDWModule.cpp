@@ -208,6 +208,7 @@ namespace smtrat
     bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
     {
       const FormulaT& formula = _subformula->formula();
+      addReceivedSubformulaToPassedFormula(_subformula);
 
       // we only consider actual constraints
       bool causesConflict = false;
