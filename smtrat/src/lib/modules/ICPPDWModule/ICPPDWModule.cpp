@@ -484,7 +484,6 @@ class CompareTrees{
     void ICPPDWModule<Settings>::createInfeasableSubset() {
       // the base set of conflicting constraints
       std::set<ConstraintT> conflictingConstraints = mSearchTree.getConflictingConstraints();
-      conflictingConstraints.insert(ConstraintT());
 
       // conflicting constraints contains the raw unsat reason, i.e. all constraints and substitutions
       // we don't need slack substitutions, we need to de-linearize, and get the original formula
