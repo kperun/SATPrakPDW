@@ -14,6 +14,7 @@
 #include "ICPPDWSettings.h"
 #include "ICPTree.h"
 #include "ICPContractionCandidate.h"
+#include "ICPUtil.h"
 #include <map>
 #include <queue>
 
@@ -117,6 +118,15 @@ namespace smtrat
        * @return the de-linearized constraint if c was a linearized constraint, otherwise c itself
        */
       ConstraintT deLinearize(const ConstraintT& c);
+
+      /**
+       * Calls the backend with the handed over parameter.
+       *
+       * @param currentNode the current node containing all boundaries etc.
+       * @return the answer as returned by the backend
+       */
+      Answer callBackend(ICPTree<Settings>* currentNode);
+
 
     public:
       typedef Settings SettingsType;

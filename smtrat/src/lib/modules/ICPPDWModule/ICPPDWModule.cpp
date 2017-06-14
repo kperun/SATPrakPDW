@@ -420,8 +420,26 @@ class CompareTrees{
               // if no leaf node knows an answer, we will return UNKNOWN
               // after this main loop
 #ifdef PDW_MODULE_DEBUG_1
-              std::cout << "No Model could be guessed, returning UNKNOWN" << std::endl;
+              std::cout << "Consult the backend!" << std::endl;
 #endif
+              Answer answerByBackend = callBackend(currentNode);
+
+              // if we get SAT, then we have to update the model
+              if(answerByBackend == Answer::SAT){
+                return Answer::SAT;
+              }
+              // if we get UNSAT, then we have to retrieve the unsat set
+              else if(answerByBackend == Answer::UNSAT){
+#ifdef PDW_MODULE_DEBUG_1
+              std::cout << "The backend returned UNSAT" << std::endl;
+#endif
+              }
+              // Unknown means that the backend is broken, should not happen
+              else{
+#ifdef PDW_MODULE_DEBUG_1
+              std::cout << "The backend returned UNKNOWN" << std::endl;
+#endif
+              }
             }
           }
         }
@@ -547,6 +565,44 @@ class CompareTrees{
         return std::experimental::optional<Model>();
       }
     }
+
+    template<class Settings>
+    Answer ICPPDWModule<Settings>::callBackend(ICPTree<Settings>* currentNode){
+      OneOrTwo<ConstraintT> tempConstr;
+      std::vector<pair<ModuleInput::iterator,bool>> tIteratorVector;
+      for (const auto& var : mOriginalVariables) {
+         tempConstr = ICPUtil<Settings>::intervalToConstraint(var,
+           currentNode->getCurrentState().getInterval(var));
+         //first create a formula out of the constraint, since the backend expects formulas
+         FormulaT tFormula(tempConstr.first);
+         //finally add the formula to the backend
+         pair<ModuleInput::iterator,bool> tIt = addSubformulaToPassedFormula(tFormula,tFormula);
+         // store it to delete it later
+         tIteratorVector.push_back(tIt);
+         //check if we have an optional second part, and store it
+         if(tempConstr.second){
+           FormulaT tOptionalFormula((*tempConstr.second));
+           //tempFormula.push_back(tOptionalFormula);
+           tIt = addSubformulaToPassedFormula(tOptionalFormula,tOptionalFormula);
+           tIteratorVector.push_back(tIt);
+         }
+      }
+      Answer tempAnswer = runBackends();
+      //model found, update it
+      if(tempAnswer==Answer::SAT){
+        //an update is not required since it is done in getBackendsModel()
+        Module::getBackendsModel();
+      }else if(tempAnswer==Answer::UNSAT){
+        //otherwise get the infeasible subset
+        //getInfeasibleSubsets();
+      }
+      //clean up after the backend has been consulted
+      for(const auto& it: tIteratorVector){
+        eraseSubformulaFromPassedFormula(it.first,it.second);
+      }
+      return tempAnswer;
+    }
+
 
 }
 
