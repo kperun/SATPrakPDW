@@ -261,6 +261,37 @@ namespace smtrat
   }
 
   template<class Settings>
+  void ICPTree<Settings>::setBackendsUnsat(std::vector<FormulaSetT>& backendInfSubsets) {
+    mIsUnsat = true;
+
+    mConflictingVariables.clear();
+    mConflictingConstraints.clear();
+
+    for (auto& formulaSet : backendInfSubsets) {
+      for (auto& formula : formulaSet) {
+        if (formula.getType() == carl::FormulaType::CONSTRAINT) {
+          mConflictingConstraints.insert(formula.constraint());
+        }
+      }
+    }
+
+    // conflicting variables are all variables occuring in conflicting constraints
+    for (auto& c : mConflictingConstraints) {
+      for (auto& v : c.variables()) {
+        mConflictingVariables.insert(v);
+      }
+    }
+
+#ifdef PDW_MODULE_DEBUG_1
+    std::cout << "Conflicting constraints determined by the backend: " << mConflictingConstraints << std::endl;
+#endif
+
+    if (mParentTree) {
+      (*mParentTree)->accumulateConflictReasons();
+    }
+  }
+
+  template<class Settings>
   void ICPTree<Settings>::generateConflictReasons() {
     // we start with only the conflicting variable
     // and determine all involved constraints and variables

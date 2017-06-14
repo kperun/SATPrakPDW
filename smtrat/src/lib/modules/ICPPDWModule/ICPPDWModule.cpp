@@ -31,7 +31,8 @@ namespace smtrat
       mDeLinearizations(),
       mSlackVariables(),
       mMonomialSlackConstraints(),
-      mMonomialSubstitutions()
+      mMonomialSubstitutions(),
+      mBackendFormulaIterators()
       {
       }
 
@@ -208,7 +209,8 @@ namespace smtrat
     bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
     {
       const FormulaT& formula = _subformula->formula();
-      addReceivedSubformulaToPassedFormula(_subformula);
+      ModuleInput::iterator miIt = addReceivedSubformulaToPassedFormula(_subformula).first;
+      mBackendFormulaIterators[formula] = miIt;
 
       // we only consider actual constraints
       bool causesConflict = false;
@@ -248,6 +250,8 @@ namespace smtrat
     void ICPPDWModule<Settings>::removeCore( ModuleInput::const_iterator _subformula )
     {
       const FormulaT& formula = _subformula->formula();
+      eraseSubformulaFromPassedFormula(mBackendFormulaIterators[formula], true);
+
       // we only consider actual constraints
       if (formula.getType() == carl::FormulaType::CONSTRAINT && formula.constraint().relation() != carl::Relation::NEQ) {
         const ConstraintT& constraint = formula.constraint();
@@ -480,6 +484,7 @@ class CompareTrees{
     void ICPPDWModule<Settings>::createInfeasableSubset() {
       // the base set of conflicting constraints
       std::set<ConstraintT> conflictingConstraints = mSearchTree.getConflictingConstraints();
+      conflictingConstraints.insert(ConstraintT());
 
       // conflicting constraints contains the raw unsat reason, i.e. all constraints and substitutions
       // we don't need slack substitutions, we need to de-linearize, and get the original formula
@@ -564,21 +569,21 @@ class CompareTrees{
     template<class Settings>
     Answer ICPPDWModule<Settings>::callBackend(ICPTree<Settings>* currentNode){
       OneOrTwo<ConstraintT> tempConstr;
-      std::vector<pair<ModuleInput::iterator,bool>> tIteratorVector;
+      std::vector<ModuleInput::iterator> tIteratorVector;
       for (const auto& var : mOriginalVariables) {
          tempConstr = ICPUtil<Settings>::intervalToConstraint(var,
            currentNode->getCurrentState().getInterval(var));
          //first create a formula out of the constraint, since the backend expects formulas
          FormulaT tFormula(tempConstr.first);
          //finally add the formula to the backend
-         pair<ModuleInput::iterator,bool> tIt = addSubformulaToPassedFormula(tFormula,tFormula);
+         ModuleInput::iterator tIt = addSubformulaToPassedFormula(tFormula,tFormula).first;
          // store it to delete it later
          tIteratorVector.push_back(tIt);
          //check if we have an optional second part, and store it
          if(tempConstr.second){
            FormulaT tOptionalFormula((*tempConstr.second));
            //tempFormula.push_back(tOptionalFormula);
-           tIt = addSubformulaToPassedFormula(tOptionalFormula,tOptionalFormula);
+           tIt = addSubformulaToPassedFormula(tOptionalFormula,tOptionalFormula).first;
            tIteratorVector.push_back(tIt);
          }
       }
@@ -589,11 +594,25 @@ class CompareTrees{
         Module::getBackendsModel();
       }else if(tempAnswer==Answer::UNSAT){
         //otherwise get the infeasible subset
-        //getInfeasibleSubsets();
+
+        // we cannot simply call getInfeasibleSubsets() because that method will try to
+        // get the origins. but we don't really use origins and so it would lead to a segfault
+        std::vector<FormulaSetT> backendInfSubsets;
+        vector<Module*>::const_iterator backend = mUsedBackends.begin();
+        while( backend != mUsedBackends.end() )
+        {
+            if( (*backend)->solverState() == UNSAT )
+            {
+                std::vector<FormulaSetT> infsubsets = (**backend).infeasibleSubsets();
+                backendInfSubsets.insert(backendInfSubsets.end(), infsubsets.begin(), infsubsets.end() );
+            }
+            ++backend;
+        }
+        currentNode->setBackendsUnsat(backendInfSubsets);
       }
       //clean up after the backend has been consulted
       for(const auto& it: tIteratorVector){
-        eraseSubformulaFromPassedFormula(it.first,it.second);
+        eraseSubformulaFromPassedFormula(it, true);
       }
       return tempAnswer;
     }

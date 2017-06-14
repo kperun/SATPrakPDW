@@ -104,6 +104,13 @@ namespace smtrat
       bool isUnsat();
 
       /**
+       * After a backend determined that this node is unsat, we have to set the conflicting
+       * constraints according to the backends' infeasible subsets.
+       * @param the infeasible subsets of the backends
+       */
+      void setBackendsUnsat(std::vector<FormulaSetT>& backendInfSubsets);
+
+      /**
        * Logs all current variable bounds.
        */
       void printVariableBounds();
