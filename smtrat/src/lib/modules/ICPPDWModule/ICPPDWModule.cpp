@@ -423,19 +423,14 @@ class CompareTrees{
               std::cout << "Consult the backend!" << std::endl;
 #endif
               Answer answerByBackend = callBackend(currentNode);
-
-              // if we get SAT, then we have to update the model
               if(answerByBackend == Answer::SAT){
                 return Answer::SAT;
               }
-              // if we get UNSAT, then we have to retrieve the unsat set
               else if(answerByBackend == Answer::UNSAT){
 #ifdef PDW_MODULE_DEBUG_1
               std::cout << "The backend returned UNSAT" << std::endl;
 #endif
-              }
-              // Unknown means that the backend is broken, should not happen
-              else{
+              }else{
 #ifdef PDW_MODULE_DEBUG_1
               std::cout << "The backend returned UNKNOWN" << std::endl;
 #endif
