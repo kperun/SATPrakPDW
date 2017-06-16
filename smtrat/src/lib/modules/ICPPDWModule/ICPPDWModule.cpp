@@ -570,21 +570,24 @@ class CompareTrees{
       OneOrTwo<ConstraintT> tempConstr;
       std::vector<ModuleInput::iterator> tIteratorVector;
       for (const auto& var : mOriginalVariables) {
-         tempConstr = ICPUtil<Settings>::intervalToConstraint(var,
-           currentNode->getCurrentState().getInterval(var));
-         //first create a formula out of the constraint, since the backend expects formulas
-         FormulaT tFormula(tempConstr.first);
-         //finally add the formula to the backend
-         ModuleInput::iterator tIt = addSubformulaToPassedFormula(tFormula,tFormula).first;
-         // store it to delete it later
-         tIteratorVector.push_back(tIt);
-         //check if we have an optional second part, and store it
-         if(tempConstr.second){
-           FormulaT tOptionalFormula((*tempConstr.second));
-           //tempFormula.push_back(tOptionalFormula);
-           tIt = addSubformulaToPassedFormula(tOptionalFormula,tOptionalFormula).first;
-           tIteratorVector.push_back(tIt);
-         }
+        IntervalT origInterval = currentNode->getCurrentState().getInterval(var);
+        if (origInterval.isInfinite()) {
+          continue;
+        }
+        tempConstr = ICPUtil<Settings>::intervalToConstraint(var, origInterval);
+        //first create a formula out of the constraint, since the backend expects formulas
+        FormulaT tFormula(tempConstr.first);
+        //finally add the formula to the backend
+        ModuleInput::iterator tIt = addSubformulaToPassedFormula(tFormula,tFormula).first;
+        // store it to delete it later
+        tIteratorVector.push_back(tIt);
+        //check if we have an optional second part, and store it
+        if(tempConstr.second){
+          FormulaT tOptionalFormula((*tempConstr.second));
+          //tempFormula.push_back(tOptionalFormula);
+          tIt = addSubformulaToPassedFormula(tOptionalFormula,tOptionalFormula).first;
+          tIteratorVector.push_back(tIt);
+        }
       }
       Answer tempAnswer = runBackends();
       //model found, update it
