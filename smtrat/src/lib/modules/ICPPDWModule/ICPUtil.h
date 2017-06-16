@@ -57,11 +57,11 @@ namespace smtrat
         if (interval.isHalfBounded()) {
           if (interval.lowerBoundType() == carl::BoundType::INFTY) {
             // (-inf, upper]
-            midpoint = (interval.upper() - Settings::maxOriginalVarBound) / 2;
+            midpoint = interval.upper() - Settings::maxOriginalVarBound / 2.0;
           }
           else {
             // [lower, inf)
-            midpoint = (interval.lower() + Settings::maxOriginalVarBound) / 2;
+            midpoint = interval.lower() + Settings::maxOriginalVarBound / 2.0;
           }
         }
         else if (interval.isInfinite()) {

@@ -31,8 +31,7 @@ namespace smtrat
       mDeLinearizations(),
       mSlackVariables(),
       mMonomialSlackConstraints(),
-      mMonomialSubstitutions(),
-      mBackendFormulaIterators()
+      mMonomialSubstitutions()
       {
       }
 
@@ -209,8 +208,7 @@ namespace smtrat
     bool ICPPDWModule<Settings>::addCore( ModuleInput::const_iterator _subformula )
     {
       const FormulaT& formula = _subformula->formula();
-      ModuleInput::iterator miIt = addReceivedSubformulaToPassedFormula(_subformula).first;
-      mBackendFormulaIterators[formula] = miIt;
+      addReceivedSubformulaToPassedFormula(_subformula);
 
       // we only consider actual constraints
       bool causesConflict = false;
@@ -250,7 +248,6 @@ namespace smtrat
     void ICPPDWModule<Settings>::removeCore( ModuleInput::const_iterator _subformula )
     {
       const FormulaT& formula = _subformula->formula();
-      eraseSubformulaFromPassedFormula(mBackendFormulaIterators[formula], true);
 
       // we only consider actual constraints
       if (formula.getType() == carl::FormulaType::CONSTRAINT && formula.constraint().relation() != carl::Relation::NEQ) {
@@ -428,15 +425,16 @@ class CompareTrees{
 #endif
               Answer answerByBackend = callBackend(currentNode);
               if(answerByBackend == Answer::SAT){
+                std::cout << "The backend returned SAT." << std::endl;
                 return Answer::SAT;
               }
               else if(answerByBackend == Answer::UNSAT){
 #ifdef PDW_MODULE_DEBUG_1
-              std::cout << "The backend returned UNSAT" << std::endl;
+                std::cout << "The backend returned UNSAT." << std::endl;
 #endif
               }else{
 #ifdef PDW_MODULE_DEBUG_1
-              std::cout << "The backend returned UNKNOWN" << std::endl;
+                std::cout << "The backend returned UNKNOWN." << std::endl;
 #endif
               }
             }

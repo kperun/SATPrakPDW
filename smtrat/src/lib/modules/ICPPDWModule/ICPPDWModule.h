@@ -70,9 +70,6 @@ namespace smtrat
       // a map from slack variables to the constraint of their substitution
       std::unordered_map<Poly, carl::Variable> mMonomialSubstitutions;
 
-      // a map from formulas to their backend iterators (necessary for erasing)
-      std::unordered_map<FormulaT, ModuleInput::iterator> mBackendFormulaIterators;
-
     private:
       /**
        * Returns a slack variable representing the given monomial.

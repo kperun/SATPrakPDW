@@ -97,15 +97,24 @@ namespace smtrat
           OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getIntervalMap());
           if(bounds.second) {
             // We contracted to two intervals, so we need to split
+            // but only if we haven't reached the maximal number of splits yet
+            if(getNumberOfSplits() > Settings::maxSplitNumber) {
 #ifdef PDW_MODULE_DEBUG_1
-            std::cout << "Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << std::endl;
+              std::cout << "Termination reached by maximal number of splits!" << std::endl;
 #endif
-            split(contractionCandidates.at((*bestCC))->getVariable());
+              return false;
+            }
+            else {
+#ifdef PDW_MODULE_DEBUG_1
+              std::cout << "Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << std::endl;
+#endif
+              split(contractionCandidates.at((*bestCC))->getVariable());
 
-            // we split the tree, now we need to apply the intervals for the children
-            mLeftChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)),  bounds.first );
-            mRightChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)), *bounds.second);
-            return true;
+              // we split the tree, now we need to apply the intervals for the children
+              mLeftChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)),  bounds.first );
+              mRightChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)), *bounds.second);
+              return true;
+            }
           } else {
             // no split, we can simply apply the contraction to the current state
 #ifdef PDW_MODULE_DEBUG_1
@@ -133,21 +142,31 @@ namespace smtrat
 #endif
 #ifdef PDW_MODULE_DEBUG_1
               //now it is not sat, thus we have to split further
-              std::cout << "No model found, gain too small -> split!" << std::endl;
+              std::cout << "No model found." << std::endl;
 #endif
-              //First extract the best variable for splitting
-              carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
-              IntervalT oldInterval = mCurrentState.getInterval(splittingVar);
 
-              std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
+              // check if maximum number of splits has been reached and terminate
+              if(getNumberOfSplits() > Settings::maxSplitNumber) {
 #ifdef PDW_MODULE_DEBUG_1
-              std::cout << "Split on " << splittingVar << " with new intervals: "
+                std::cout << "Termination reached by maximal number of splits!" << std::endl;
+#endif
+                return false;
+              }
+              else {
+                //First extract the best variable for splitting
+                carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
+                IntervalT oldInterval = mCurrentState.getInterval(splittingVar);
+
+                std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
+#ifdef PDW_MODULE_DEBUG_1
+                std::cout << "Split on " << splittingVar << " with new intervals: "
                   << newIntervals.first << " and " << newIntervals.second << "\n" << std::endl;
 #endif
-              split(splittingVar);
-              mLeftChild->getCurrentState().setInterval(splittingVar, newIntervals.first, ConstraintT()); // empty origin
-              mRightChild->getCurrentState().setInterval(splittingVar, newIntervals.second, ConstraintT());
-              return true;
+                split(splittingVar);
+                mLeftChild->getCurrentState().setInterval(splittingVar, newIntervals.first, ConstraintT()); // empty origin
+                mRightChild->getCurrentState().setInterval(splittingVar, newIntervals.second, ConstraintT());
+                return true;
+              }
             }
         }
       }

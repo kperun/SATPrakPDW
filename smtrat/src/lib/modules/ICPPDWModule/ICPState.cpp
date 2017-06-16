@@ -153,19 +153,11 @@ namespace smtrat
       return true;
     }
 
-    // check if maximum number of splits has been reached and terminate
-    if(mCorrespondingTree->getNumberOfSplits() > Settings::maxSplitNumber) {
-#ifdef PDW_MODULE_DEBUG_1
-      std::cout << "Termination reached by maximal number of splits!" << std::endl;
-#endif
-      return true;
-    }
-
     //otherwise check if we have reached our desired interval
     //first check if all intervals are inside the desired one
     bool isTargetDiameterReached = true;
     for (auto key : (*mOriginalVariables) ) {
-      if(mBounds.getDoubleInterval(key).isUnbounded() || mBounds.getDoubleInterval(key).diameter()>Settings::targetDiameter) {
+      if(getInterval(key).isUnbounded() || getInterval(key).diameter()>Settings::targetDiameter) {
         isTargetDiameterReached = false;
         break;
       }
@@ -202,7 +194,7 @@ namespace smtrat
     std::experimental::optional<double> currentBestGain = (candidates[currentBest])->computeGain(getIntervalMap());
 
      //store the new diameter in case two candidates with equal gain are regarded
-    double currentBestAbsoluteReduction = (*currentBestGain)*(mBounds.getDoubleInterval((*(candidates[currentBest])).getVariable()).diameter());
+    double currentBestAbsoluteReduction = (*currentBestGain)*(getInterval((*(candidates[currentBest])).getVariable()).diameter());
 
 
     //first compute the new weighted gain according to W_new = W_old + alpha*(gain - W_old)
@@ -230,7 +222,7 @@ namespace smtrat
         currentBestGain = currentGain;
         currentBest = it;
         //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
-        currentBestAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
+        currentBestAbsoluteReduction = currentGain*(getInterval((*(candidates[it])).getVariable()).diameter());
         continue;
       }
       //if the current candidate is below weightEps, we disregard it
@@ -246,18 +238,18 @@ namespace smtrat
         currentBestGain = currentGain;
         currentBest = it;
         //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
-        currentBestAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
+        currentBestAbsoluteReduction = currentGain*(getInterval((*(candidates[it])).getVariable()).diameter());
 
       }else if(currentGainWeighted-currentBestGainWeighted>Settings::lowerDelta){
         //if the gain is not high enough but still almost the same, it would be interesting to consider the absolute interval reduction
-        double currentNewAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
+        double currentNewAbsoluteReduction = currentGain*(getInterval((*(candidates[it])).getVariable()).diameter());
         //now check if the
         if(currentBestAbsoluteReduction<currentNewAbsoluteReduction){
            currentBestGainWeighted = currentGainWeighted;
            currentBestGain = currentGain;
            currentBest = it;
            //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
-           currentBestAbsoluteReduction = currentGain*(mBounds.getDoubleInterval((*(candidates[it])).getVariable()).diameter());
+           currentBestAbsoluteReduction = currentGain*(getInterval((*(candidates[it])).getVariable()).diameter());
         }
       }
     }
@@ -353,10 +345,13 @@ namespace smtrat
       carl::Variable bestSplitVariable = unsatVars[0];
     // now finally we can iterate over all variables which are part of an unsat clause
     for (carl::Variable var : unsatVars) {
+      currentInterval = getInterval(var).diameter();
       //first compute the diameter of a variable
-      currentInterval = mBounds.getDoubleInterval(var).diameter();
+      if (getInterval(var).isUnbounded()) {
+        return var;
+      }
       //now check if the new interval is "bigger"
-      if(bestSplitInterval<currentInterval) {
+      else if(bestSplitInterval<currentInterval) {
         bestSplitVariable = var;
         bestSplitInterval = currentInterval;
       }
