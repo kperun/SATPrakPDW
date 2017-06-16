@@ -425,7 +425,9 @@ class CompareTrees{
 #endif
               Answer answerByBackend = callBackend(currentNode);
               if(answerByBackend == Answer::SAT){
+#ifdef PDW_MODULE_DEBUG_1
                 std::cout << "The backend returned SAT." << std::endl;
+#endif
                 return Answer::SAT;
               }
               else if(answerByBackend == Answer::UNSAT){
