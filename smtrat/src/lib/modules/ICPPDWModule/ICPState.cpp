@@ -340,7 +340,7 @@ namespace smtrat
        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
 
        assert(isSatisfied != 2);
-       if(isSatisfied == 0) {
+       if(isSatisfied != 1) {
           //if it is not sat, get the corresponding variables from the initial constraints
           for(const auto& var:rf.formula().constraint().variables()){
             if(std::find(unsatVars.begin(), unsatVars.end(), var) == unsatVars.end()) {
