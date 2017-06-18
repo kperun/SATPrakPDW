@@ -324,18 +324,17 @@ class CompareTrees{
 };
 
 
-template<typename Settings>
-class CompareCandidates{
-public:
-  bool operator()(ICPContractionCandidate<Settings>* cc1,ICPContractionCandidate<Settings>* cc2){
-    if(cc1->getWeight()>cc2->getWeight()){
-      return cc1;
-    }else{
-      return cc2;
+  template<typename Settings>
+  class CompareCandidates{
+    public:
+    bool operator()(ICPContractionCandidate<Settings>* cc1,ICPContractionCandidate<Settings>* cc2){
+      if(cc1->getWeight()>cc2->getWeight()){
+        return cc1;
+      }else{
+        return cc2;
+      }
     }
-  }
-};
-
+  };
 
 
 
@@ -368,7 +367,7 @@ public:
       std::priority_queue<ICPContractionCandidate<Settings>*,std::vector<ICPContractionCandidate<Settings>*>,
              CompareCandidates<Settings>> ccPriorityQueue;
 
-      mSearchTree.mCurrentState.initializeWeights(mActiveContractionCandidates);
+      mSearchTree.getCurrentState().initializeWeights(mActiveContractionCandidates);
 
       // add all candidates to the queue
       for (ICPContractionCandidate<Settings>* cc : mActiveContractionCandidates){
@@ -395,7 +394,7 @@ public:
         // contract() will contract the node until a split occurs,
         // or the bounds turn out to be UNSAT,
         // or some other termination criterium was met (e.g. target diameter of intervals)
-        bool splitOccurred = currentNode->contract(mActiveContractionCandidates,this);
+        bool splitOccurred = currentNode->contract(ccPriorityQueue,this);
 
         if (splitOccurred) {
 #ifdef SMTRAT_DEVOPTION_Statistics

@@ -149,7 +149,8 @@ namespace smtrat
        * @param contractionCandidates A list of available contraction candidates
        * @return the best contraction candidate
        */
-      std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& contractionCandidates);
+      std::experimental::optional<ICPContractionCandidate<Settings>*> getBestContractionCandidate(
+              std::priority_queue<ICPContractionCandidate<Settings>*>& ccPriorityQueue);
 
       /**
        * Determines whether we should stop contracting.

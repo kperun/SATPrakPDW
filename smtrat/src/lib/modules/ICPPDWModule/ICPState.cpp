@@ -197,41 +197,47 @@ namespace smtrat
 
 
   template<class Settings>
-  std::experimental::optional<int> ICPState<Settings>::getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& candidates){
-    if(candidates.size()==0) {
+  std::experimental::optional<ICPContractionCandidate<Settings>*> ICPState<Settings>::getBestContractionCandidate(
+    std::priority_queue<ICPContractionCandidate<Settings>*>& ccPriorityQueue){
+    if(ccPriorityQueue.empty()) {
       throw std::invalid_argument( "Candidates vector is empty!" );
     }
-    //in the case that the list has only one element, return this one element
-    if(candidates.size()==1) {
-      return 0; //return the first element
-    }
-
 
     //store the current best candidate index
-    int currentBest = 0;
-    std::experimental::optional<double> currentBestGain = (candidates[currentBest])->computeGain(getIntervalMap());
+    ICPContractionCandidate<Settings>* currentBest = ccPriorityQueue.top();
+    ccPriorityQueue.pop(); //Pop so that the updated weight is used for sorting
+    std::experimental::optional<double> currentBestGain = currentBest->computeGain(getIntervalMap());
 
      //store the new diameter in case two candidates with equal gain are regarded
-    double currentBestAbsoluteReduction = (*currentBestGain)*(getInterval((*(candidates[currentBest])).getVariable()).diameter());
+    double currentBestAbsoluteReduction = (*currentBestGain)*(getInterval((*currentBest).getVariable()).diameter());
 
 
     //first compute the new weighted gain according to W_new = W_old + alpha*(gain - W_old)
-    double currentBestGainWeighted = (*(candidates[currentBest])).getWeight()+
-              Settings::alpha*((*currentBestGain)-(*(candidates[currentBest])).getWeight());
+    double currentBestGainWeighted = (*currentBest).getWeight()+
+              Settings::alpha*((*currentBestGain)-(*currentBest).getWeight());
     //update the weight
-    //SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[currentBest]))<< " is " << (*(candidates[currentBest])).getWeight());
-    (*(candidates[currentBest])).setWeight(currentBestGainWeighted);
-    //SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[currentBest]))<< " adjusted to " << currentBestGainWeighted);
+    (*currentBest).setWeight(currentBestGainWeighted);
+    //Reinsert the top element at new position
+    ccPriorityQueue.push(currentBest);
 
+    //Create the return optional
+    std::experimental::optional<ICPContractionCandidate<Settings>*> ret;
+    //Only return the object if the gain is good enough
+    if(currentBestGainWeighted>Settings::weightEps){
+      ret = currentBest;
+      return ret;
+    }else{
+      return ret;
+    }
+
+/*
     for (int it = 1; it < (int) candidates.size(); it++) {
       double currentGain = (candidates[it])->computeGain(getIntervalMap());
       //compute the weighted gain
       double currentGainWeighted = (*(candidates[it])).getWeight()+
               Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
       //update the weighted gain
-      //SMTRAT_LOG_INFO("smtrat.module","Old weight of " << (*(candidates[it]))<< " is " << (*(candidates[it])).getWeight());
       (*(candidates[it])).setWeight(currentGainWeighted);
-      //SMTRAT_LOG_INFO("smtrat.module","Weight of " << (*(candidates[it]))<< " adjusted to " << currentGainWeighted);
 
       //do not consider candidates with weight < weight_eps
       if(currentBestGainWeighted<Settings::weightEps&&currentGainWeighted>Settings::weightEps){
@@ -290,6 +296,7 @@ namespace smtrat
       //otherwise return an optional.empty()
       return ret;
     }
+*/
 
   }
 

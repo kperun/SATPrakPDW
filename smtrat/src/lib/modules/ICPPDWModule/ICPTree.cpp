@@ -56,8 +56,8 @@ namespace smtrat
 #endif
   }
 
-  template<class Settings>
-  bool ICPTree<Settings>::contract(vector<ICPContractionCandidate<Settings>*>& contractionCandidates,ICPPDWModule<Settings>* module) {
+    template<class Settings>
+  bool ICPTree<Settings>::contract(std::priority_queue<ICPContractionCandidate<Settings>*>& ccPriorityQueue,ICPPDWModule<Settings>* module) {
     while(true) {
       printVariableBounds();
 
@@ -88,13 +88,13 @@ namespace smtrat
 
         // We have to pick the best contraction candidate that we want to apply
         // if we have nothing to contract, we cannot use this method
-        if (contractionCandidates.empty()) {
+        if (ccPriorityQueue.empty()) {
           return false;
         }
-        std::experimental::optional<int> bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
+        std::experimental::optional<ICPContractionCandidate<Settings>*> bestCC = mCurrentState.getBestContractionCandidate(ccPriorityQueue);
 
         if(bestCC) { //if a contraction candidate has been found proceed
-          OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getIntervalMap());
+          OneOrTwo<IntervalT> bounds = (*bestCC)->getContractedInterval(mCurrentState.getIntervalMap());
           if(bounds.second) {
             // We contracted to two intervals, so we need to split
             // but only if we haven't reached the maximal number of splits yet
@@ -106,21 +106,21 @@ namespace smtrat
             }
             else {
 #ifdef PDW_MODULE_DEBUG_1
-              std::cout << "Split on " << contractionCandidates.at((*bestCC))->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << std::endl;
+              std::cout << "Split on " << (*bestCC)->getVariable() << " by " << bounds.first << " vs " << (*bounds.second) << std::endl;
 #endif
-              split(contractionCandidates.at((*bestCC))->getVariable());
+              split((*bestCC)->getVariable());
 
               // we split the tree, now we need to apply the intervals for the children
-              mLeftChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)),  bounds.first );
-              mRightChild->getCurrentState().applyContraction(contractionCandidates.at((*bestCC)), *bounds.second);
+              mLeftChild->getCurrentState().applyContraction ((*bestCC),  bounds.first );
+              mRightChild->getCurrentState().applyContraction((*bestCC), *bounds.second);
               return true;
             }
           } else {
             // no split, we can simply apply the contraction to the current state
 #ifdef PDW_MODULE_DEBUG_1
-            std::cout << "Contract with " << *(contractionCandidates.at((*bestCC))) << ", results in bounds: " << bounds.first << std::endl;
+            std::cout << "Contract with " << (*(*bestCC)) << ", results in bounds: " << bounds.first << std::endl;
 #endif
-            mCurrentState.applyContraction(contractionCandidates.at((*bestCC)), bounds.first);
+            mCurrentState.applyContraction((*bestCC), bounds.first);
           }
         }else{ //otherwise perform a split
 #ifdef PDW_MODULE_DEBUG_1
@@ -314,7 +314,7 @@ namespace smtrat
   void ICPTree<Settings>::generateConflictReasons() {
     // we start with only the conflicting variable
     // and determine all involved constraints and variables
-    
+
     // traverse the applied contraction candidates and generate the transitive closure
     for (int i = (int) mCurrentState.getAppliedContractionCandidates().size() - 1; i >= 0; i--) {
       ICPContractionCandidate<Settings>* it = (mCurrentState.getAppliedContractionCandidates())[i];

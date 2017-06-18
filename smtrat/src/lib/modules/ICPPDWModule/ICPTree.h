@@ -75,7 +75,7 @@ namespace smtrat
        * @param contractionCandidates A set of pointers to contraction candidates that can be applied
        * @return whether a split occurred
        */
-      bool contract(vector<ICPContractionCandidate<Settings>*>& contractionCandidates,ICPPDWModule<Settings>* module);
+      bool contract(std::priority_queue<ICPContractionCandidate<Settings>*>& ccPriorityQueue,ICPPDWModule<Settings>* module);
 
       ICPState<Settings>& getCurrentState();
 

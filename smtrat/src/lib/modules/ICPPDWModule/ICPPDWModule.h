@@ -20,6 +20,9 @@
 
 namespace smtrat
 {
+
+
+
   template<typename Settings>
     class ICPPDWModule : public Module
   {
