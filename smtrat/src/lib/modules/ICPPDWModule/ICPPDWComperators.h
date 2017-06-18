@@ -8,7 +8,7 @@
 
   template<typename Settings>
   class ICPContractionCandidate;
-  double ICPContractionCandidate<Settings>::getWeight();
+
 
 
 

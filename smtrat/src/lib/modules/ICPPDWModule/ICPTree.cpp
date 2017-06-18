@@ -57,7 +57,8 @@ namespace smtrat
   }
 
     template<class Settings>
-  bool ICPTree<Settings>::contract(std::priority_queue<ICPContractionCandidate<Settings>*>& ccPriorityQueue,ICPPDWModule<Settings>* module) {
+  bool ICPTree<Settings>::contract(std::priority_queue<ICPContractionCandidate<Settings>*,std::vector<ICPContractionCandidate<Settings>*>,
+             CompareCandidates<Settings>>& ccPriorityQueue,ICPPDWModule<Settings>* module) {
     while(true) {
       printVariableBounds();
 

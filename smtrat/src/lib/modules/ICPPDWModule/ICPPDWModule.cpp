@@ -324,21 +324,6 @@ class CompareTrees{
 };
 
 
-  template<typename Settings>
-  class CompareCandidates{
-    public:
-    bool operator()(ICPContractionCandidate<Settings>* cc1,ICPContractionCandidate<Settings>* cc2){
-      if(cc1->getWeight()>cc2->getWeight()){
-        return cc1;
-      }else{
-        return cc2;
-      }
-    }
-  };
-
-
-
-
   template<class Settings>
     Answer ICPPDWModule<Settings>::checkCore(){
 #ifdef SMTRAT_DEVOPTION_Statistics

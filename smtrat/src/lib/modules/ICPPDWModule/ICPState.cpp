@@ -180,7 +180,7 @@ namespace smtrat
 
   template<class Settings>
   void ICPState<Settings>::initializeWeights(std::vector<ICPContractionCandidate<Settings>*>& candidates){
-    if(candidates.size()==0) {
+    if(candidates.empty()) {
       throw std::invalid_argument( "Candidates vector is empty!" );
     }
 
@@ -198,7 +198,8 @@ namespace smtrat
 
   template<class Settings>
   std::experimental::optional<ICPContractionCandidate<Settings>*> ICPState<Settings>::getBestContractionCandidate(
-    std::priority_queue<ICPContractionCandidate<Settings>*>& ccPriorityQueue){
+    std::priority_queue<ICPContractionCandidate<Settings>*,std::vector<ICPContractionCandidate<Settings>*>,
+             CompareCandidates<Settings>>& ccPriorityQueue){
     if(ccPriorityQueue.empty()) {
       throw std::invalid_argument( "Candidates vector is empty!" );
     }

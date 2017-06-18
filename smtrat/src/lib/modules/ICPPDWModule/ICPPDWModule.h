@@ -15,6 +15,7 @@
 #include "ICPTree.h"
 #include "ICPContractionCandidate.h"
 #include "ICPUtil.h"
+#include "ICPPDWComperators.h"
 #include <map>
 #include <queue>
 
