@@ -324,6 +324,18 @@ class CompareTrees{
 };
 
 
+template<typename Settings>
+class CompareCandidates{
+public:
+  bool operator()(ICPContractionCandidate<Settings>* cc1,ICPContractionCandidate<Settings>* cc2){
+    if(cc1->getWeight()>cc2->getWeight()){
+      return cc1;
+    }else{
+      return cc2;
+    }
+  }
+};
+
 
 
 
@@ -353,6 +365,16 @@ class CompareTrees{
 
       // we need to search through all leaf nodes of the search tree, store them in a priority queue
       std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,CompareTrees<Settings>> searchPriorityQueue;
+      std::priority_queue<ICPContractionCandidate<Settings>*,std::vector<ICPContractionCandidate<Settings>*>,
+             CompareCandidates<Settings>> ccPriorityQueue;
+
+      mSearchTree.mCurrentState.initializeWeights(mActiveContractionCandidates);
+
+      // add all candidates to the queue
+      for (ICPContractionCandidate<Settings>* cc : mActiveContractionCandidates){
+        ccPriorityQueue.push(cc);
+      }
+
 
       vector<ICPTree<Settings>*> leafNodes = mSearchTree.getLeafNodes();
       for (ICPTree<Settings>* i : leafNodes) {

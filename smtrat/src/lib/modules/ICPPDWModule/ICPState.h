@@ -182,6 +182,12 @@ namespace smtrat
        */
       carl::Variable getConflictingVariable();
 
+
+      /**
+       * Initializes the weights if all handed over candidates.
+       */
+      void initializeWeights(std::vector<ICPContractionCandidate<Settings>*>& candidates);
+
     private:
       void addAppliedContractionCandidate(ICPContractionCandidate<Settings>* contractionCandidate);
 

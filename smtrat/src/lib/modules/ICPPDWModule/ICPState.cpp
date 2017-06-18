@@ -179,6 +179,24 @@ namespace smtrat
   }
 
   template<class Settings>
+  void ICPState<Settings>::initializeWeights(std::vector<ICPContractionCandidate<Settings>*>& candidates){
+    if(candidates.size()==0) {
+      throw std::invalid_argument( "Candidates vector is empty!" );
+    }
+
+    //for all handed over candidates initialize the weights
+    for (int it = 0; it < (int) candidates.size(); it++) {
+      double currentGain = (candidates[it])->computeGain(getIntervalMap());
+      //compute the weighted gain
+      double currentGainWeighted = (*(candidates[it])).getWeight()+
+              Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
+      //now set this value as the init weight
+      (*(candidates[it])).setWeight(currentGainWeighted);
+    }
+  }
+
+
+  template<class Settings>
   std::experimental::optional<int> ICPState<Settings>::getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& candidates){
     if(candidates.size()==0) {
       throw std::invalid_argument( "Candidates vector is empty!" );
