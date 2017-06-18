@@ -6,6 +6,7 @@
 #pragma once
 
 #include "../../Common.h"
+#include <chrono>
 
 namespace smtrat
 {
@@ -180,6 +181,25 @@ namespace smtrat
         else /*if (hasLower)*/ {
           return OneOrTwo<ConstraintT>(lowerBound, std::experimental::optional<ConstraintT>());
         }
+      }
+
+      /**
+       * Function that returns an std::chrono::time_point representing the current time in nanoseconds? TODO
+       * Use like this: auto t1 = getTimeNow(); ... auto t2 = getTimeNow(); double duration = getDuration(t1,t2);
+       */
+      static std::chrono::high_resolution_clock::time_point getTimeNow(){
+        return std::chrono::high_resolution_clock::now();
+      }
+
+      /**
+       * Function that calculates the difference between two time_points.
+       * @param t1 first timepoint
+       * @param t2 second timepoint
+       * @return the difference between the timepoints in seconds as double
+       */
+      static double getDuration(std::chrono::high_resolution_clock::time_point t1, std::chrono::high_resolution_clock::time_point t2){
+        std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+        return time_span.count();
       }
   };
 }
