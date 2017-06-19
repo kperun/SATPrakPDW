@@ -18,10 +18,10 @@
   class CompareCandidates{
     public:
     bool operator()(ICPContractionCandidate<Settings>* cc1,ICPContractionCandidate<Settings>* cc2){
-      if(cc1->getWeight()>cc2->getWeight()){
-        return cc1;
+      if(cc1->getWeight() < cc2->getWeight()){
+        return true;
       }else{
-        return cc2;
+        return false;
       }
     }
   };
