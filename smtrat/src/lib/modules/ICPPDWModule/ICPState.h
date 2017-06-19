@@ -141,7 +141,7 @@ namespace smtrat
        *
        * @param index the index of the applied contraction candidate
        */
-      void removeAppliedContraction(int index);
+      void removeAppliedContraction(unsigned int index);
 
       /**
        * Chooses the best contraction candidate.
@@ -149,7 +149,7 @@ namespace smtrat
        * @param contractionCandidates A list of available contraction candidates
        * @return the best contraction candidate
        */
-      std::experimental::optional<int> getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& contractionCandidates);
+      std::experimental::optional<unsigned int> getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& contractionCandidates);
 
       /**
        * Determines whether we should stop contracting.
