@@ -142,7 +142,7 @@ namespace smtrat
        *
        * @param index the index of the applied contraction candidate
        */
-      void removeAppliedContraction(int index);
+      void removeAppliedContraction(unsigned int index);
 
       /**
        * Chooses the best contraction candidate.

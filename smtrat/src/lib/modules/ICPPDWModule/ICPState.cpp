@@ -112,7 +112,7 @@ namespace smtrat
   }
 
   template<class Settings>
-  void ICPState<Settings>::removeAppliedContraction(int index) {
+  void ICPState<Settings>::removeAppliedContraction(unsigned int index) {
     // first revert the interval constraints from the variable bounds
     removeIntervalConstraints(mAppliedIntervalConstraints[index], mAppliedContractionCandidates[index]->getConstraint());
 
@@ -362,7 +362,7 @@ namespace smtrat
         getStatistics()->increaseNumberOfContractions();
     }
 #endif
-    std::experimental::optional<int> ret;
+    std::experimental::optional<unsigned int> ret;
 
     if((*currentBestGain) > Settings::gainThreshold) {
       //if the gain is beyond the threshold, return it
