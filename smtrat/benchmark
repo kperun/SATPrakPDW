@@ -3,6 +3,7 @@ overallElapsed=0
 overallTested=0
 solvedProblems=0
 unsolved=0
+timeouts=0
 declare -a unsolvedNames
 wrongSolved=0
 declare -a wrongSolvedNames
@@ -15,7 +16,7 @@ for problem in $1/*.smt2;
 do
   overallTested=$(($overallTested+1))
   start=$(date +%s.%N)
-  temp="$(./build/smtrat $problem)"
+  temp="$(timeout 10 ./build/smtrat $problem)"
   finish=$(date +%s.%N)
   if [ "$temp" = "sat" ] || [ "$temp" = "unsat" ];  # solved problems
   then #add one to solved
@@ -26,8 +27,13 @@ do
       unsolvedNames[$unsolved]="$problem";
       unsolved=$(($unsolved+1))
     else
-      wrongSolvedNames[$wrongSolved]="$problem";
-      wrongSolved=$(($wrongSolved+1))
+        if [ "$temp" = "" ]; # timeouts
+        then
+          timeouts=$(($timeouts+1))
+        else
+          wrongSolvedNames[$wrongSolved]="$problem";
+          wrongSolved=$(($wrongSolved+1))
+        fi
     fi
   fi
 
@@ -38,6 +44,7 @@ echo "Overall tested problems:" $overallTested
 echo "Overall solved problems:" $solvedProblems
 echo "Overall unsolved problems:" $unsolved
 echo "Overall wrong results:" $wrongSolved
+echo "Overall timeouts:" $timeouts
 echo "Overall time elapsed since start:" $overallElapsed "ms"
 echo "Avarage time to solve a problem: " $(echo "$overallElapsed / $overallTested" |bc -l) "ms"
 
