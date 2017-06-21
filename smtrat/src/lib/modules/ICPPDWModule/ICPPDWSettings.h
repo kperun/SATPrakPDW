@@ -67,6 +67,9 @@ namespace smtrat
 
     //an epsilon is required to distinguish between candidates with weights which are regarded and which are not
     static constexpr double weightEps = 0.01;
+
+    //look at this many possible contraction candidates:
+    static constexpr int minCandidates = 5;
   };
 
   struct ICPPDWSettingsProduction  : ModuleSettings
@@ -105,5 +108,8 @@ namespace smtrat
 
     //an epsilon is required to distinguish between candidates with weights which are regarded and which are not
     static constexpr double weightEps = 0.01;
+
+    //look at this many possible contraction candidates:
+    static constexpr int minCandidates = 5;
   };
 }

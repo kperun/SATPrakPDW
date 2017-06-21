@@ -8,6 +8,7 @@
 #include "../../Common.h"
 #include "ICPContractionCandidate.h"
 #include "ICPPDWSettings.h"
+#include "ICPPDWComperators.h"
 #include <map>
 #include <math.h>
 #include <stdexcept>
@@ -149,7 +150,9 @@ namespace smtrat
        * @param contractionCandidates A list of available contraction candidates
        * @return the best contraction candidate
        */
-      std::experimental::optional<unsigned int> getBestContractionCandidate(vector<ICPContractionCandidate<Settings>*>& contractionCandidates);
+      std::experimental::optional<ICPContractionCandidate<Settings>*> getBestContractionCandidate(
+              std::priority_queue<ICPContractionCandidate<Settings>*,std::vector<ICPContractionCandidate<Settings>*>,
+             CompareCandidates<Settings>>& ccPriorityQueue);
 
       /**
        * Determines whether we should stop contracting.
@@ -181,6 +184,12 @@ namespace smtrat
        * @return the variable that has an empty interval.
        */
       carl::Variable getConflictingVariable();
+
+
+      /**
+       * Initializes the weights if all handed over candidates.
+       */
+      void initializeWeights(std::vector<ICPContractionCandidate<Settings>*>& candidates);
 
     private:
       void addAppliedContractionCandidate(ICPContractionCandidate<Settings>* contractionCandidate);

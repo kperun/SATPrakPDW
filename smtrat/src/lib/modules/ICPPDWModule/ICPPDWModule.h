@@ -15,11 +15,15 @@
 #include "ICPTree.h"
 #include "ICPContractionCandidate.h"
 #include "ICPUtil.h"
+#include "ICPPDWComperators.h"
 #include <map>
 #include <queue>
 
 namespace smtrat
 {
+
+
+
   template<typename Settings>
     class ICPPDWModule : public Module
   {
