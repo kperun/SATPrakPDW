@@ -91,7 +91,7 @@ namespace smtrat
         if (contractionCandidates.empty()) {
           return false;
         }
-        std::experimental::optional<int> bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
+        std::experimental::optional<unsigned int> bestCC = mCurrentState.getBestContractionCandidate(contractionCandidates);
 
         if(bestCC) { //if a contraction candidate has been found proceed
           OneOrTwo<IntervalT> bounds = contractionCandidates.at((*bestCC))->getContractedInterval(mCurrentState.getIntervalMap());
@@ -317,7 +317,7 @@ namespace smtrat
     
     // traverse the applied contraction candidates and generate the transitive closure
     for (int i = (int) mCurrentState.getAppliedContractionCandidates().size() - 1; i >= 0; i--) {
-      ICPContractionCandidate<Settings>* it = (mCurrentState.getAppliedContractionCandidates())[i];
+      ICPContractionCandidate<Settings>* it = (mCurrentState.getAppliedContractionCandidates())[(unsigned int) i];
       // if the variable that was contracted was involved in the unsat reason, all the variables of the contractor are too
       if (mConflictingVariables.count(it->getVariable()) > 0) {
         // the constraint itself is an involved constraint
@@ -451,7 +451,7 @@ namespace smtrat
 
     // check applied contraction candidates for involvment with the constraint that should be removed
     for (int i = 0; i < (int) mCurrentState.getAppliedContractionCandidates().size(); i++) {
-      ICPContractionCandidate<Settings>* ccIt = (mCurrentState.getAppliedContractionCandidates())[i];
+      ICPContractionCandidate<Settings>* ccIt = (mCurrentState.getAppliedContractionCandidates())[(unsigned int) i];
       if (involvedConstraints.count(ccIt->getConstraint()) > 0 ||
           ICPUtil<Settings>::occurVariablesInConstraint(involvedVars, ccIt->getConstraint())) {
         // the constraint itself is an involved constraint
@@ -460,7 +460,7 @@ namespace smtrat
         involvedConstraints.insert(ccIt->getConstraint());
 
         // now we need to revert and remove the applied contraction candidate
-        mCurrentState.removeAppliedContraction(i);
+        mCurrentState.removeAppliedContraction((unsigned int) i);
         // since we remove one of them, our iterator is decreased by one
         i--;
       }

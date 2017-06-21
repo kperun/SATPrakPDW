@@ -172,6 +172,26 @@ namespace smtrat
       mSearchTree.getCurrentState().initVariables(mOriginalVariables);
       mSearchTree.getCurrentState().initVariables(mSlackVariables);
 
+#ifdef PDW_MODULE_DEBUG_1
+      std::cout <<  "------------------------------------\nAll constraints informed.\n" << std::endl;
+      std::cout << "Original Variables: " << std::endl;
+      for (carl::Variable var : mOriginalVariables) {
+        std::cout << var << ": " << var.getType() << std::endl;
+      }
+      std::cout << std::endl;
+
+      std::cout << "Slack Variables: " << std::endl;
+      for (carl::Variable var : mSlackVariables) {
+        Poly monomial;
+        for (auto it = mMonomialSubstitutions.begin(); it != mMonomialSubstitutions.end(); it++) {
+          if (it->second == var)
+            monomial = it->first;
+        }
+        std::cout << var << "=" << monomial << ": " << var.getType() << std::endl;
+      }
+      std::cout << std::endl;
+#endif
+
       // generates all contraction candidates, i.e. for every constraint c
       // it generates a pair of (var, c) for every variable that occurs in that constraint
       createAllContractionCandidates();
@@ -189,7 +209,6 @@ namespace smtrat
       }
 
 #ifdef PDW_MODULE_DEBUG_1
-      std::cout <<  "------------------------------------\nAll constraints informed.\n" << std::endl;
       std::cout << "Monomial-slack substitutions:" << endl;
       for (const ConstraintT& c : mMonomialSlackConstraints) {
         std::cout << c << endl;
