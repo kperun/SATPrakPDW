@@ -78,13 +78,13 @@ namespace smtrat
     static constexpr auto moduleName = "ICPPDWModule<ICPPDWSettingsProduction>";
 
     // number of maximal contraction per ICP state
-    static constexpr int maxContractions = 1000;
+    static constexpr int maxContractions = 10000;
 
     // desired interval relative to the initial interval
-    static constexpr double targetDiameter = 1.0;
+    static constexpr double targetDiameter = 0.01;
 
     // maximal number of splits allowed
-    static constexpr int maxSplitNumber = 100;
+    static constexpr int maxSplitNumber = 1000;
 
     //we define a big M in order to be able to compute gain in case of inf intervals
     // it is defined as twice the max interval, since we have to consider an interval [-inf,0] to be better than [-1000,0]
@@ -100,7 +100,7 @@ namespace smtrat
     static constexpr double epsilon = 0.001;
 
     //for a heuristic in the getBestContractionCandidate we need a lower and an upper bound
-    static constexpr double lowerDelta = 0.01;//set the lower bound to a smaller value to make absolute reduction more relevant
+    static constexpr double lowerDelta = 0.0;//set the lower bound to a smaller value to make absolute reduction more relevant
     static constexpr double upperDelta = 0.03;//set the upper higher in order to make the difference in gain more relevant
 
     //alpha as used in reinforced learning, see chapter 8 slide 17
