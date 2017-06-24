@@ -31,7 +31,8 @@ namespace smtrat
       carl::Relation mRelation;
 
       //the current weight as used in the reinforced learning
-      double mWeight = 0;
+      // we initialize it with the value -1 in order to distinguish initialized and not initialized weights
+      double mWeight = -1;
 
     public:
       ICPContractionCandidate(const carl::Variable& var, const ConstraintT& constraint);

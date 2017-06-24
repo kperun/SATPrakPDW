@@ -70,6 +70,10 @@ namespace smtrat
 
     //look at this many possible contraction candidates:
     static constexpr int minCandidates = 5;
+
+    //this factor states how weights are updated after checkCore is called ones more
+    static constexpr double updateFactor = 1.1;
+
   };
 
   struct ICPPDWSettingsProduction  : ModuleSettings
@@ -111,5 +115,8 @@ namespace smtrat
 
     //look at this many possible contraction candidates:
     static constexpr int minCandidates = 5;
+
+    //this factor states how weights are updated after checkCore is called ones more
+    static constexpr double updateFactor = 1.1;
   };
 }

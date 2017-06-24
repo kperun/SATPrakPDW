@@ -186,12 +186,17 @@ namespace smtrat
 
     //for all handed over candidates initialize the weights
     for (int it = 0; it < (int) candidates.size(); it++) {
-      double currentGain = (candidates[it])->computeGain(getIntervalMap());
-      //compute the weighted gain
-      double currentGainWeighted = (*(candidates[it])).getWeight()+
-              Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
-      //now set this value as the init weight
-      (*(candidates[it])).setWeight(currentGainWeighted);
+      // this wight has yet not been initialized
+      if((*candidates[it]).getWeight()==-1){
+        double currentGain = (candidates[it])->computeGain(getIntervalMap());
+        //compute the weighted gain
+        double currentGainWeighted = (*(candidates[it])).getWeight()+
+                Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
+        //now set this value as the init weight
+        (*(candidates[it])).setWeight(currentGainWeighted);
+      }else{// otherwise it is already initialized, thus scale them a little
+        (*(candidates[it])).setWeight((*(candidates[it])).getWeight()*Settings::updateFactor);
+      }
     }
   }
 
