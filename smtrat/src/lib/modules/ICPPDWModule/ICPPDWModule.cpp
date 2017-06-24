@@ -312,6 +312,8 @@ class CompareTrees{
     bool operator()(ICPTree<Settings>* node1, ICPTree<Settings>* node2) {
     map<carl::Variable,double> sol(node1->getCurrentState().guessSolution());
     int numThis = 0;
+    int numActiveConstraints = node1->getCorrespondingModule()->getActiveOriginalConstraints().size();
+
     Model model;
     for(auto& clause : sol) {
       Rational val = carl::rationalize<Rational>(clause.second);
@@ -338,7 +340,10 @@ class CompareTrees{
         numThat++;
       }
     }
-    return numThis<numThat;
+    double weightedThis = abs(numThis - Settings::compAlpha*numActiveConstraints/2.0);
+    double weightedThat = abs(numThat - Settings::compAlpha*numActiveConstraints/2.0);
+    //return numThis<numThat;
+    return weightedThis<weightedThat;
     }
 };
 
@@ -642,6 +647,11 @@ class CompareTrees{
         eraseSubformulaFromPassedFormula(it, true);
       }
       return tempAnswer;
+    }
+
+    template<class Settings>
+    std::set<ConstraintT> ICPPDWModule<Settings>::getActiveOriginalConstraints(){
+      return mActiveOriginalConstraints;
     }
 
 

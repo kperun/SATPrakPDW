@@ -74,6 +74,9 @@ namespace smtrat
     //this factor states how weights are updated after checkCore is called ones more
     static constexpr double updateFactor = 1.1;
 
+    //this factor represents a scaling factor as used whenever trees are compared
+    static constexpr double compAlpha = 0.5;
+
   };
 
   struct ICPPDWSettingsProduction  : ModuleSettings
@@ -118,5 +121,9 @@ namespace smtrat
 
     //this factor states how weights are updated after checkCore is called ones more
     static constexpr double updateFactor = 1.1;
+
+    //this factor represents a scaling factor as used whenever trees are compared
+    static constexpr double compAlpha = 0.5;
+
   };
 }

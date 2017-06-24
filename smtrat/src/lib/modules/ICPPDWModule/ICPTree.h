@@ -35,7 +35,7 @@ namespace smtrat
       unique_ptr<ICPTree<Settings>> mLeftChild;
       unique_ptr<ICPTree<Settings>> mRightChild;
 
-      // dimension in which the split occurred, if a split occured
+      // dimension in which the split occurred, if a split occurred
       std::experimental::optional<carl::Variable> mSplitDimension;
 
       // In case of UNSAT, this set will contain the reason for unsatisfiability.
@@ -59,8 +59,8 @@ namespace smtrat
 
       /**
        * Contracts the current ICP state until either:
-       * 1) A split occurrs.
-       *    In this case, two new child trees which correspond to the splitted search space
+       * 1) A split occurs.
+       *    In this case, two new child trees which correspond to the split search space
        *    will be added to mChildTrees, and true will be returned.
        * 2) The bounds are UNSAT.
        *    In this case, the current ICP state will contain a set of conflicting constraints,

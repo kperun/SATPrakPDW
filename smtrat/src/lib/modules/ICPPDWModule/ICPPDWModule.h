@@ -32,7 +32,7 @@ namespace smtrat
       ICPPDWStatistics mStatistics;
 #endif
       // Members.
-      //if a model existis, it should be stored here
+      //if a model exists, it should be stored here
       std::experimental::optional<Model> mFoundModel;
 
       // a map from constraints to formulas as required for the mInfeasibleSubset
@@ -203,6 +203,9 @@ namespace smtrat
       std::experimental::optional<Model> getSolution(ICPTree<Settings>* currentNode);
 
       void setModel(Model model);
+
+
+      std::set<ConstraintT> getActiveOriginalConstraints();
 
 #ifdef SMTRAT_DEVOPTION_Statistics
       ICPPDWStatistics* getStatistics(){return &mStatistics;}
