@@ -144,7 +144,7 @@ namespace smtrat
     bool ICPPDWModule<Settings>::informCore( const FormulaT& _constraint )
     {
       // we only consider actual constraints and ignore "!="-constraints (they will simply be checked in the end)
-      if (_constraint.getType() == carl::FormulaType::CONSTRAINT && _constraint.constraint().relation() != carl::Relation::NEQ) {
+      if (_constraint.getType() == carl::FormulaType::CONSTRAINT) {
         const ConstraintT& constraint = _constraint.constraint();
 
         //first add it to the map between constraints and formulas
@@ -154,13 +154,14 @@ namespace smtrat
         for (const auto& var : constraint.variables()) {
           mOriginalVariables.insert(var);
         }
-
-        // linearize the constraints
-        linearizeConstraint(constraint);
+        if (_constraint.constraint().relation() != carl::Relation::NEQ) {
+          // linearize the constraints
+          linearizeConstraint(constraint);
 
 #ifdef PDW_MODULE_DEBUG_1
-        std::cout << "Linearized constraint for " << constraint << ":\n" << mLinearizations[constraint] << std::endl;
+          std::cout << "Linearized constraint for " << constraint << ":\n" << mLinearizations[constraint] << std::endl;
 #endif
+        }
       }
       return true; // This should be adapted according to your implementation.
     }

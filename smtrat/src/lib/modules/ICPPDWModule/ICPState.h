@@ -51,6 +51,11 @@ namespace smtrat
       vb::VariableBounds<ConstraintT> mBounds;
 
       /**
+       * Stores the initial bounds of each variable.
+       */
+      std::unordered_map<carl::Variable, OneOrTwo<ConstraintT>> mInitialBounds;
+
+      /**
        * The contraction candidates that have been applied.
        * They will be stored in the order that they have been applied.
        */
@@ -136,6 +141,11 @@ namespace smtrat
        * Removes a simple bound to the variable bounds.
        */
       void removeSimpleBound(const ConstraintT& simpleBound);
+
+      /**
+       * Resets the initial bound of a variable to the given interval.
+       */
+      void resetInitialBound(carl::Variable var, IntervalT interval);
 
       /**
        * Reverts and removes an applied contraction candidate from this ICP State.

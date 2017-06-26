@@ -13,6 +13,7 @@ namespace smtrat
     mOriginalVariables(originalVariables),
     mCorrespondingTree(correspondingTree),
     mBounds(),
+    mInitialBounds(),
     mAppliedContractionCandidates(),
     mAppliedIntervalConstraints()
   {
@@ -23,6 +24,7 @@ namespace smtrat
     mOriginalVariables(originalVariables),
     mCorrespondingTree(correspondingTree),
     mBounds(),
+    mInitialBounds(),
     mAppliedContractionCandidates(),
     mAppliedIntervalConstraints()
   {
@@ -34,7 +36,8 @@ namespace smtrat
       // if the interval is infinite, there is no point in setting it
       // (setInterval actually expects a bounded interval)
       if (!interval.isInfinite()) {
-        setInterval(var, interval, ConstraintT());
+        OneOrTwo<ConstraintT> intervalConstraints = setInterval(var, interval, ConstraintT());
+        mInitialBounds[var] = intervalConstraints;
       }
       else {
         // we also need to make sure the copied variable bounds object knows about unbounded variables
@@ -109,6 +112,19 @@ namespace smtrat
   template<class Settings>
   void ICPState<Settings>::removeSimpleBound(const ConstraintT& simpleBound) {
     mBounds.removeBound(simpleBound, ConstraintT());
+  }
+
+  template<class Settings>
+  void ICPState<Settings>::resetInitialBound(carl::Variable var, IntervalT interval) {
+    auto it = mInitialBounds.find(var);
+    if (it != mInitialBounds.end()) {
+      removeIntervalConstraints(it->second, ConstraintT());
+      mInitialBounds.erase(it);
+    }
+
+    if (!interval.isInfinite()) {
+      mInitialBounds[var] = setInterval(var, interval, ConstraintT());
+    }
   }
 
   template<class Settings>

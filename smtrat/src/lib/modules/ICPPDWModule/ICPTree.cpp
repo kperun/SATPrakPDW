@@ -450,6 +450,14 @@ namespace smtrat
       mCurrentState.removeSimpleBound(_constraint);
     }
 
+    // reset the initial bounds of involved variables
+    // if we don't do this, then previous results from the parent tree will not be reset
+    if (mParentTree) {
+      for (carl::Variable var : involvedVars) {
+        mCurrentState.resetInitialBound(var, (*mParentTree)->getCurrentState().getInterval(var));
+      }
+    }
+
     // check applied contraction candidates for involvment with the constraint that should be removed
     for (int i = 0; i < (int) mCurrentState.getAppliedContractionCandidates().size(); i++) {
       ICPContractionCandidate<Settings>* ccIt = (mCurrentState.getAppliedContractionCandidates())[(unsigned int) i];
