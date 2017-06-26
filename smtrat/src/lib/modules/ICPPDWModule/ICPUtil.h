@@ -53,7 +53,7 @@ namespace smtrat
        * @param interval the interval that should be splitted
        * @return a pair of two new non-empty intervals which 
        */
-      static std::pair<IntervalT, IntervalT> splitInterval(IntervalT interval) {
+      static std::pair<IntervalT, IntervalT> splitInterval(IntervalT interval, carl::Variable variable) {
         double midpoint = 0.0;
         if (interval.isHalfBounded()) {
           if (interval.lowerBoundType() == carl::BoundType::INFTY) {
@@ -76,6 +76,14 @@ namespace smtrat
 
         IntervalT firstNewInterval(interval.lower(), interval.lowerBoundType(), midpoint, carl::BoundType::WEAK);
         IntervalT secondNewInterval(midpoint, carl::BoundType::STRICT, interval.upper(), interval.upperBoundType());
+
+
+        if (variable.getType() == carl::VariableType::VT_INT) {
+          firstNewInterval = firstNewInterval.integralPart();
+          secondNewInterval = secondNewInterval.integralPart();
+        }
+
+
         return std::make_pair(firstNewInterval, secondNewInterval);
       }
 

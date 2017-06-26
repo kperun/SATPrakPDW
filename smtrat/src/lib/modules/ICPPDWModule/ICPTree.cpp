@@ -158,7 +158,7 @@ namespace smtrat
                 carl::Variable splittingVar = mCurrentState.getBestSplitVariable();
                 IntervalT oldInterval = mCurrentState.getInterval(splittingVar);
 
-                std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval);
+                std::pair<IntervalT, IntervalT> newIntervals = ICPUtil<Settings>::splitInterval(oldInterval, splittingVar);
 #ifdef PDW_MODULE_DEBUG_1
                 std::cout << "Split on " << splittingVar << " with new intervals: "
                   << newIntervals.first << " and " << newIntervals.second << "\n" << std::endl;

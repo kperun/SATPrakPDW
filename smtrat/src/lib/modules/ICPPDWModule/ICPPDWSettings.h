@@ -75,7 +75,7 @@ namespace smtrat
     static constexpr double updateFactor = 1.1;
 
     //this factor represents a scaling factor as used whenever trees are compared
-    static constexpr double compAlpha = 0.5;
+    static constexpr double compAlpha = 0;
 
   };
 
@@ -123,7 +123,7 @@ namespace smtrat
     static constexpr double updateFactor = 1.1;
 
     //this factor represents a scaling factor as used whenever trees are compared
-    static constexpr double compAlpha = 0.5;
+    static constexpr double compAlpha = 0;
 
   };
 }
