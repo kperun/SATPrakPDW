@@ -23,5 +23,6 @@ smtrat/src/lib/modules/VSModule/config.h
 smtrat/src/lib/strategies/config.h
 smtrat/src/lib/utilities/CMakeOptions.cpp
 smtrat/src/lib/utilities/CompileInfo.cpp
+smtrat/stats.xml
 smtrat/.travis/
 smtrat/.travis.yml
