@@ -145,6 +145,12 @@ namespace smtrat
 
       static bool compareTrees(ICPTree<Settings>* node1, ICPTree<Settings>* node2);
 
+      /**
+       * Resets the tree to a state where no unsat has been determined yet,
+       * i.e. conflicting variables and constraints will be cleared and mUnsat will be set to false.
+       */
+      void clearUnsat();
+
 
     private:
       void removeConstraint(const ConstraintT& _constraint, std::set<carl::Variable> involvedVars, std::set<ConstraintT> involvedConstraints);
@@ -154,12 +160,6 @@ namespace smtrat
        * I.e., it will generate conflict reasons, set appropriate member variables etc.
        */
       void handleUnsat();
-
-      /**
-       * Resets the tree to a state where no unsat has been determined yet,
-       * i.e. conflicting variables and constraints will be cleared and mUnsat will be set to false.
-       */
-      void clearUnsat();
 
       /**
        * Splits the search tree.

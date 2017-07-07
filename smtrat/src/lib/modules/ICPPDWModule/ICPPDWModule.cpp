@@ -371,6 +371,7 @@ class CompareTrees{
       // clean up first
       // reset the found model for the next iteration
       mFoundModel = std::experimental::nullopt;
+      mSearchTree.clearUnsat();
 
       // we need to search through all leaf nodes of the search tree, store them in a priority queue
       std::priority_queue<ICPTree<Settings>*,std::vector<ICPTree<Settings>*>,CompareTrees<Settings>> searchPriorityQueue;
