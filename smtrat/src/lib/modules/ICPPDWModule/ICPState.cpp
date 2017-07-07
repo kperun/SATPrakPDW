@@ -419,7 +419,7 @@ namespace smtrat
           }
         } else if(bound.second.upperBoundType() == carl::BoundType::INFTY) { //Has lower bound
           if(bound.second.lowerBoundType() == carl::BoundType::STRICT) { //lower bound is strict
-            mid = bound.second.lower() - epsilon; //Subtract some small epsilon in this case
+            mid = bound.second.lower() + epsilon; //Subtract some small epsilon in this case
           } else {
             mid = bound.second.lower();
           }
