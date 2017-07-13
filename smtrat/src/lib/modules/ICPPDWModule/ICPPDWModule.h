@@ -74,6 +74,7 @@ namespace smtrat
       // a map from slack variables to the constraint of their substitution
       std::unordered_map<Poly, carl::Variable> mMonomialSubstitutions;
 
+      ICPPDWDynamicSettings<Settings> mDynamicSettings;
     private:
       /**
        * Returns a slack variable representing the given monomial.
@@ -204,6 +205,7 @@ namespace smtrat
 
       void setModel(Model model);
 
+      ICPPDWDynamicSettings<Settings>& getSettings();
 
       std::set<ConstraintT> getActiveOriginalConstraints();
 

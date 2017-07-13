@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#usage: The argument is the problem which is executed for N times (second arg)
+#for problem in ../examples/*.smt2;
+for i in $(seq 1 $2);
+do
+  ./build/smtrat $1 >/dev/null
+done
+

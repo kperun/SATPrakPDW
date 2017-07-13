@@ -9,6 +9,7 @@
 #include "ICPContractionCandidate.h"
 #include "ICPPDWSettings.h"
 #include "ICPPDWComperators.h"
+#include "ICPPDWDynamicSettings.h"
 #include <map>
 #include <math.h>
 #include <stdexcept>
@@ -162,7 +163,7 @@ namespace smtrat
        */
       std::experimental::optional<ICPContractionCandidate<Settings>*> getBestContractionCandidate(
               std::priority_queue<ICPContractionCandidate<Settings>*,std::vector<ICPContractionCandidate<Settings>*>,
-             CompareCandidates<Settings>>& ccPriorityQueue);
+             CompareCandidates<Settings>>& ccPriorityQueue,ICPPDWDynamicSettings<Settings>& settings);
 
       /**
        * Determines whether we should stop contracting.

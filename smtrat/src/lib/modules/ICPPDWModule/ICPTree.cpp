@@ -1,6 +1,7 @@
 #include "ICPTree.h"
 #include "ICPUtil.h"
-#include "ICPPDWModule.h"
+#include "ICPPDWModule.cpp"
+
 
 namespace smtrat
 {
@@ -92,14 +93,15 @@ namespace smtrat
         if (ccPriorityQueue.empty()) {
           return false;
         }
-        std::experimental::optional<ICPContractionCandidate<Settings>*> bestCC = mCurrentState.getBestContractionCandidate(ccPriorityQueue);
+        //ICPPDWDynamicSettings<Settings> curSettings = module->getSettings();
+        std::experimental::optional<ICPContractionCandidate<Settings>*> bestCC = mCurrentState.getBestContractionCandidate(ccPriorityQueue,module->getSettings());
 
         if(bestCC) { //if a contraction candidate has been found proceed
           OneOrTwo<IntervalT> bounds = (*bestCC)->getContractedInterval(mCurrentState.getIntervalMap());
           if(bounds.second) {
             // We contracted to two intervals, so we need to split
             // but only if we haven't reached the maximal number of splits yet
-            if(getNumberOfSplits() > Settings::maxSplitNumber) {
+            if(getNumberOfSplits() > getCorrespondingModule()->getSettings().getMaxSplitNumber()) {
 #ifdef PDW_MODULE_DEBUG_1
               std::cout << "Termination reached by maximal number of splits!" << std::endl;
 #endif
@@ -147,7 +149,7 @@ namespace smtrat
 #endif
 
               // check if maximum number of splits has been reached and terminate
-              if(getNumberOfSplits() > Settings::maxSplitNumber) {
+              if(getNumberOfSplits() > getCorrespondingModule()->getSettings().getMaxSplitNumber()) {
 #ifdef PDW_MODULE_DEBUG_1
                 std::cout << "Termination reached by maximal number of splits!" << std::endl;
 #endif

@@ -10,6 +10,7 @@
 #include "ICPContractionCandidate.h"
 #include "ICPState.h"
 #include "ICPUtil.h"
+#include "ICPPDWDynamicSettings.cpp"
 
 namespace smtrat
 {
@@ -31,7 +32,8 @@ namespace smtrat
       mDeLinearizations(),
       mSlackVariables(),
       mMonomialSlackConstraints(),
-      mMonomialSubstitutions()
+      mMonomialSubstitutions(),
+      mDynamicSettings()
       {
       }
 
@@ -655,6 +657,11 @@ class CompareTrees{
       return mActiveOriginalConstraints;
     }
 
+
+    template<class Settings>
+    ICPPDWDynamicSettings<Settings>& ICPPDWModule<Settings>::getSettings(){
+      return mDynamicSettings;
+    }
 
 }
 

@@ -4,6 +4,7 @@
 #include "ICPPDWModule.h"
 #include "ICPUtil.h"
 #include "../../logging.h"
+#include "ICPPDWDynamicSettings.cpp"
 
 namespace smtrat
 {
@@ -162,7 +163,7 @@ namespace smtrat
 
   template<class Settings>
   bool ICPState<Settings>::isTerminationConditionReached() {
-    if(mAppliedContractionCandidates.size() > Settings::maxContractions) {
+    if(mAppliedContractionCandidates.size() > mCorrespondingTree->getCorrespondingModule()->getSettings().getMaxContractions()) {//maxContractions
 #ifdef PDW_MODULE_DEBUG_1
       std::cout << "Termination reached by max iterations!" << std::endl;
 #endif
@@ -173,7 +174,7 @@ namespace smtrat
     //first check if all intervals are inside the desired one
     bool isTargetDiameterReached = true;
     for (auto key : (*mOriginalVariables) ) {
-      if(getInterval(key).isUnbounded() || getInterval(key).diameter()>Settings::targetDiameter) {
+      if(getInterval(key).isUnbounded() || getInterval(key).diameter()>mCorrespondingTree->getCorrespondingModule()->getSettings().getTargetDiameter()) {
         isTargetDiameterReached = false;
         break;
       }
@@ -207,11 +208,11 @@ namespace smtrat
         double currentGain = (candidates[it])->computeGain(getIntervalMap());
         //compute the weighted gain
         double currentGainWeighted = (*(candidates[it])).getWeight()+
-                Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
+                mCorrespondingTree->getCorrespondingModule()->getSettings().getAlpha()*(currentGain-(*(candidates[it])).getWeight());
         //now set this value as the init weight
         (*(candidates[it])).setWeight(currentGainWeighted);
       }else{// otherwise it is already initialized, thus scale them a little
-        (*(candidates[it])).setWeight((*(candidates[it])).getWeight()*Settings::updateFactor);
+        (*(candidates[it])).setWeight((*(candidates[it])).getWeight()*mCorrespondingTree->getCorrespondingModule()->getSettings().getUpdateFactor());
       }
     }
   }
@@ -220,7 +221,7 @@ namespace smtrat
   template<class Settings>
   std::experimental::optional<ICPContractionCandidate<Settings>*> ICPState<Settings>::getBestContractionCandidate(
     std::priority_queue<ICPContractionCandidate<Settings>*,std::vector<ICPContractionCandidate<Settings>*>,
-             CompareCandidates<Settings>>& ccPriorityQueue){
+             CompareCandidates<Settings>>& ccPriorityQueue,ICPPDWDynamicSettings<Settings>& settings){
     //If the list is empty something must have gone wrong, since it was not empty in ICPTree
     if(ccPriorityQueue.empty()) {
       throw std::invalid_argument( "Candidates priority queue is empty!" );
@@ -240,7 +241,7 @@ namespace smtrat
 
     //first compute the new weighted gain according to W_new = W_old + alpha*(gain - W_old)
     double currentBestGainWeighted = (*currentBest).getWeight()+
-              Settings::alpha * ( (*currentBestGain) - currentBest->getWeight() );
+              mCorrespondingTree->getCorrespondingModule()->getSettings().getAlpha() * ( (*currentBestGain) - currentBest->getWeight() );
     //update the weight
     (*currentBest).setWeight(currentBestGainWeighted);
 
@@ -249,7 +250,7 @@ namespace smtrat
 
     //Look at the first minCandidates -1 and choose the best one
     //We already looked at the first one
-    for(int i = 1; i < Settings::minCandidates || currentBestGainWeighted <= Settings::weightEps; i++){
+    for(int i = 1; i < mCorrespondingTree->getCorrespondingModule()->getSettings().getMinCandidates() || currentBestGainWeighted <= settings.getWeightEps(); i++){
       //First retrieve and store the element
       //But check if the queue is already empty
       if(ccPriorityQueue.empty()){
@@ -263,12 +264,12 @@ namespace smtrat
       double currentGain = currentElement->computeGain(getIntervalMap());
       //compute the weighted gain
       double currentGainWeighted = (*(currentElement)).getWeight()+
-              Settings::alpha*(currentGain-(*(currentElement)).getWeight());
+              mCorrespondingTree->getCorrespondingModule()->getSettings().getAlpha()*(currentGain-(*(currentElement)).getWeight());
       //update the weighted gain
       (*(currentElement)).setWeight(currentGainWeighted);
 
       //do not consider candidates with weight < weight_eps
-      if(currentBestGainWeighted<Settings::weightEps&&currentGainWeighted>Settings::weightEps){
+      if(currentBestGainWeighted<settings.getWeightEps()&&currentGainWeighted>settings.getWeightEps()){
         //if the previous candidate have not at lease epsilon weight, we disregard it
         currentBestGainWeighted = currentGainWeighted;
         currentBestGain = currentGain;
@@ -278,7 +279,7 @@ namespace smtrat
         continue;
       }
       //if the current candidate is below weightEps, we disregard it
-      if(currentGainWeighted<Settings::weightEps){
+      if(currentGainWeighted<settings.getWeightEps()){
         continue;
       }
       //now actual comparison can take place
@@ -286,7 +287,6 @@ namespace smtrat
       if(currentGainWeighted-currentBestGainWeighted>Settings::upperDelta) {//the delta states that between the old and the new gain
         //the difference has to be at least upperDelta, by using this behavior we are able to enforce that only candidates which
         //achieve a certain margin of gain are regarded as the new optimal
-        //now set the new best candidate as current
         currentBestGainWeighted = currentGainWeighted;
         currentBestGain = currentGain;
         currentBest = currentElement;
@@ -321,81 +321,12 @@ namespace smtrat
     //Create the return optional
     std::experimental::optional<ICPContractionCandidate<Settings>*> ret;
     //Only return the object if the gain is good enough
-    if(currentBestGainWeighted>Settings::weightEps){
+    if(currentBestGainWeighted>settings.getWeightEps()){
       ret = currentBest;
       return ret;
     }else{
       return ret;
     }
-
-/*
-    for (int it = 1; it < (int) candidates.size(); it++) {
-      double currentGain = (candidates[it])->computeGain(getIntervalMap());
-      //compute the weighted gain
-      double currentGainWeighted = (*(candidates[it])).getWeight()+
-              Settings::alpha*(currentGain-(*(candidates[it])).getWeight());
-      //update the weighted gain
-      (*(candidates[it])).setWeight(currentGainWeighted);
-
-      //do not consider candidates with weight < weight_eps
-      if(currentBestGainWeighted<Settings::weightEps&&currentGainWeighted>Settings::weightEps){
-        //if the previous candidate have not at lease epsilon weight, we disregard it
-        currentBestGainWeighted = currentGainWeighted;
-        currentBestGain = currentGain;
-        currentBest = it;
-        //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
-        currentBestAbsoluteReduction = currentGain*(getInterval((*(candidates[it])).getVariable()).diameter());
-        continue;
-      }
-      //if the current candidate is below weightEps, we disregard it
-      if(currentGainWeighted<Settings::weightEps){
-        continue;
-      }
-      //now actual comparison can take place
-      if(currentGainWeighted-currentBestGainWeighted>Settings::upperDelta) {//the delta states that between the old and the new gain
-        //the difference has to be at least upperDelta, by using this behavior we are able to enforce that only candidates which
-        //achieve a certain margin of gain are regarded as the new optimal
-        //now set the new best candidate as current
-        currentBestGainWeighted = currentGainWeighted;
-        currentBestGain = currentGain;
-        currentBest = it;
-        //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
-        currentBestAbsoluteReduction = currentGain*(getInterval((*(candidates[it])).getVariable()).diameter());
-
-      }else if(currentGainWeighted-currentBestGainWeighted>Settings::lowerDelta){
-        //if the gain is not high enough but still almost the same, it would be interesting to consider the absolute interval reduction
-        double currentNewAbsoluteReduction = currentGain*(getInterval((*(candidates[it])).getVariable()).diameter());
-        //now check if the
-        if(currentBestAbsoluteReduction<currentNewAbsoluteReduction){
-           currentBestGainWeighted = currentGainWeighted;
-           currentBestGain = currentGain;
-           currentBest = it;
-           //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
-           currentBestAbsoluteReduction = currentGain*(getInterval((*(candidates[it])).getVariable()).diameter());
-        }
-      }
-    }
-#ifdef SMTRAT_DEVOPTION_Statistics
-    if(currentBestGain){
-      mCorrespondingTree->getCorrespondingModule()->
-        getStatistics()->addContractionGain((*currentBestGain));
-       mCorrespondingTree->getCorrespondingModule()->
-        getStatistics()->increaseNumberOfContractions();
-    }
-#endif
-    std::experimental::optional<unsigned int> ret;
-
-    if((*currentBestGain) > Settings::gainThreshold) {
-      //if the gain is beyond the threshold, return it
-      ret = currentBest;
-      return ret;
-    }
-    else{
-      //otherwise return an optional.empty()
-      return ret;
-    }
-*/
-
   }
 
   template<class Settings>

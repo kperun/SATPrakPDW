@@ -101,7 +101,7 @@ namespace smtrat
     static constexpr double bigM = 10 * maxOriginalVarBound * maxOriginalVarBound * maxOriginalVarBound;
 
     //gain threshold. Best gain in contraction lower than this will result in a manual split.
-    static constexpr double gainThreshold = 0.01;
+    static constexpr double gainThreshold = 0.5;
 
     //Small value
     static constexpr double epsilon = 0.001;
@@ -114,10 +114,10 @@ namespace smtrat
     static constexpr double alpha = 0.9;
 
     //an epsilon is required to distinguish between candidates with weights which are regarded and which are not
-    static constexpr double weightEps = 0.01;
+    static constexpr double weightEps = 0.5;
 
     //look at this many possible contraction candidates:
-    static constexpr int minCandidates = 5;
+    static constexpr int minCandidates = 15;
 
     //this factor states how weights are updated after checkCore is called ones more
     static constexpr double updateFactor = 1.1;
