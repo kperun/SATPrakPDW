@@ -244,6 +244,15 @@ namespace smtrat
     //update the weight
     (*currentBest).setWeight(currentBestGainWeighted);
 
+    //Always contract to empty interval
+    if(currentBestGain && *currentBestGain == 1){
+      //Reinsert the popped candidate, else we loose it
+      ccPriorityQueue.push(currentBest);
+      std::experimental::optional<ICPContractionCandidate<Settings>*> ret;
+      ret = currentBest;
+      return ret;
+    }
+
     //Store the element in the poppedCandidates vector
     poppedCandidates.push_back(currentBest);
 
@@ -266,6 +275,17 @@ namespace smtrat
               Settings::alpha*(currentGain-(*(currentElement)).getWeight());
       //update the weighted gain
       (*(currentElement)).setWeight(currentGainWeighted);
+
+      //Always contract to empty interval
+      if(currentBestGain && *currentBestGain == 1){
+        //First we have to reinsert the popped elements
+        for(int i = 0; i < poppedCandidates.size(); i ++){
+          ccPriorityQueue.push(poppedCandidates[i]);
+        }
+        std::experimental::optional<ICPContractionCandidate<Settings>*> ret;
+        ret = currentBest;
+        return ret;
+      }
 
       //do not consider candidates with weight < weight_eps
       if(currentBestGainWeighted<Settings::weightEps&&currentGainWeighted>Settings::weightEps){
