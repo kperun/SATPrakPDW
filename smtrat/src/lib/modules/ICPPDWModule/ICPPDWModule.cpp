@@ -369,7 +369,26 @@ class CompareTrees{
       std::cout << std::endl;
 #endif
       // clean up first
-      // reset the found model for the next iteration
+      // Check if an old model exists and if it satisfies the current constraints
+      if(mFoundModel){
+        auto model = *mFoundModel;
+        bool isSat = true;
+        for( const auto& rf : rReceivedFormula()) {
+          unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+
+          assert(isSatisfied != 2);
+          if(isSatisfied != 1) {
+            isSat = false;
+          }
+        }
+        if(isSat){
+#ifdef PDW_MODULE_DEBUG_1
+          std::cout << "No need to check again, same model works" << endl;
+#endif
+          return Answer::SAT;
+        }
+      }
+      // If the model does not exist or does not satisfy the current constraints we reset it.
       mFoundModel = std::experimental::nullopt;
       mSearchTree.clearUnsat();
 
