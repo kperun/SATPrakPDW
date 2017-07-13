@@ -311,40 +311,82 @@ template<typename Settings>
 class CompareTrees{
   public:
     bool operator()(ICPTree<Settings>* node1, ICPTree<Settings>* node2) {
-    map<carl::Variable,double> sol(node1->getCurrentState().guessSolution());
-    int numThis = 0;
-    int numActiveConstraints = node1->getCorrespondingModule()->getActiveOriginalConstraints().size();
+      map<carl::Variable,double> sol(node1->getCurrentState().guessSolution());
+      int numThis = 0;
+      int numActiveConstraints = node1->getCorrespondingModule()->getActiveOriginalConstraints().size();
 
-    Model model;
-    for(auto& clause : sol) {
-      Rational val = carl::rationalize<Rational>(clause.second);
-      model.emplace(clause.first, val);
-    }
-    for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
-      unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
-      assert(isSatisfied != 2);
-      if(isSatisfied == 1) {
-        numThis++;
+      Model model;
+      for(auto& clause : sol) {
+        Rational val = carl::rationalize<Rational>(clause.second);
+        model.emplace(clause.first, val);
       }
-    }
-    map<carl::Variable,double> sol2(node2->getCurrentState().guessSolution());
-    int numThat = 0;
-    Model model2;
-    for(auto& clause : sol2) {
-      Rational val = carl::rationalize<Rational>(clause.second);
-      model2.emplace(clause.first, val);
-    }
-    for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
-      unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model2);
-      assert(isSatisfied != 2);
-      if(isSatisfied == 1) {
-        numThat++;
+      for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
+        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model);
+        assert(isSatisfied != 2);
+        if(isSatisfied == 1) {
+          numThis++;
+        }
       }
-    }
-    double weightedThis = abs(numThis - Settings::compAlpha*numActiveConstraints/2.0);
-    double weightedThat = abs(numThat - Settings::compAlpha*numActiveConstraints/2.0);
-    //return numThis<numThat;
-    return weightedThis<weightedThat;
+      map<carl::Variable,double> sol2(node2->getCurrentState().guessSolution());
+      int numThat = 0;
+      Model model2;
+      for(auto& clause : sol2) {
+        Rational val = carl::rationalize<Rational>(clause.second);
+        model2.emplace(clause.first, val);
+      }
+      for( const auto& rf : node1->getCorrespondingModule()->rReceivedFormula() ) {
+        unsigned isSatisfied = carl::model::satisfiedBy(rf.formula().constraint(), model2);
+        assert(isSatisfied != 2);
+        if(isSatisfied == 1) {
+          numThat++;
+        }
+      }
+      double weightedThis = abs(numThis - Settings::compAlpha*numActiveConstraints/2.0);
+      double weightedThat = abs(numThat - Settings::compAlpha*numActiveConstraints/2.0);
+      //Sort by number of constraints first and diameters second
+      if(weightedThis - weightedThat != 0){
+        //return numThis<numThat;
+        return weightedThis<weightedThat;
+      }else{
+        //Iterate over all variable intervals, calculate diameters:
+        //If infty up: bigM - lower
+        //If infty low: bigM + upper
+        //If infty: 2bigM
+        double diameter1 = 0;
+        for (const auto& mapEntry : node1->getCurrentState().getIntervalMap()) {
+          carl::Variable var = mapEntry.first;
+          IntervalT interval = mapEntry.second;
+          if(interval.isInfinite()){
+            diameter1 += 2*Settings::bigM;
+          }else if(interval.lowerBoundType() == carl::BoundType::INFTY){
+            diameter1 += Settings::bigM + interval.lower();
+          }else if(interval.upperBoundType() == carl::BoundType::INFTY){
+            diameter1 += Settings::bigM - interval.upper();
+          }else{
+            diameter1 += interval.diameter();
+          }
+        }
+        std::cout << diameter1;
+
+        double diameter2 = 0;
+        for (const auto& mapEntry : node2->getCurrentState().getIntervalMap()) {
+          carl::Variable var = mapEntry.first;
+          IntervalT interval = mapEntry.second;
+          if(interval.isInfinite()){
+            diameter2 += 2*Settings::bigM;
+          }else if(interval.lowerBoundType() == carl::BoundType::INFTY){
+            diameter2 += Settings::bigM + interval.lower();
+          }else if(interval.upperBoundType() == carl::BoundType::INFTY){
+            diameter2 += Settings::bigM - interval.upper();
+          }else{
+            diameter2 += interval.diameter();
+          }
+        }
+
+        //Return diameter1 > diameter2, since smaller diameter should be first in the queue
+        return diameter1 > diameter2;
+
+      }
     }
 };
 
