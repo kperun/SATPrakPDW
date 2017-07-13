@@ -366,7 +366,6 @@ class CompareTrees{
             diameter1 += interval.diameter();
           }
         }
-        std::cout << diameter1;
 
         double diameter2 = 0;
         for (const auto& mapEntry : node2->getCurrentState().getIntervalMap()) {

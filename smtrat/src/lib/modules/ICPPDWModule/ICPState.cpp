@@ -302,7 +302,6 @@ namespace smtrat
         continue;
       }
       //now actual comparison can take place
-      //TODO: What? Why not always take the better one?
       if(currentGainWeighted-currentBestGainWeighted>Settings::upperDelta) {//the delta states that between the old and the new gain
         //the difference has to be at least upperDelta, by using this behavior we are able to enforce that only candidates which
         //achieve a certain margin of gain are regarded as the new optimal
@@ -313,7 +312,7 @@ namespace smtrat
         //retrieve the new diameter by means of the formula D_old - (1-gain)*D_old = absolute reduction
         currentBestAbsoluteReduction = currentGain*(getInterval((*(currentElement)).getVariable()).diameter());
 
-        //TODO: Does it make more sense to look at best - current and say "It might be worse but the absolute gain is better"?
+        //lowerDelta is negative, if the currentGain is similar but has a higher absolute value we take it.
       }else if(currentGainWeighted-currentBestGainWeighted>Settings::lowerDelta){
         //if the gain is not high enough but still almost the same, it would be interesting to consider the absolute interval reduction
         double currentNewAbsoluteReduction = currentGain*(getInterval((*(currentElement)).getVariable()).diameter());

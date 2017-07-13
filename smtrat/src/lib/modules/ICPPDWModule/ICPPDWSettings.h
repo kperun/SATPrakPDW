@@ -59,7 +59,7 @@ namespace smtrat
     static constexpr double epsilon = 0.001;
 
     //for a heuristic in the getBestContractionCandidate we need a lower and an upper bound
-    static constexpr double lowerDelta = 0.01;//set the lower bound to a smaller value to make absolute reduction more relevant
+    static constexpr double lowerDelta = -0.01;//set the lower bound to a smaller value to make absolute reduction more relevant
     static constexpr double upperDelta = 0.03;//set the upper higher in order to make the difference in gain more relevant
 
     //alpha as used in reinforced learning, see chapter 8 slide 17
@@ -107,7 +107,7 @@ namespace smtrat
     static constexpr double epsilon = 0.001;
 
     //for a heuristic in the getBestContractionCandidate we need a lower and an upper bound
-    static constexpr double lowerDelta = 0.0;//set the lower bound to a smaller value to make absolute reduction more relevant
+    static constexpr double lowerDelta = -0.1;//set the lower bound to a smaller value to make absolute reduction more relevant
     static constexpr double upperDelta = 0.03;//set the upper higher in order to make the difference in gain more relevant
 
     //alpha as used in reinforced learning, see chapter 8 slide 17
