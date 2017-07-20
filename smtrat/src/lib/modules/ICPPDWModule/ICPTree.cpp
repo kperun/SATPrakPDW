@@ -319,15 +319,10 @@ namespace smtrat
     // traverse the applied contraction candidates and generate the transitive closure
     for (int i = (int) mCurrentState.getAppliedContractionCandidates().size() - 1; i >= 0; i--) {
       ICPContractionCandidate<Settings>* it = (mCurrentState.getAppliedContractionCandidates())[(unsigned int) i];
-      // if the variable that was contracted was involved in the unsat reason, all the variables of the contractor are too
-      if (mConflictingVariables.count(it->getVariable()) > 0) {
-        // the constraint itself is an involved constraint
-        // or it contains an involved variable
-        auto cVars = it->getConstraint().variables();
+      auto cVars = it->getConstraint().variables();
 
-        mConflictingVariables.insert(cVars.begin(), cVars.end());
-        mConflictingConstraints.insert(it->getConstraint());
-      }
+      mConflictingVariables.insert(cVars.begin(), cVars.end());
+      mConflictingConstraints.insert(it->getConstraint());
     }
 
     // and we need to add all used simple bounds
