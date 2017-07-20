@@ -242,7 +242,11 @@ namespace smtrat
     }
 
     //return the value
-    return 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
+    double ret = 1 -(std::abs(newFirstUpper-newFirstLower)+std::abs(newSecondUpper-newSecondLower))/std::abs(oldIntervalUpper-oldIntervalLower);
+    if(intervals.second){
+      ret *= Settings::splitPenalty;
+    }
+    return ret;
   }
 
   //Template instantiations

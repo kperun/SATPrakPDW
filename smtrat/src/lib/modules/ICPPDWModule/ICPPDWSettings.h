@@ -65,6 +65,9 @@ namespace smtrat
     //alpha as used in reinforced learning, see chapter 8 slide 17
     static constexpr double alpha = 0.9;
 
+    //Split intervals are multiplied by this value to prefer non-splitting contractions
+    static constexpr double splitPenalty = 0.3;
+
     //an epsilon is required to distinguish between candidates with weights which are regarded and which are not
     static constexpr double weightEps = 0.01;
 
@@ -112,6 +115,9 @@ namespace smtrat
 
     //alpha as used in reinforced learning, see chapter 8 slide 17
     static constexpr double alpha = 0.9;
+
+    //Split intervals are multiplied by this value to prefer non-splitting contractions
+    static constexpr double splitPenalty = 0.3;
 
     //an epsilon is required to distinguish between candidates with weights which are regarded and which are not
     static constexpr double weightEps = 0.01;
