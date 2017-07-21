@@ -574,6 +574,9 @@ class CompareTrees{
 
   template<class Settings>
     void ICPPDWModule<Settings>::createInfeasableSubset() {
+      generateTrivialInfeasibleSubset();
+      return;
+
       // the base set of conflicting constraints
       std::set<ConstraintT> conflictingConstraints = mSearchTree.getConflictingConstraints();
 
